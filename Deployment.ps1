@@ -42,3 +42,8 @@ jlink --output ".\build\image" `
 --add-modules "visparu.vocabularytrial" `
 --launcher "VocabularyTrial=visparu.vocabularytrial"
 echo "Application linked and provisioned to the build folder"
+
+# Replace execution environment "java" with "javaw"
+((Get-Content -Path ".\build\image\bin\VocabularyTrial.bat" -Raw) -replace '"%DIR%\\java"','start javaw') | `
+Set-Content -Path ".\build\image\bin\VocabularyTrial.bat"
+echo "Corrected execution environment"
