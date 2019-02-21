@@ -5,6 +5,7 @@
 module visparu.vocabularytrial
 {	
 	requires java.sql;
+	requires sqlite.jdbc;
 	requires json.simple;
 	requires javafx.controls;
 	requires javafx.fxml;

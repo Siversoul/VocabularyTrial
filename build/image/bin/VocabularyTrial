@@ -1,0 +1,4 @@
+#!/bin/sh
+JLINK_VM_OPTIONS=
+DIR=`dirname $0`
+$DIR/java $JLINK_VM_OPTIONS -m visparu.vocabularytrial/com.visparu.vocabularytrial.root.Main $@

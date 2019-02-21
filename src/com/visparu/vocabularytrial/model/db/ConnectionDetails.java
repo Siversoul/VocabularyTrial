@@ -10,6 +10,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.sqlite.JDBC;
+
 import com.visparu.vocabularytrial.model.db.entities.Language;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
@@ -26,6 +28,18 @@ public final class ConnectionDetails
 	private String						protocol;
 	private String						filename;
 
+	static
+	{
+		try
+		{
+			DriverManager.deregisterDriver(new JDBC());
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	private ConnectionDetails(final String driver, final String protocol, final String filename)
 	{
 		this.driver = driver;
