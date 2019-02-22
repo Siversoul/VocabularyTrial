@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
+
 public final class IOUtil
 {
 	
@@ -28,6 +30,7 @@ public final class IOUtil
 	
 	public static final void writeString(String data, String file)
 	{
+		LogItem.enter();
 		final String	absolutePathString	= IOUtil.DATA_PATH + file;
 		final Path		absolutePath		= Paths.get(absolutePathString);
 		try
@@ -39,19 +42,23 @@ public final class IOUtil
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public static final String readString(String file)
 	{
+		LogItem.enter();
 		final String	absolutePathString	= IOUtil.DATA_PATH + file;
 		final Path		absolutePath		= Paths.get(absolutePathString);
 		try
 		{
 			final String data = new String(Files.readAllBytes(absolutePath), Charset.defaultCharset());
+			LogItem.exit();
 			return data;
 		}
 		catch (IOException e)
 		{
+			LogItem.exit();
 			return null;
 		}
 	}

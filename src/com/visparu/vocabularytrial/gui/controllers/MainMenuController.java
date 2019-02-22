@@ -19,6 +19,7 @@ import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
 import com.visparu.vocabularytrial.gui.interfaces.WordComponent;
 import com.visparu.vocabularytrial.model.db.ConnectionDetails;
 import com.visparu.vocabularytrial.model.db.entities.Language;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.Word;
@@ -83,20 +84,25 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	
 	public MainMenuController(final Stage stage)
 	{
+		LogItem.enter();
 		this.stage = stage;
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
+		LogItem.enter();
 		LanguageComponent.instances.add(this);
 		WordComponent.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
+			LogItem.enter();
 			LanguageComponent.instances.remove(this);
 			WordComponent.instances.remove(this);
 			
 			VokAbfController.closeAll();
+			LogItem.exit();
 		});
 		
 		int index;
@@ -129,21 +135,27 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		this.repopulateWords();
 		this.cb_language_from.getSelectionModel().selectedItemProperty().addListener(e ->
 		{
+			LogItem.enter();
 			this.repopulateLanguages_to();
 			this.repopulateWords();
+			LogItem.exit();
 		});
 		this.cb_language_to.getSelectionModel().selectedItemProperty().addListener(e ->
 		{
+			LogItem.enter();
 			this.repopulateWords();
+			LogItem.exit();
 		});
 		
 		this.tv_vocabulary.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		this.tv_vocabulary.setOnKeyPressed(e ->
 		{
+			LogItem.enter();
 			if (e.getCode() == KeyCode.DELETE)
 			{
 				this.removeAllSelectedWords();
 			}
+			LogItem.exit();
 		});
 		
 		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordView, String>("name"));
@@ -152,6 +164,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	
 	private final void removeAllSelectedWords()
 	{
+		LogItem.enter();
 		final Alert					alert	= new Alert(AlertType.CONFIRMATION, I18N.createStringBinding("gui.mainmenu.alert.delete").get(),
 			ButtonType.YES, ButtonType.NO);
 		final Optional<ButtonType>	result	= alert.showAndWait();
@@ -163,22 +176,28 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				this.tv_vocabulary.getItems().remove(wv);
 			}
 		}
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void repopulateLanguages()
 	{
+		LogItem.enter();
 		this.repopulateLanguages_from();
 		this.repopulateLanguages_to();
+		LogItem.exit();
 	}
 	
 	private final void repopulateLanguages_from()
 	{
+		LogItem.enter();
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
+		LogItem.exit();
 	}
 	
 	private final void repopulateLanguages_to()
 	{
+		LogItem.enter();
 		final Language l_prev = this.cb_language_to.getSelectionModel().getSelectedItem();
 		this.cb_language_to.setItems(FXCollections.observableArrayList(Language.getAll()));
 		this.cb_language_to.getItems().remove(this.cb_language_from.getSelectionModel().getSelectedItem());
@@ -186,16 +205,19 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void repopulateWords()
 	{
+		LogItem.enter();
 		final Language	language_from	= this.cb_language_from.getSelectionModel().getSelectedItem();
 		final Language	language_to		= this.cb_language_to.getSelectionModel().getSelectedItem();
 		if (language_from == null || language_to == null)
 		{
 			this.tv_vocabulary.getItems().clear();
+			LogItem.exit();
 			return;
 		}
 		final List<Word>				wordsRaw	= language_from.getWords();
@@ -203,11 +225,13 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty())
 			.forEach(w -> wordViews.add(new WordView(w, language_to)));
 		this.tv_vocabulary.setItems(wordViews);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void file_new(final ActionEvent event)
 	{
+		LogItem.enter();
 		final FileChooser fc = new FileChooser();
 		fc.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.menubar.file.new.title"));
 		fc.getExtensionFilters().add(
@@ -222,6 +246,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			catch (IOException e)
 			{
 				e.printStackTrace();
+				LogItem.exit();
 				return;
 			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
@@ -231,11 +256,13 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 		}
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void file_open(final ActionEvent event)
 	{
+		LogItem.enter();
 		final FileChooser fc = new FileChooser();
 		fc.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.menubar.file.open.title"));
 		fc.getExtensionFilters().add(
@@ -250,11 +277,13 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 		}
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void file_saveas(final ActionEvent event)
 	{
+		LogItem.enter();
 		final FileChooser fc = new FileChooser();
 		fc.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.menubar.file.saveas.title"));
 		fc.getExtensionFilters().add(
@@ -264,6 +293,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			if(C11N.getDatabasePath().equals(selectedFile))
 			{
+				LogItem.exit();
 				return;
 			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
@@ -274,29 +304,35 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 		}
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void file_close(final ActionEvent event)
 	{
+		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void vocab_add(final ActionEvent event)
 	{
+		LogItem.enter();
 		final String				fxmlName	= "AddWords";
 		final AddWordsController	awc			= new AddWordsController(
 			this.cb_language_from.getSelectionModel().getSelectedItem(),
 			this.cb_language_to.getSelectionModel().getSelectedItem());
 		final StringBinding			title		= I18N.createStringBinding("gui.addwords.title");
 		GUIUtil.createNewStage(fxmlName, awc, title);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void vocab_clear(final ActionEvent event)
 	{
+		LogItem.enter();
 		final Alert					alert	= new Alert(AlertType.WARNING, I18N.createStringBinding("gui.mainmenu.alert.clearvocabulary.first").get(),
 			ButtonType.YES, ButtonType.NO);
 		final Optional<ButtonType>	result	= alert.showAndWait();
@@ -318,51 +354,62 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				TrialComponent.repopulateAllTrials();
 			}
 		}
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void vocab_languages(final ActionEvent event)
 	{
+		LogItem.enter();
 		final String					fxmlName	= "ManageLanguages";
 		final ManageLanguagesController	mlc			= new ManageLanguagesController();
 		final StringBinding				title		= I18N.createStringBinding("gui.languages.title");
 		GUIUtil.createNewStage(fxmlName, mlc, title);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void trial_list(final ActionEvent event)
 	{
+		LogItem.enter();
 		final TrialListController	tlc		= new TrialListController(this.cb_language_from.getValue(),
 			this.cb_language_to.getValue());
 		final StringBinding			title	= I18N.createStringBinding("gui.triallist.title");
 		GUIUtil.createNewStage("TrialList", tlc, title);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void trial_all(final ActionEvent event)
 	{
+		LogItem.enter();
 		final List<Word> trialWords = new ArrayList<>();
 		this.tv_vocabulary.getItems().forEach(w -> trialWords.add(Word.get(w.getWord_id())));
 		this.createTrial(trialWords);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void trial_selected(final ActionEvent event)
 	{
+		LogItem.enter();
 		final List<Word> trialWords = new ArrayList<>();
 		this.tv_vocabulary.getSelectionModel().getSelectedItems()
 			.forEach(w -> trialWords.add(Word.get(w.getWord_id())));
 		this.createTrial(trialWords);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void trial_failed(final ActionEvent event)
 	{
+		LogItem.enter();
 		final List<Word>	trialWords	= new ArrayList<>();
 		final Language		l_from		= this.cb_language_from.getValue();
 		final Language		l_to		= this.cb_language_to.getValue();
 		if (l_from == null || l_to == null)
 		{
+			LogItem.exit();
 			return;
 		}
 		final List<Word> words = l_from.getWords();
@@ -386,20 +433,24 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			}
 		}
 		this.createTrial(trialWords);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void trial_custom(final ActionEvent event)
 	{
+		LogItem.enter();
 		// TODO: implement custom trial configuration
 		final Alert alert = new Alert(AlertType.INFORMATION, I18N.createStringBinding("root.notimplementedyet").get(),
 			ButtonType.OK);
 		alert.showAndWait();
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void trial_reset(final ActionEvent event)
 	{
+		LogItem.enter();
 		final Alert					alert	= new Alert(AlertType.WARNING, I18N.createStringBinding("gui.mainmenu.alert.erasetrials").get(),
 			ButtonType.YES,
 			ButtonType.NO);
@@ -409,15 +460,18 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
 			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
 		}
+		LogItem.exit();
 	}
 	
 	private final void createTrial(List<Word> trialWords)
 	{
+		LogItem.enter();
 		if (trialWords.isEmpty())
 		{
 			final Alert alert = new Alert(AlertType.ERROR,
 				I18N.createStringBinding("gui.mainmenu.alert.noapplicablewords").get(), ButtonType.OK);
 			alert.showAndWait();
+			LogItem.exit();
 			return;
 		}
 		if (this.cmi_trial_randomize.isSelected())
@@ -436,15 +490,18 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final TrialController	tc		= new TrialController(l_from, l_to, trialWords);
 		final StringBinding		title	= I18N.createStringBinding("gui.trial.title");
 		GUIUtil.createNewStage("Trial", tc, title);
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void change_language(final ActionEvent event)
 	{
+		LogItem.enter();
 		Alert					alert	= new Alert(AlertType.WARNING, I18N.get("gui.mainmenu.alert.languagechange"), ButtonType.YES, ButtonType.NO);
 		Optional<ButtonType>	result	= alert.showAndWait();
 		if (!result.isPresent() || result.get() != ButtonType.YES)
 		{
+			LogItem.exit();
 			return;
 		}
 		
@@ -498,23 +555,28 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void debug_fillrandomly(final ActionEvent event)
 	{
+		LogItem.enter();
 		Debug.debug_fillRandomly();
 		this.repopulateLanguages_from();
 		this.cb_language_from.getSelectionModel().select(0);
 		this.repopulateLanguages_to();
 		this.cb_language_to.getSelectionModel().select(0);
 		this.repopulateWords();
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void help_about(final ActionEvent event)
 	{
+		LogItem.enter();
 		final StringBinding title = I18N.createStringBinding("gui.about.title");
 		GUIUtil.createNewStage("About", new AboutController(), title);
+		LogItem.exit();
 	}
 }

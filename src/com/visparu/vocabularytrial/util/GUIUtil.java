@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 
 import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ public final class GUIUtil
 	
 	public static final Stage createNewStage(final String fxmlName, final VokAbfController vac, final StringBinding title)
 	{
+		LogItem.enter();
 		try
 		{
 			final Stage			stage	= new Stage();
@@ -29,12 +31,14 @@ public final class GUIUtil
 			stage.setScene(scene);
 			stage.titleProperty().bind(title);
 			stage.show();
+			LogItem.exit();
 			return stage;
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return null;
 	}
 	

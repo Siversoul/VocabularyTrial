@@ -8,6 +8,7 @@ import com.visparu.vocabularytrial.gui.interfaces.LanguageComponent;
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
 import com.visparu.vocabularytrial.model.db.entities.Language;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.views.TrialView;
 import com.visparu.vocabularytrial.util.GUIUtil;
@@ -54,21 +55,26 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	
 	public TrialListController(final Language init_l_from, final Language init_l_to)
 	{
+		LogItem.enter();
 		this.init_l_from	= init_l_from;
 		this.init_l_to		= init_l_to;
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
+		LogItem.enter();
 		VokAbfController.instances.add(this);
 		LanguageComponent.instances.add(this);
 		TrialComponent.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
+			LogItem.enter();
 			VokAbfController.instances.remove(this);
 			LanguageComponent.instances.remove(this);
 			TrialComponent.instances.remove(this);
+			LogItem.exit();
 		});
 		
 		this.repopulateLanguages_from();
@@ -77,12 +83,16 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		this.cb_language_to.getSelectionModel().select(this.init_l_to);
 		this.cb_language_from.getSelectionModel().selectedItemProperty().addListener(e ->
 		{
+			LogItem.enter();
 			this.repopulateLanguages_to();
 			this.repopulateTrials();
+			LogItem.exit();
 		});
 		this.cb_language_to.getSelectionModel().selectedItemProperty().addListener(e ->
 		{
+			LogItem.enter();
 			this.repopulateTrials();
+			LogItem.exit();
 		});
 		
 		this.repopulateTrials();
@@ -94,24 +104,29 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		this.tc_percentage.setCellValueFactory(new PropertyValueFactory<TrialView, String>("percentage"));
 		this.tc_view.setCellFactory(e ->
 		{
+			LogItem.enter();
 			final TableCell<TrialView, Void> cell = new TableCell<TrialView, Void>()
 			{
-				
 				private final Button btn = new Button();
 				{
+					LogItem.enter();
 					this.btn.textProperty().bind(I18N.createStringBinding("gui.triallist.table.data.view"));
 					this.btn.setOnAction((ActionEvent event) ->
 					{
+						LogItem.enter();
 						final TrialResultController	trc		= new TrialResultController(
 							Trial.get(((TrialView) this.getTableRow().getItem()).getTrial_id()));
 						final StringBinding			title	= I18N.createStringBinding("gui.result.title");
 						GUIUtil.createNewStage("TrialResult", trc, title);
+						LogItem.exit();
 					});
+					LogItem.exit();
 				}
 				
 				@Override
 				public final void updateItem(Void item, boolean empty)
 				{
+					LogItem.enter();
 					super.updateItem(item, empty);
 					if (empty)
 					{
@@ -121,26 +136,34 @@ public final class TrialListController implements Initializable, VokAbfControlle
 					{
 						this.setGraphic(this.btn);
 					}
+					LogItem.exit();
 				}
 			};
+			LogItem.exit();
 			return cell;
 		});
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void repopulateLanguages()
 	{
+		LogItem.enter();
 		this.repopulateLanguages_from();
 		this.repopulateLanguages_to();
+		LogItem.exit();
 	}
 	
 	private final void repopulateLanguages_from()
 	{
+		LogItem.enter();
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
+		LogItem.exit();
 	}
 	
 	private final void repopulateLanguages_to()
 	{
+		LogItem.enter();
 		final Language l_prev = this.cb_language_to.getSelectionModel().getSelectedItem();
 		this.cb_language_to.setItems(FXCollections.observableArrayList(Language.getAll()));
 		this.cb_language_to.getItems().remove(this.cb_language_from.getSelectionModel().getSelectedItem());
@@ -148,41 +171,51 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		{
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void repopulateTrials()
 	{
+		LogItem.enter();
 		final Language	l_from	= this.cb_language_from.getSelectionModel().getSelectedItem();
 		final Language	l_to	= this.cb_language_to.getSelectionModel().getSelectedItem();
 		if (l_from == null || l_to == null)
 		{
 			this.tv_trials.getItems().clear();
+			LogItem.exit();
 			return;
 		}
 		final List<TrialView> trialViews = FXCollections.observableArrayList();
 		Trial.getTrials(l_from, l_to).forEach(t -> trialViews.add(new TrialView(t)));
 		this.tv_trials.setItems(FXCollections.observableArrayList(trialViews));
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void setStage(final Stage stage)
 	{
+		LogItem.enter();
 		this.stage = stage;
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void close()
 	{
+		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void close(final ActionEvent event)
 	{
+		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.exit();
 	}
 	
 }

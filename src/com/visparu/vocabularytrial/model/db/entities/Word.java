@@ -24,13 +24,16 @@ public final class Word
 	
 	private Word(final Integer word_id, final String name, final Language language)
 	{
+		LogItem.enter();
 		this.word_id	= word_id;
 		this.name		= name;
 		this.language	= language;
+		LogItem.exit();
 	}
 	
 	public static final void createTable()
 	{
+		LogItem.enter();
 		final String	query		= "CREATE TABLE IF NOT EXISTS word("
 			+ "word_id INTEGER PRIMARY KEY AUTOINCREMENT, "
 			+ "name VARCHAR(100), "
@@ -46,29 +49,41 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public static final void clearCache()
 	{
+		LogItem.enter();
 		Word.cache.clear();
+		LogItem.exit();
 	}
 	
 	public static final Word get(final Integer word_id)
 	{
+		LogItem.enter();
 		if (Word.cache.containsKey(word_id))
 		{
-			return Word.cache.get(word_id);
+			Word w = Word.cache.get(word_id);
+			LogItem.exit();
+			return w;
 		}
-		return Word.readEntity(word_id);
+		Word w = Word.readEntity(word_id);
+		LogItem.exit();
+		return w;
 	}
 	
 	public static final Word get(final String name, final Language l)
 	{
-		return Word.readEntity(name, l.getLanguage_code());
+		LogItem.enter();
+		Word w = Word.readEntity(name, l.getLanguage_code());
+		LogItem.exit();
+		return w;
 	}
 	
 	public static final Word createWord(final String name, final Language l)
 	{
+		LogItem.enter();
 		Word w = Word.get(name, l);
 		if (w == null)
 		{
@@ -77,11 +92,13 @@ public final class Word
 			w.setWord_id(word_id);
 			Word.cache.put(word_id, w);
 		}
+		LogItem.exit();
 		return w;
 	}
 	
 	public static final void removeWord(final Integer word_id)
 	{
+		LogItem.enter();
 		Word.cache.remove(word_id);
 		final String	query		= "DELETE FROM word "
 			+ "WHERE word_id = ?";
@@ -95,10 +112,12 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public static final void removeWord(final String name, final Language l)
 	{
+		LogItem.enter();
 		Word.cache.remove(Word.get(name, l).getWord_id());
 		final String	query		= "DELETE FROM word "
 			+ "WHERE word_id = ?";
@@ -113,16 +132,20 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public static final void removeAllWords()
 	{
+		LogItem.enter();
 		Word.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM word");
+		LogItem.exit();
 	}
 	
 	private static final Word readEntity(Integer word_id)
 	{
+		LogItem.enter();
 		final String	query		= "SELECT * "
 			+ "FROM word "
 			+ "WHERE word_id = ?";
@@ -140,6 +163,7 @@ public final class Word
 				final Word		w				= new Word(word_id, name, l);
 				Word.cache.put(word_id, w);
 				rs.close();
+				LogItem.exit();
 				return w;
 			}
 			rs.close();
@@ -148,11 +172,13 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return null;
 	}
 	
 	private static final Word readEntity(final String name, final String language_code)
 	{
+		LogItem.enter();
 		final String	query		= "SELECT * "
 			+ "FROM word "
 			+ "WHERE name = ? "
@@ -171,6 +197,7 @@ public final class Word
 				final Word		w		= new Word(word_id, name, l);
 				Word.cache.put(word_id, w);
 				rs.close();
+				LogItem.exit();
 				return w;
 			}
 			rs.close();
@@ -179,11 +206,13 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return null;
 	}
 	
 	private static final Integer writeEntity(final Word word)
 	{
+		LogItem.enter();
 		final String	query		= "INSERT INTO word(name, language_code) "
 			+ "VALUES(?, ?)";
 		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
@@ -196,32 +225,41 @@ public final class Word
 			final ResultSet rs = pstmt.getGeneratedKeys();
 			rs.next();
 			final Integer word_id = rs.getInt(1);
+			LogItem.exit();
 			return word_id;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return -1;
 	}
 	
 	public final Integer getWord_id()
 	{
+		LogItem.enter();
+		LogItem.exit();
 		return this.word_id;
 	}
 	
 	private final void setWord_id(final Integer word_id)
 	{
+		LogItem.enter();
 		this.word_id = word_id;
+		LogItem.exit();
 	}
 	
 	public final String getName()
 	{
+		LogItem.enter();
+		LogItem.exit();
 		return this.name;
 	}
 	
 	public final void setName(final String name)
 	{
+		LogItem.enter();
 		final String	query		= "UPDATE word "
 			+ "SET name = ? "
 			+ "WHERE word_id = ?";
@@ -238,15 +276,19 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public final Language getLanguage()
 	{
+		LogItem.enter();
+		LogItem.exit();
 		return this.language;
 	}
 	
 	public final void setLanguage(final Language l)
 	{
+		LogItem.enter();
 		final String	query		= "UPDATE word "
 			+ "SET language_code = ? "
 			+ "WHERE word_id = ?";
@@ -263,10 +305,12 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public final List<Translation> getTranslations(final Language l)
 	{
+		LogItem.enter();
 		final List<Translation>	translations	= new ArrayList<>();
 		final String			query			= "SELECT word1_id, word2_id "
 			+ "FROM translation t "
@@ -303,11 +347,13 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return translations;
 	}
 	
 	public final List<WordCheck> getWordChecks(final Language l)
 	{
+		LogItem.enter();
 		final List<WordCheck>	wordchecks	= new ArrayList<>();
 		final String			query		= "SELECT c.trial_id "
 			+ "FROM wordcheck c "
@@ -331,6 +377,7 @@ public final class Word
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return wordchecks;
 	}
 	

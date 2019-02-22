@@ -20,8 +20,10 @@ public final class Translation
 	
 	private Translation(Integer word1_id, Integer word2_id)
 	{
+		LogItem.enter();
 		if (word1_id == null || word2_id == null || word1_id == -1 || word2_id == -1)
 		{
+			LogItem.exit();
 			throw new IllegalArgumentException();
 		}
 		if (word1_id > word2_id)
@@ -32,10 +34,12 @@ public final class Translation
 		}
 		this.word1_id	= word1_id;
 		this.word2_id	= word2_id;
+		LogItem.exit();
 	}
 	
 	public final static void createTable()
 	{
+		LogItem.enter();
 		ConnectionDetails.getInstance().executeSimpleStatement(
 			"CREATE TABLE IF NOT EXISTS translation("
 				+ "word1_id INTEGER, "
@@ -44,29 +48,39 @@ public final class Translation
 				+ "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, "
 				+ "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE"
 				+ ")");
+		LogItem.exit();
 	}
 	
 	public final static void clearCache()
 	{
+		LogItem.enter();
 		Translation.cache.clear();
+		LogItem.exit();
 	}
 	
 	public final static Translation get(final Word w1, final Word w2)
 	{
+		LogItem.enter();
 		final Integer	word1_id	= w1.getWord_id();
 		final Integer	word2_id	= w2.getWord_id();
 		final Integer	hash		= Translation.createKeyHash(word1_id, word2_id);
 		if (Translation.cache.containsKey(hash))
 		{
-			return Translation.cache.get(hash);
+			Translation t = Translation.cache.get(hash);
+			LogItem.exit();
+			return t;
 		}
-		return Translation.readEntity(w1, w2);
+		Translation t = Translation.readEntity(w1, w2);
+		LogItem.exit();
+		return t;
 	}
 	
 	public final static Translation createTranslation(final Word w1, final Word w2)
 	{
+		LogItem.enter();
 		if (w1 == null || w2 == null)
 		{
+			LogItem.exit();
 			throw new IllegalArgumentException();
 		}
 		final Integer	word1_id	= w1.getWord_id();
@@ -78,11 +92,13 @@ public final class Translation
 			Translation.writeEntity(t);
 			Translation.cache.put(Translation.createKeyHash(word1_id, word2_id), t);
 		}
+		LogItem.exit();
 		return t;
 	}
 	
 	public final static void removeTranslation(final Word w1, final Word w2)
 	{
+		LogItem.enter();
 		final Integer	word1_id	= w1.getWord_id();
 		final Integer	word2_id	= w2.getWord_id();
 		Translation.cache.remove(Translation.createKeyHash(word1_id, word2_id));
@@ -101,16 +117,20 @@ public final class Translation
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public final static void removeAllTranslations()
 	{
+		LogItem.enter();
 		Translation.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM translation");
+		LogItem.exit();
 	}
 	
 	public final static Translation readEntity(Word w1, Word w2)
 	{
+		LogItem.enter();
 		final Integer	word1_id	= w1.getWord_id();
 		final Integer	word2_id	= w2.getWord_id();
 		final String	query		= "SELECT * "
@@ -129,6 +149,7 @@ public final class Translation
 				final Translation t = new Translation(word1_id, word2_id);
 				Translation.cache.put(Translation.createKeyHash(word1_id, word2_id), t);
 				rs.close();
+				LogItem.exit();
 				return t;
 			}
 			rs.close();
@@ -137,11 +158,13 @@ public final class Translation
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return null;
 	}
 	
 	private final static void writeEntity(final Translation t)
 	{
+		LogItem.enter();
 		final String	query		= "INSERT INTO translation "
 			+ "VALUES(?, ?)";
 		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
@@ -156,10 +179,12 @@ public final class Translation
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	private final static Integer createKeyHash(Integer k1, Integer k2)
 	{
+		LogItem.enter();
 		if (k1 > k2)
 		{
 			final Integer temp = k1;
@@ -167,27 +192,38 @@ public final class Translation
 			k2	= temp;
 		}
 		final Integer hash = ((k1 + k2) * (k1 + k2 + 1)) / 2 + k2;
+		LogItem.exit();
 		return hash;
 	}
 	
 	public final Integer getWord1_id()
 	{
+		LogItem.enter();
+		LogItem.exit();
 		return this.word1_id;
 	}
 	
 	public final Integer getWord2_id()
 	{
+		LogItem.enter();
+		LogItem.exit();
 		return this.word2_id;
 	}
 	
 	public final Word getWord1()
 	{
-		return Word.get(this.word1_id);
+		LogItem.enter();
+		Word w1 = Word.get(this.word1_id);
+		LogItem.exit();
+		return w1;
 	}
 	
 	public final Word getWord2()
 	{
-		return Word.get(this.word2_id);
+		LogItem.enter();
+		Word w2 = Word.get(this.word2_id);
+		LogItem.exit();
+		return w2;
 	}
 	
 }

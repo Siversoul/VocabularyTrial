@@ -4,6 +4,8 @@ import java.net.URL;
 
 import com.visparu.vocabularytrial.gui.controllers.MainMenuController;
 import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
+import com.visparu.vocabularytrial.model.log.Severity;
 import com.visparu.vocabularytrial.util.C11N;
 import com.visparu.vocabularytrial.util.I18N;
 
@@ -25,20 +27,27 @@ public final class Main extends Application
 	public final void start(final Stage primaryStage)
 	{
 		this.initializeDatabase();
+		LogItem.initializeNewLogSession();
+		LogItem.createLogItem(Severity.INFO, "Initialized database and log");
+		LogItem.enter();
 		this.initializeStage(primaryStage);
+		LogItem.exit();
 	}
 	
 	private final void initializeDatabase()
 	{
+		LogItem.enter();
 		ConnectionDetails.getInstance().activateForeignKeyPragma();
 		ConnectionDetails.getInstance().changeDatabase(
 			C11N.getDriver(),
 			C11N.getProtocol(),
 			C11N.getDatabasePath().getAbsolutePath());
+		LogItem.exit();
 	}
 	
 	private final void initializeStage(final Stage primaryStage)
 	{
+		LogItem.enter();
 		try
 		{
 			final URL					url		= this.getClass().getResource("/com/visparu/vocabularytrial/gui/fxml/MainMenu.fxml");
@@ -56,6 +65,7 @@ public final class Main extends Application
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public static final void main(String[] args)

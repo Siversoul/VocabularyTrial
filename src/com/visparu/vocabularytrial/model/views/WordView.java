@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.visparu.vocabularytrial.model.db.entities.Language;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 
@@ -15,22 +16,31 @@ public final class WordView
 	
 	public WordView(final Word w, final Language l)
 	{
+		LogItem.enter();
 		this.w	= w;
 		this.l	= l;
+		LogItem.exit();
 	}
 	
 	public final Integer getWord_id()
 	{
-		return w.getWord_id();
+		LogItem.enter();
+		Integer word_id = this.w.getWord_id();
+		LogItem.exit();
+		return word_id;
 	}
 	
 	public final String getName()
 	{
-		return w.getName();
+		LogItem.enter();
+		String name = this.w.getName();
+		LogItem.exit();
+		return name;
 	}
 	
 	public final String getTranslationsString()
 	{
+		LogItem.enter();
 		final List<Translation>	translations		= this.w.getTranslations(this.l);
 		final List<Word>		translationWords	= new ArrayList<>();
 		for (final Translation t : translations)
@@ -58,7 +68,9 @@ public final class WordView
 			sb.append(tw.getName());
 		}
 		
-		return sb.toString();
+		String ret = sb.toString();
+		LogItem.exit();
+		return ret;
 	}
 	
 }

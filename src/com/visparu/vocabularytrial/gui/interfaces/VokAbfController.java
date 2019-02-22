@@ -3,6 +3,8 @@ package com.visparu.vocabularytrial.gui.interfaces;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
+
 import javafx.stage.Stage;
 
 public interface VokAbfController
@@ -12,17 +14,22 @@ public interface VokAbfController
 	
 	static void repopulateAll()
 	{
+		LogItem.enter();
 		LanguageComponent.repopulateAllLanguages();
 		WordComponent.repopulateAllWords();
 		TrialComponent.repopulateAllTrials();
+		LogComponent.repopulateAllLogs();
+		LogItem.exit();
 	}
 	
 	static void closeAll()
 	{
+		LogItem.enter();
 		while (!VokAbfController.instances.isEmpty())
 		{
 			VokAbfController.instances.get(0).close();
 		}
+		LogItem.exit();
 	}
 	
 	void setStage(Stage stage);

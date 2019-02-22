@@ -5,18 +5,18 @@ import java.util.List;
 
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
 
-public interface LanguageComponent
+public interface LogComponent
 {
 	
-	List<LanguageComponent> instances = new ArrayList<>();
+	List<LogComponent> instances = new ArrayList<>();
 	
-	static void repopulateAllLanguages()
+	static void repopulateAllLogs()
 	{
 		LogItem.enter();
-		LanguageComponent.instances.forEach(i -> i.repopulateLanguages());
+		LogComponent.instances.forEach(i -> i.repopulateLogs());
 		LogItem.exit();
 	}
 	
-	void repopulateLanguages();
+	void repopulateLogs();
 	
 }

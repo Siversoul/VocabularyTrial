@@ -2,6 +2,7 @@ package com.visparu.vocabularytrial.model.views;
 
 import java.text.SimpleDateFormat;
 
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 
 public final class TrialView
@@ -11,39 +12,59 @@ public final class TrialView
 	
 	public TrialView(final Trial trial)
 	{
+		LogItem.enter();
 		this.trial = trial;
+		LogItem.exit();
 	}
 	
 	public final Integer getTrial_id()
 	{
-		return this.trial.getTrial_id();
+		LogItem.enter();
+		Integer trial_id = this.trial.getTrial_id();
+		LogItem.exit();
+		return trial_id;
 	}
 	
 	public final String getDate()
 	{
-		return new SimpleDateFormat("dd.MM.yyyy HH:mm").format(this.trial.getDate());
+		LogItem.enter();
+		String dateString = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(this.trial.getDate());
+		LogItem.exit();
+		return dateString;
 	}
 	
 	public final String getCount()
 	{
-		return String.valueOf(this.trial.getWordChecks().size());
+		LogItem.enter();
+		String count = String.valueOf(this.trial.getWordChecks().size());
+		LogItem.exit();
+		return count;
 	}
 	
 	public final String getCorrect()
 	{
-		return String.valueOf(this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect()).count());
+		LogItem.enter();
+		String correct = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect()).count());
+		LogItem.exit();
+		return correct;
 	}
 	
 	public final String getWrong()
 	{
-		return String.valueOf(this.trial.getWordChecks().stream().filter(wc -> !wc.isCorrect()).count());
+		LogItem.enter();
+		String wrong = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> !wc.isCorrect()).count());
+		LogItem.exit();
+		return wrong;
 	}
 	
 	public final String getPercentage()
 	{
+		LogItem.enter();
 		final long	correct	= this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect()).count();
 		final int	count	= this.trial.getWordChecks().size();
-		return String.format("%.2f", (double) correct / count);
+		String perc = String.format("%.2f", (double) correct / count);
+		LogItem.exit();
+		return perc;
 	}
 	
 }

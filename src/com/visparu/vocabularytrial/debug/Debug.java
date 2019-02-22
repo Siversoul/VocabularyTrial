@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.visparu.vocabularytrial.model.db.entities.Language;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.Word;
@@ -32,15 +33,20 @@ public final class Debug
 	
 	private static boolean showDebugWarning()
 	{
+		LogItem.enter();
 		Alert					alert	= new Alert(AlertType.WARNING, I18N.createStringBinding("gui.debug.debugwarning").get(), ButtonType.YES, ButtonType.NO);
 		Optional<ButtonType>	result	= alert.showAndWait();
-		return result.isPresent() && result.get() == ButtonType.YES;
+		boolean ret = result.isPresent() && result.get() == ButtonType.YES;
+		LogItem.exit();
+		return ret;
 	}
 	
 	public static final void debug_fillRandomly()
 	{
+		LogItem.enter();
 		if (!Debug.showDebugWarning())
 		{
+			LogItem.exit();
 			return;
 		}
 		
@@ -148,6 +154,7 @@ public final class Debug
 				WordCheck.createWordCheck(w, t, as, correct);
 			}
 		}
+		LogItem.exit();
 	}
 	
 }

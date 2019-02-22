@@ -28,14 +28,17 @@ public final class Trial
 	
 	public Trial(final Integer trial_id, final Date date, final Language language_from, final Language language_to)
 	{
+		LogItem.enter();
 		this.trial_id		= trial_id;
 		this.date			= date;
 		this.language_from	= language_from;
 		this.language_to	= language_to;
+		LogItem.exit();
 	}
 	
 	public static final void createTable()
 	{
+		LogItem.enter();
 		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS trial("
 			+ "trial_id INTEGER PRIMARY KEY AUTOINCREMENT,"
 			+ "datetime VARCHAR(23), "
@@ -43,34 +46,45 @@ public final class Trial
 			+ "language_code_to VARCHAR(2), "
 			+ "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
 			+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE)");
+		LogItem.exit();
 	}
 	
 	public static final void clearCache()
 	{
+		LogItem.enter();
 		Trial.cache.clear();
+		LogItem.exit();
 	}
 	
 	public static final Trial get(final Integer trial_id)
 	{
+		LogItem.enter();
 		if (Trial.cache.containsKey(trial_id))
 		{
-			return Trial.cache.get(trial_id);
+			Trial t = Trial.cache.get(trial_id);
+			LogItem.exit();
+			return t;
 		}
-		return Trial.readEntity(trial_id);
+		Trial t = Trial.readEntity(trial_id);
+		LogItem.exit();
+		return t;
 	}
 	
 	public static final Trial createTrial(final Date date, final Language language_from, final Language language_to)
 	{
+		LogItem.enter();
 		final Trial		t			= new Trial(-1, date, language_from, language_to);
 		final Integer	trial_id	= Trial.writeEntity(t);
 		t.setTrial_id(trial_id);
 		Trial.cache.put(trial_id, t);
 		TrialComponent.repopulateAllTrials();
+		LogItem.exit();
 		return t;
 	}
 	
 	public static final void removeTrial(final Integer trial_id)
 	{
+		LogItem.enter();
 		Trial.cache.remove(trial_id);
 		final String	query		= "DELETE FROM trial "
 			+ "WHERE trial_id = ?";
@@ -85,16 +99,20 @@ public final class Trial
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 	}
 	
 	public static final void removeAllTrials()
 	{
+		LogItem.enter();
 		Trial.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
+		LogItem.exit();
 	}
 	
 	private static final Trial readEntity(final Integer trial_id)
 	{
+		LogItem.enter();
 		final String	query		= "SELECT * "
 			+ "FROM trial "
 			+ "WHERE trial_id = ?";
@@ -115,6 +133,7 @@ public final class Trial
 				final Trial		t				= new Trial(trial_id, date, l_from, l_to);
 				Trial.cache.put(trial_id, t);
 				rs.close();
+				LogItem.exit();
 				return t;
 			}
 			rs.close();
@@ -123,11 +142,13 @@ public final class Trial
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return null;
 	}
 	
 	private static final Integer writeEntity(final Trial trial)
 	{
+		LogItem.enter();
 		final String	query		= "INSERT INTO trial(datetime, language_code_from, language_code_to) "
 			+ "VALUES(?, ?, ?)";
 		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
@@ -142,17 +163,20 @@ public final class Trial
 			final ResultSet rs = pstmt.getGeneratedKeys();
 			rs.next();
 			Integer trial_id = rs.getInt(1);
+			LogItem.exit();
 			return trial_id;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return -1;
 	}
 	
 	public static final List<Trial> getTrials(final Language l_from, final Language l_to)
 	{
+		LogItem.enter();
 		final List<Trial>	trials		= new ArrayList<>();
 		final String		query		= "SELECT trial_id "
 			+ "FROM trial "
@@ -177,41 +201,56 @@ public final class Trial
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return trials;
 	}
 	
 	public static final SimpleDateFormat getDateFormatter()
 	{
-		return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+		LogItem.enter();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+		LogItem.exit();
+		return sdf;
 	}
 	
 	public final Integer getTrial_id()
 	{
-		return trial_id;
+		LogItem.enter();
+		LogItem.exit();
+		return this.trial_id;
 	}
 	
 	private final void setTrial_id(final Integer trial_id)
 	{
+		LogItem.enter();
 		this.trial_id = trial_id;
+		LogItem.exit();
 	}
 	
 	public final Date getDate()
 	{
-		return date;
+		LogItem.enter();
+		LogItem.exit();
+		return this.date;
 	}
 	
 	public final Language getLanguage_from()
 	{
-		return language_from;
+		LogItem.enter();
+		LogItem.exit();
+		return this.language_from;
 	}
 	
 	public Language getLanguage_to()
 	{
-		return language_to;
+		LogItem.enter();
+		LogItem.exit();
+		return this.language_to;
 	}
 	
 	public final List<WordCheck> getWordChecks()
 	{
+		LogItem.enter();
 		final List<WordCheck>	wordchecks	= new ArrayList<>();
 		final String			query		= "SELECT * "
 			+ "FROM wordcheck "
@@ -233,6 +272,7 @@ public final class Trial
 		{
 			e.printStackTrace();
 		}
+		LogItem.exit();
 		return wordchecks;
 	}
 	

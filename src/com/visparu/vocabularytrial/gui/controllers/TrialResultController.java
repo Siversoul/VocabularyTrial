@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.WordCheck;
 import com.visparu.vocabularytrial.model.views.CheckView;
@@ -53,16 +54,21 @@ public final class TrialResultController implements Initializable, VokAbfControl
 	
 	public TrialResultController(final Trial trial)
 	{
+		LogItem.enter();
 		this.trial = trial;
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
+		LogItem.enter();
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
+			LogItem.enter();
 			VokAbfController.instances.remove(this);
+			LogItem.exit();
 		});
 		
 		this.lb_date.setText(new SimpleDateFormat("dd.MM.yyyy HH:mm").format(this.trial.getDate()));
@@ -89,25 +95,32 @@ public final class TrialResultController implements Initializable, VokAbfControl
 		this.lb_correct.setText(String.valueOf(correct));
 		this.lb_wrong.setText(String.valueOf(wrong));
 		this.lb_perc.setText(String.format("%.2f", perc * 100));
+		LogItem.exit();
 	}
 	
 	@FXML
 	public final void exit(final ActionEvent event)
 	{
+		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void setStage(final Stage stage)
 	{
+		LogItem.enter();
 		this.stage = stage;
+		LogItem.exit();
 	}
 	
 	@Override
 	public final void close()
 	{
+		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.exit();
 	}
 }
