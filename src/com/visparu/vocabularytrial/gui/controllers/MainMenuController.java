@@ -262,6 +262,10 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final File selectedFile = fc.showSaveDialog(this.stage);
 		if (selectedFile != null)
 		{
+			if(C11N.getDatabasePath().equals(selectedFile))
+			{
+				return;
+			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
 			ConnectionDetails.getInstance().copyDatabase(selectedFile);
 			ConnectionDetails.getInstance().changeDatabase(
