@@ -47,3 +47,12 @@ echo "Application linked and provisioned to the build folder"
 ((Get-Content -Path ".\build\image\bin\VocabularyTrial.bat" -Raw) -replace '"%DIR%\\java"','start javaw') | `
 Set-Content -Path ".\build\image\bin\VocabularyTrial.bat"
 echo "Corrected execution environment"
+
+# Compress and store build in ZIP file
+Compress-Archive -Path ".\build\image\*" -CompressionLevel "Optimal" -Destination ".\build\VocabularyTrial.zip" > $null
+echo "Compressed build to ZIP archive"
+
+# Clean up unnecessary files
+Remove-Item -R ".\build\modules"
+Remove-Item -R ".\build\VocabularyTrial.jar"
+echo "Cleaned up build space"
