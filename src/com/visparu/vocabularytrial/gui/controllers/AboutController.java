@@ -22,9 +22,9 @@ public final class AboutController implements Initializable, VokAbfController
 	private Label	lb_author;
 	@FXML
 	private Label	lb_date;
-
-	private Stage	stage;
-
+	
+	private Stage stage;
+	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
@@ -33,26 +33,26 @@ public final class AboutController implements Initializable, VokAbfController
 		{
 			VokAbfController.instances.remove(this);
 		});
-
+		
 		this.lb_name.setText(Main.NAME);
 		this.lb_version.setText(Main.VERSION);
 		this.lb_author.setText(Main.AUTHOR);
 		this.lb_date.setText(Main.RELEASE_DATE);
 	}
-
+	
 	@Override
 	public final void setStage(final Stage stage)
 	{
 		this.stage = stage;
 	}
-
+	
 	@Override
 	public final void close()
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 	@FXML
 	public final void close(final ActionEvent event)
 	{

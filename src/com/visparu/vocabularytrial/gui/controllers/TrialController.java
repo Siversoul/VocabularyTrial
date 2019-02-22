@@ -40,31 +40,31 @@ public final class TrialController implements Initializable, VokAbfController
 	private Button		bt_wrong;
 	@FXML
 	private Button		bt_solution;
-
+	
 	private enum State
 	{
 		INIT, QUESTION, SOLUTION
 	}
-
-	private Stage				stage;
-
-	private final Language		language_to;
-
-	private final Trial			trial;
-
+	
+	private Stage stage;
+	
+	private final Language language_to;
+	
+	private final Trial trial;
+	
 	private final List<Word>	words;
 	private int					currentIndex	= 0;
-
-	private State				currentState	= State.INIT;
-
+	
+	private State currentState = State.INIT;
+	
 	public TrialController(final Language language_from, final Language language_to, final List<Word> words)
 	{
-		this.language_to = language_to;
-		this.words = words;
-
+		this.language_to	= language_to;
+		this.words			= words;
+		
 		this.trial = Trial.createTrial(Date.from(Instant.now()), language_from, language_to);
 	}
-
+	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
@@ -72,44 +72,44 @@ public final class TrialController implements Initializable, VokAbfController
 		this.stage.setOnCloseRequest(e ->
 		{
 			VokAbfController.instances.remove(this);
-
+			
 			if (this.trial.getWordChecks().isEmpty())
 			{
 				return;
 			}
-			final TrialResultController trc = new TrialResultController(this.trial);
-			final StringBinding title = I18N.createStringBinding("gui.result.title");
+			final TrialResultController	trc		= new TrialResultController(this.trial);
+			final StringBinding			title	= I18N.createStringBinding("gui.result.title");
 			GUIUtil.createNewStage("TrialResult", trc, title);
 		});
-
+		
 		this.bt_correct.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.correct.tooltip").get()));
 		this.bt_wrong.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.wrong.tooltip").get()));
-
+		
 		this.ta_answer.requestFocus();
-
+		
 		this.cycle(State.QUESTION);
 	}
-
+	
 	@Override
 	public final void setStage(final Stage stage)
 	{
 		this.stage = stage;
 	}
-
+	
 	@Override
 	public final void close()
 	{
 		this.stage.setOnCloseRequest(null);
 		this.stage.close();
 	}
-
+	
 	@FXML
 	public final void exit(final ActionEvent event)
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 	@FXML
 	public final void correct(final ActionEvent event)
 	{
@@ -117,7 +117,7 @@ public final class TrialController implements Initializable, VokAbfController
 		WordCheck.createWordCheck(word, this.trial, this.ta_answer.getText(), true);
 		this.cycle(State.QUESTION);
 	}
-
+	
 	@FXML
 	public final void wrong(final ActionEvent event)
 	{
@@ -125,13 +125,13 @@ public final class TrialController implements Initializable, VokAbfController
 		WordCheck.createWordCheck(word, this.trial, this.ta_answer.getText(), false);
 		this.cycle(State.QUESTION);
 	}
-
+	
 	@FXML
 	public final void solution(final ActionEvent event)
 	{
 		this.cycle(State.SOLUTION);
 	}
-
+	
 	@FXML
 	public final void keyPressed(final KeyEvent event)
 	{
@@ -156,17 +156,17 @@ public final class TrialController implements Initializable, VokAbfController
 			return;
 		}
 	}
-
+	
 	private final void cycle(final State nextState)
 	{
-
+		
 		if (this.currentState == State.INIT)
 		{
 			this.currentState = State.QUESTION;
 			this.setQuestion(this.words.get(this.currentIndex));
 			return;
 		}
-
+		
 		switch (nextState)
 		{
 			case QUESTION:
@@ -188,9 +188,9 @@ public final class TrialController implements Initializable, VokAbfController
 			{
 				this.ta_answer.setEditable(false);
 				this.bt_solution.setDisable(true);
-
+				
 				this.setSolution(this.words.get(this.currentIndex));
-
+				
 				break;
 			}
 			default:
@@ -200,12 +200,12 @@ public final class TrialController implements Initializable, VokAbfController
 		}
 		this.currentState = nextState;
 	}
-
+	
 	private final void setQuestion(final Word question)
 	{
 		this.ta_question.setText(question.getName());
 	}
-
+	
 	private final void setSolution(final Word question)
 	{
 		if (question == null)
@@ -214,8 +214,8 @@ public final class TrialController implements Initializable, VokAbfController
 		}
 		else
 		{
-			final List<Translation> translations = question.getTranslations(this.language_to);
-			final StringBuilder sb = new StringBuilder();
+			final List<Translation>	translations	= question.getTranslations(this.language_to);
+			final StringBuilder		sb				= new StringBuilder();
 			for (int i = 0; i < translations.size(); i++)
 			{
 				final Translation t = translations.get(i);

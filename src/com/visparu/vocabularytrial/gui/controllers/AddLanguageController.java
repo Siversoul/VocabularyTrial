@@ -17,14 +17,14 @@ import javafx.stage.Stage;
 public final class AddLanguageController implements Initializable, VokAbfController
 {
 	@FXML
-	private TextField								tf_language_code;
+	private TextField	tf_language_code;
 	@FXML
-	private TextField								tf_language;
-
-	public static final List<AddLanguageController>	instances	= new ArrayList<>();
-
-	private Stage									stage;
-
+	private TextField	tf_language;
+	
+	public static final List<AddLanguageController> instances = new ArrayList<>();
+	
+	private Stage stage;
+	
 	@Override
 	public void initialize(final URL location, final ResourceBundle resources)
 	{
@@ -36,20 +36,20 @@ public final class AddLanguageController implements Initializable, VokAbfControl
 			AddLanguageController.instances.remove(this);
 		});
 	}
-
+	
 	@Override
 	public final void close()
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 	@Override
 	public final void setStage(final Stage stage)
 	{
 		this.stage = stage;
 	}
-
+	
 	@FXML
 	public final void confirm(final ActionEvent event)
 	{
@@ -57,7 +57,7 @@ public final class AddLanguageController implements Initializable, VokAbfControl
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 	@FXML
 	public final void cancel(final ActionEvent event)
 	{

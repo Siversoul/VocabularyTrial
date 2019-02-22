@@ -10,13 +10,13 @@ import org.json.simple.parser.ParseException;
 
 public final class C11N
 {
-
-	private static final String	DEFAULT_CONFIG_FILE	= "config.json";
-
+	
+	private static final String DEFAULT_CONFIG_FILE = "config.json";
+	
 	private static final String	DEFAULT_DRIVER		= "jdbc";
 	private static final String	DEFAULT_PROTOCOL	= "sqlite";
 	private static final String	DEFAULT_FILENAME	= IOUtil.DATA_PATH + "temp.db";
-
+	
 	public static final String getDriver()
 	{
 		final String driver = C11N.getValue("driver");
@@ -26,12 +26,12 @@ public final class C11N
 		}
 		return driver;
 	}
-
+	
 	public static final void setDriver(String driver)
 	{
 		C11N.setValue("driver", driver);
 	}
-
+	
 	public static final String getProtocol()
 	{
 		final String protocol = C11N.getValue("protocol");
@@ -41,12 +41,12 @@ public final class C11N
 		}
 		return protocol;
 	}
-
+	
 	public static final void setProtocol(String protocol)
 	{
 		C11N.setValue("protocol", protocol);
 	}
-
+	
 	public static final File getDatabasePath()
 	{
 		final String dbPath = C11N.getValue("dbPath");
@@ -56,12 +56,12 @@ public final class C11N
 		}
 		return Paths.get(dbPath).toFile();
 	}
-
+	
 	public static final void setDatabasePath(String databasePath)
 	{
 		C11N.setValue("dbPath", databasePath);
 	}
-
+	
 	public static final Locale getLocale()
 	{
 		final String localeString = C11N.getValue("locale");
@@ -71,13 +71,13 @@ public final class C11N
 		}
 		return Locale.forLanguageTag(localeString);
 	}
-
+	
 	public static final void setLocale(Locale locale)
 	{
 		C11N.setValue("locale", locale.toLanguageTag());
 		I18N.localeProperty().set(locale);
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private static final <V> V getValue(String key)
 	{
@@ -89,8 +89,8 @@ public final class C11N
 		final JSONParser parser = new JSONParser();
 		try
 		{
-			final JSONObject obj = (JSONObject) parser.parse(jsonString);
-			final V value = (V) obj.get(key);
+			final JSONObject	obj		= (JSONObject) parser.parse(jsonString);
+			final V				value	= (V) obj.get(key);
 			return value;
 		}
 		catch (ParseException | ClassCastException e)
@@ -99,13 +99,13 @@ public final class C11N
 		}
 		return null;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private static final void setValue(Object key, Object value)
 	{
-		final String jsonString = IOUtil.readString(C11N.DEFAULT_CONFIG_FILE);
-		final JSONObject obj;
-		if(jsonString == null)
+		final String		jsonString	= IOUtil.readString(C11N.DEFAULT_CONFIG_FILE);
+		final JSONObject	obj;
+		if (jsonString == null)
 		{
 			obj = new JSONObject();
 		}
@@ -124,5 +124,5 @@ public final class C11N
 		obj.put(key, value);
 		IOUtil.writeString(obj.toJSONString(), C11N.DEFAULT_CONFIG_FILE);
 	}
-
+	
 }

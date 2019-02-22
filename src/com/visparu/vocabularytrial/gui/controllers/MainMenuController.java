@@ -78,14 +78,14 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	private Label							lb_status;
 	@FXML
 	private ImageView						iv_status_icon;
-
-	private final Stage						stage;
-
+	
+	private final Stage stage;
+	
 	public MainMenuController(final Stage stage)
 	{
 		this.stage = stage;
 	}
-
+	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
@@ -95,12 +95,12 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			LanguageComponent.instances.remove(this);
 			WordComponent.instances.remove(this);
-
+			
 			VokAbfController.closeAll();
 		});
-
+		
 		int index;
-		switch(C11N.getLocale().toLanguageTag())
+		switch (C11N.getLocale().toLanguageTag())
 		{
 			case "en":
 			{
@@ -119,9 +119,9 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			}
 		}
 		((CheckMenuItem) this.mn_languages.getItems().get(index)).setSelected(true);
-
+		
 		this.cmi_trial_randomize.setSelected(true);
-
+		
 		this.repopulateLanguages_from();
 		this.cb_language_from.getSelectionModel().select(0);
 		this.repopulateLanguages_to();
@@ -136,7 +136,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			this.repopulateWords();
 		});
-
+		
 		this.tv_vocabulary.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		this.tv_vocabulary.setOnKeyPressed(e ->
 		{
@@ -145,16 +145,16 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				this.removeAllSelectedWords();
 			}
 		});
-
+		
 		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordView, String>("name"));
 		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordView, String>("translationsString"));
 	}
-
+	
 	private final void removeAllSelectedWords()
 	{
-		final Alert alert = new Alert(AlertType.CONFIRMATION, I18N.createStringBinding("gui.mainmenu.alert.delete").get(),
-				ButtonType.YES, ButtonType.NO);
-		final Optional<ButtonType> result = alert.showAndWait();
+		final Alert					alert	= new Alert(AlertType.CONFIRMATION, I18N.createStringBinding("gui.mainmenu.alert.delete").get(),
+			ButtonType.YES, ButtonType.NO);
+		final Optional<ButtonType>	result	= alert.showAndWait();
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
 			for (final WordView wv : this.tv_vocabulary.getSelectionModel().getSelectedItems())
@@ -164,19 +164,19 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			}
 		}
 	}
-
+	
 	@Override
 	public final void repopulateLanguages()
 	{
 		this.repopulateLanguages_from();
 		this.repopulateLanguages_to();
 	}
-
+	
 	private final void repopulateLanguages_from()
 	{
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
 	}
-
+	
 	private final void repopulateLanguages_to()
 	{
 		final Language l_prev = this.cb_language_to.getSelectionModel().getSelectedItem();
@@ -187,31 +187,31 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
 	}
-
+	
 	@Override
 	public final void repopulateWords()
 	{
-		final Language language_from = this.cb_language_from.getSelectionModel().getSelectedItem();
-		final Language language_to = this.cb_language_to.getSelectionModel().getSelectedItem();
+		final Language	language_from	= this.cb_language_from.getSelectionModel().getSelectedItem();
+		final Language	language_to		= this.cb_language_to.getSelectionModel().getSelectedItem();
 		if (language_from == null || language_to == null)
 		{
 			this.tv_vocabulary.getItems().clear();
 			return;
 		}
-		final List<Word> wordsRaw = language_from.getWords();
-		final ObservableList<WordView> wordViews = FXCollections.observableArrayList();
+		final List<Word>				wordsRaw	= language_from.getWords();
+		final ObservableList<WordView>	wordViews	= FXCollections.observableArrayList();
 		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty())
-				.forEach(w -> wordViews.add(new WordView(w, language_to)));
+			.forEach(w -> wordViews.add(new WordView(w, language_to)));
 		this.tv_vocabulary.setItems(wordViews);
 	}
-
+	
 	@FXML
 	public final void file_new(final ActionEvent event)
 	{
 		final FileChooser fc = new FileChooser();
 		fc.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.menubar.file.new.title"));
 		fc.getExtensionFilters().add(
-				new ExtensionFilter(I18N.createStringBinding("gui.mainmenu.menubar.file.new.filter").get(), "*.db"));
+			new ExtensionFilter(I18N.createStringBinding("gui.mainmenu.menubar.file.new.filter").get(), "*.db"));
 		final File selectedFile = fc.showSaveDialog(this.stage);
 		if (selectedFile != null)
 		{
@@ -226,81 +226,81 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
 			ConnectionDetails.getInstance().changeDatabase(
-					C11N.getDriver(),
-					C11N.getProtocol(),
-					C11N.getDatabasePath().getAbsolutePath());
+				C11N.getDriver(),
+				C11N.getProtocol(),
+				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 		}
 	}
-
+	
 	@FXML
 	public final void file_open(final ActionEvent event)
 	{
 		final FileChooser fc = new FileChooser();
 		fc.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.menubar.file.open.title"));
 		fc.getExtensionFilters().add(
-				new ExtensionFilter(I18N.createStringBinding("gui.mainmenu.menubar.file.open.filter").get(), "*.db"));
+			new ExtensionFilter(I18N.createStringBinding("gui.mainmenu.menubar.file.open.filter").get(), "*.db"));
 		final File selectedFile = fc.showOpenDialog(this.stage);
 		if (selectedFile != null)
 		{
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
 			ConnectionDetails.getInstance().changeDatabase(
-					C11N.getDriver(),
-					C11N.getProtocol(),
-					C11N.getDatabasePath().getAbsolutePath());
+				C11N.getDriver(),
+				C11N.getProtocol(),
+				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 		}
 	}
-
+	
 	@FXML
 	public final void file_saveas(final ActionEvent event)
 	{
 		final FileChooser fc = new FileChooser();
 		fc.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.menubar.file.saveas.title"));
 		fc.getExtensionFilters().add(
-				new ExtensionFilter(I18N.createStringBinding("gui.mainmenu.menubar.file.saveas.filter").get(), "*.db"));
+			new ExtensionFilter(I18N.createStringBinding("gui.mainmenu.menubar.file.saveas.filter").get(), "*.db"));
 		final File selectedFile = fc.showSaveDialog(this.stage);
 		if (selectedFile != null)
 		{
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
 			ConnectionDetails.getInstance().copyDatabase(selectedFile);
 			ConnectionDetails.getInstance().changeDatabase(
-					C11N.getDriver(),
-					C11N.getProtocol(),
-					C11N.getDatabasePath().getAbsolutePath());
+				C11N.getDriver(),
+				C11N.getProtocol(),
+				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 		}
 	}
-
+	
 	@FXML
 	public final void file_close(final ActionEvent event)
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 	@FXML
 	public final void vocab_add(final ActionEvent event)
 	{
-		final String fxmlName = "AddWords";
-		final AddWordsController awc = new AddWordsController(
-				this.cb_language_from.getSelectionModel().getSelectedItem(),
-				this.cb_language_to.getSelectionModel().getSelectedItem());
-		final StringBinding title = I18N.createStringBinding("gui.addwords.title");
+		final String				fxmlName	= "AddWords";
+		final AddWordsController	awc			= new AddWordsController(
+			this.cb_language_from.getSelectionModel().getSelectedItem(),
+			this.cb_language_to.getSelectionModel().getSelectedItem());
+		final StringBinding			title		= I18N.createStringBinding("gui.addwords.title");
 		GUIUtil.createNewStage(fxmlName, awc, title);
 	}
-
+	
 	@FXML
 	public final void vocab_clear(final ActionEvent event)
 	{
-		final Alert alert = new Alert(AlertType.WARNING, I18N.createStringBinding("gui.mainmenu.alert.clearvocabulary.first").get(),
-				ButtonType.YES, ButtonType.NO);
-		final Optional<ButtonType> result = alert.showAndWait();
+		final Alert					alert	= new Alert(AlertType.WARNING, I18N.createStringBinding("gui.mainmenu.alert.clearvocabulary.first").get(),
+			ButtonType.YES, ButtonType.NO);
+		final Optional<ButtonType>	result	= alert.showAndWait();
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
-			final Alert confirm = new Alert(AlertType.CONFIRMATION, I18N.createStringBinding("gui.mainmenu.alert.clearvocabulary.second").get(), ButtonType.YES,
-					ButtonType.NO);
-			final Optional<ButtonType> result2 = confirm.showAndWait();
+			final Alert					confirm	= new Alert(AlertType.CONFIRMATION, I18N.createStringBinding("gui.mainmenu.alert.clearvocabulary.second").get(), ButtonType.YES,
+				ButtonType.NO);
+			final Optional<ButtonType>	result2	= confirm.showAndWait();
 			if (result2.isPresent() && result2.get() == ButtonType.YES)
 			{
 				WordCheck.removeAllWordChecks();
@@ -308,32 +308,32 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				Translation.removeAllTranslations();
 				Word.removeAllWords();
 				Language.removeAllLanguages();
-
+				
 				LanguageComponent.repopulateAllLanguages();
 				WordComponent.repopulateAllWords();
 				TrialComponent.repopulateAllTrials();
 			}
 		}
 	}
-
+	
 	@FXML
 	public final void vocab_languages(final ActionEvent event)
 	{
-		final String fxmlName = "ManageLanguages";
-		final ManageLanguagesController mlc = new ManageLanguagesController();
-		final StringBinding title = I18N.createStringBinding("gui.languages.title");
+		final String					fxmlName	= "ManageLanguages";
+		final ManageLanguagesController	mlc			= new ManageLanguagesController();
+		final StringBinding				title		= I18N.createStringBinding("gui.languages.title");
 		GUIUtil.createNewStage(fxmlName, mlc, title);
 	}
-
+	
 	@FXML
 	public final void trial_list(final ActionEvent event)
 	{
-		final TrialListController tlc = new TrialListController(this.cb_language_from.getValue(),
-				this.cb_language_to.getValue());
-		final StringBinding title = I18N.createStringBinding("gui.triallist.title");
+		final TrialListController	tlc		= new TrialListController(this.cb_language_from.getValue(),
+			this.cb_language_to.getValue());
+		final StringBinding			title	= I18N.createStringBinding("gui.triallist.title");
 		GUIUtil.createNewStage("TrialList", tlc, title);
 	}
-
+	
 	@FXML
 	public final void trial_all(final ActionEvent event)
 	{
@@ -341,22 +341,22 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		this.tv_vocabulary.getItems().forEach(w -> trialWords.add(Word.get(w.getWord_id())));
 		this.createTrial(trialWords);
 	}
-
+	
 	@FXML
 	public final void trial_selected(final ActionEvent event)
 	{
 		final List<Word> trialWords = new ArrayList<>();
 		this.tv_vocabulary.getSelectionModel().getSelectedItems()
-				.forEach(w -> trialWords.add(Word.get(w.getWord_id())));
+			.forEach(w -> trialWords.add(Word.get(w.getWord_id())));
 		this.createTrial(trialWords);
 	}
-
+	
 	@FXML
 	public final void trial_failed(final ActionEvent event)
 	{
-		final List<Word> trialWords = new ArrayList<>();
-		final Language l_from = this.cb_language_from.getValue();
-		final Language l_to = this.cb_language_to.getValue();
+		final List<Word>	trialWords	= new ArrayList<>();
+		final Language		l_from		= this.cb_language_from.getValue();
+		final Language		l_to		= this.cb_language_to.getValue();
 		if (l_from == null || l_to == null)
 		{
 			return;
@@ -364,16 +364,16 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final List<Word> words = l_from.getWords();
 		for (Word w : words)
 		{
-			final List<WordCheck> wordchecks = w.getWordChecks(l_to);
-			Date date = null;
-			WordCheck latestCheck = null;
+			final List<WordCheck>	wordchecks	= w.getWordChecks(l_to);
+			Date					date		= null;
+			WordCheck				latestCheck	= null;
 			for (final WordCheck wc : wordchecks)
 			{
 				final Trial t = wc.getTrial();
 				if (date == null || date.before(t.getDate()))
 				{
-					date = t.getDate();
-					latestCheck = wc;
+					date		= t.getDate();
+					latestCheck	= wc;
 				}
 			}
 			if (latestCheck != null && !latestCheck.isCorrect())
@@ -383,43 +383,43 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		}
 		this.createTrial(trialWords);
 	}
-
+	
 	@FXML
 	public final void trial_custom(final ActionEvent event)
 	{
 		// TODO: implement custom trial configuration
 		final Alert alert = new Alert(AlertType.INFORMATION, I18N.createStringBinding("root.notimplementedyet").get(),
-				ButtonType.OK);
+			ButtonType.OK);
 		alert.showAndWait();
 	}
-
+	
 	@FXML
 	public final void trial_reset(final ActionEvent event)
 	{
-		final Alert alert = new Alert(AlertType.WARNING, I18N.createStringBinding("gui.mainmenu.alert.erasetrials").get(),
-				ButtonType.YES,
-				ButtonType.NO);
-		final Optional<ButtonType> result = alert.showAndWait();
+		final Alert					alert	= new Alert(AlertType.WARNING, I18N.createStringBinding("gui.mainmenu.alert.erasetrials").get(),
+			ButtonType.YES,
+			ButtonType.NO);
+		final Optional<ButtonType>	result	= alert.showAndWait();
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
 			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
 			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
 		}
 	}
-
+	
 	private final void createTrial(List<Word> trialWords)
 	{
 		if (trialWords.isEmpty())
 		{
 			final Alert alert = new Alert(AlertType.ERROR,
-					I18N.createStringBinding("gui.mainmenu.alert.noapplicablewords").get(), ButtonType.OK);
+				I18N.createStringBinding("gui.mainmenu.alert.noapplicablewords").get(), ButtonType.OK);
 			alert.showAndWait();
 			return;
 		}
 		if (this.cmi_trial_randomize.isSelected())
 		{
-			final Random rand = new Random();
-			final List<Word> randomizedList = new ArrayList<>();
+			final Random		rand			= new Random();
+			final List<Word>	randomizedList	= new ArrayList<>();
 			while (!trialWords.isEmpty())
 			{
 				int randIndex = rand.nextInt(trialWords.size());
@@ -427,31 +427,31 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			}
 			trialWords = randomizedList;
 		}
-		final Language l_from = this.cb_language_from.getSelectionModel().getSelectedItem();
-		final Language l_to = this.cb_language_to.getSelectionModel().getSelectedItem();
-		final TrialController tc = new TrialController(l_from, l_to, trialWords);
-		final StringBinding title = I18N.createStringBinding("gui.trial.title");
+		final Language			l_from	= this.cb_language_from.getSelectionModel().getSelectedItem();
+		final Language			l_to	= this.cb_language_to.getSelectionModel().getSelectedItem();
+		final TrialController	tc		= new TrialController(l_from, l_to, trialWords);
+		final StringBinding		title	= I18N.createStringBinding("gui.trial.title");
 		GUIUtil.createNewStage("Trial", tc, title);
 	}
-
+	
 	@FXML
 	public final void change_language(final ActionEvent event)
 	{
-		Alert alert = new Alert(AlertType.WARNING, I18N.get("gui.mainmenu.alert.languagechange"), ButtonType.YES, ButtonType.NO);
-		Optional<ButtonType> result = alert.showAndWait();
-		if(!result.isPresent() || result.get() != ButtonType.YES)
+		Alert					alert	= new Alert(AlertType.WARNING, I18N.get("gui.mainmenu.alert.languagechange"), ButtonType.YES, ButtonType.NO);
+		Optional<ButtonType>	result	= alert.showAndWait();
+		if (!result.isPresent() || result.get() != ButtonType.YES)
 		{
 			return;
 		}
-
+		
 		List<MenuItem> items = this.mn_languages.getItems();
-		for(int i = 0; i < items.size(); i++)
+		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = items.get(i);
-			if(event.getSource() == item)
+			if (event.getSource() == item)
 			{
 				((CheckMenuItem) item).setSelected(true);
-				switch(i)
+				switch (i)
 				{
 					case 0:
 					{
@@ -475,17 +475,17 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				((CheckMenuItem) item).setSelected(false);
 			}
 		}
-
+		
 		VokAbfController.closeAll();
 		try
 		{
-			final URL url = this.getClass().getResource("/fxml/MainMenu.fxml");
-			final FXMLLoader loader = new FXMLLoader(url);
-			final MainMenuController mmc = new MainMenuController(this.stage);
+			final URL					url		= this.getClass().getResource("/fxml/MainMenu.fxml");
+			final FXMLLoader			loader	= new FXMLLoader(url);
+			final MainMenuController	mmc		= new MainMenuController(this.stage);
 			loader.setController(mmc);
 			loader.setResources(I18N.getResources());
-			final Parent root = loader.load();
-			final Scene scene = new Scene(root);
+			final Parent	root	= loader.load();
+			final Scene		scene	= new Scene(root);
 			this.stage.setScene(scene);
 			this.stage.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.title"));
 			this.stage.show();
@@ -495,7 +495,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			e.printStackTrace();
 		}
 	}
-
+	
 	@FXML
 	public final void debug_fillrandomly(final ActionEvent event)
 	{
@@ -506,7 +506,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		this.cb_language_to.getSelectionModel().select(0);
 		this.repopulateWords();
 	}
-
+	
 	@FXML
 	public final void help_about(final ActionEvent event)
 	{

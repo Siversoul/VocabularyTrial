@@ -10,10 +10,10 @@ import java.nio.file.StandardOpenOption;
 
 public final class IOUtil
 {
-
+	
 	public static final String DATA_PATH = System.getProperty("user.home") + File.separator + "Documents"
-			+ File.separator + "Visparu" + File.separator + "VocabularyTrial" + File.separator;
-
+		+ File.separator + "Visparu" + File.separator + "VocabularyTrial" + File.separator;
+	
 	static
 	{
 		try
@@ -25,26 +25,26 @@ public final class IOUtil
 			e.printStackTrace();
 		}
 	}
-
+	
 	public static final void writeString(String data, String file)
 	{
-		final String absolutePathString = IOUtil.DATA_PATH + file;
-		final Path absolutePath = Paths.get(absolutePathString);
+		final String	absolutePathString	= IOUtil.DATA_PATH + file;
+		final Path		absolutePath		= Paths.get(absolutePathString);
 		try
 		{
 			Files.write(absolutePath, data.getBytes(Charset.defaultCharset()), StandardOpenOption.CREATE,
-					StandardOpenOption.TRUNCATE_EXISTING);
+				StandardOpenOption.TRUNCATE_EXISTING);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
-
+	
 	public static final String readString(String file)
 	{
-		final String absolutePathString = IOUtil.DATA_PATH + file;
-		final Path absolutePath = Paths.get(absolutePathString);
+		final String	absolutePathString	= IOUtil.DATA_PATH + file;
+		final Path		absolutePath		= Paths.get(absolutePathString);
 		try
 		{
 			final String data = new String(Files.readAllBytes(absolutePath), Charset.defaultCharset());
@@ -55,5 +55,5 @@ public final class IOUtil
 			return null;
 		}
 	}
-
+	
 }

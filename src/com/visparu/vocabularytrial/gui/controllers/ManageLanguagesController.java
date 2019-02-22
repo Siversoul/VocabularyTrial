@@ -37,9 +37,9 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 	private TableColumn<LanguageView, String>	tc_language;
 	@FXML
 	private TableColumn<LanguageView, Void>		tc_delete;
-
-	private Stage								stage;
-
+	
+	private Stage stage;
+	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
@@ -51,14 +51,14 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 			VokAbfController.instances.remove(this);
 			AddLanguageController.instances.forEach(i -> i.close());
 		});
-
+		
 		this.tc_language_code.setCellValueFactory(new PropertyValueFactory<LanguageView, String>("language_code"));
 		this.tc_language.setCellValueFactory(new PropertyValueFactory<LanguageView, String>("name"));
 		this.tc_delete.setCellFactory(e ->
 		{
 			final TableCell<LanguageView, Void> cell = new TableCell<LanguageView, Void>()
 			{
-
+				
 				private final Button btn = new Button();
 				{
 					this.btn.textProperty().bind(I18N.createStringBinding("gui.languages.table.data.delete"));
@@ -67,7 +67,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 						ManageLanguagesController.this.removeLanguage((LanguageView) this.getTableRow().getItem());
 					});
 				}
-
+				
 				@Override
 				public final void updateItem(final Void item, final boolean empty)
 				{
@@ -84,10 +84,10 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 			};
 			return cell;
 		});
-
+		
 		this.repopulateLanguages();
 	}
-
+	
 	@Override
 	public final void repopulateLanguages()
 	{
@@ -95,17 +95,17 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 		Language.getAll().forEach(l -> lv_list.add(new LanguageView(l.getLanguage_code(), l.getName())));
 		this.tv_languages.setItems(lv_list);
 	}
-
+	
 	private final void removeLanguage(final LanguageView lv)
 	{
-		final Language l = Language.get(lv.getLanguage_code());
-		final int wordCount = l.getWords().size();
+		final Language	l			= Language.get(lv.getLanguage_code());
+		final int		wordCount	= l.getWords().size();
 		if (wordCount > 0)
 		{
-			final Alert alert = new Alert(AlertType.WARNING,
-					I18N.createStringBinding("gui.languages.alert.wordsexist").get(),
-					ButtonType.YES, ButtonType.NO);
-			final Optional<ButtonType> result = alert.showAndWait();
+			final Alert					alert	= new Alert(AlertType.WARNING,
+				I18N.createStringBinding("gui.languages.alert.wordsexist").get(),
+				ButtonType.YES, ButtonType.NO);
+			final Optional<ButtonType>	result	= alert.showAndWait();
 			if (!result.isPresent() || (result.isPresent() && result.get() != ButtonType.YES))
 			{
 				return;
@@ -113,34 +113,34 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 		}
 		Language.removeLanguage(l.getLanguage_code());
 	}
-
+	
 	@Override
 	public final void close()
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 	@Override
 	public final void setStage(final Stage stage)
 	{
 		this.stage = stage;
 	}
-
+	
 	@FXML
 	public final void newLanguage(final ActionEvent event)
 	{
-		final String fxmlName = "AddLanguage";
-		final AddLanguageController alc = new AddLanguageController();
-		final StringBinding title = I18N.createStringBinding("gui.addlanguage.title");
+		final String				fxmlName	= "AddLanguage";
+		final AddLanguageController	alc			= new AddLanguageController();
+		final StringBinding			title		= I18N.createStringBinding("gui.addlanguage.title");
 		GUIUtil.createNewStage(fxmlName, alc, title);
 	}
-
+	
 	@FXML
 	public final void close(final ActionEvent event)
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 }

@@ -7,25 +7,26 @@ import javafx.stage.Stage;
 
 public interface VokAbfController
 {
-
+	
 	List<VokAbfController> instances = new ArrayList<>();
-
+	
 	static void repopulateAll()
 	{
 		LanguageComponent.repopulateAllLanguages();
 		WordComponent.repopulateAllWords();
 		TrialComponent.repopulateAllTrials();
 	}
-
+	
 	static void closeAll()
 	{
-		while(!VokAbfController.instances.isEmpty())
+		while (!VokAbfController.instances.isEmpty())
 		{
 			VokAbfController.instances.get(0).close();
 		}
 	}
-
+	
 	void setStage(Stage stage);
+	
 	void close();
-
+	
 }

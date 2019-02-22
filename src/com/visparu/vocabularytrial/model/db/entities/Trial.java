@@ -18,38 +18,38 @@ import com.visparu.vocabularytrial.model.db.ConnectionDetails;
 
 public final class Trial
 {
-
-	private static final Map<Integer, Trial>	cache	= new HashMap<>();
-
-	private Integer								trial_id;
-	private final Date							date;
-	private final Language						language_from;
-	private final Language						language_to;
-
+	
+	private static final Map<Integer, Trial> cache = new HashMap<>();
+	
+	private Integer			trial_id;
+	private final Date		date;
+	private final Language	language_from;
+	private final Language	language_to;
+	
 	public Trial(final Integer trial_id, final Date date, final Language language_from, final Language language_to)
 	{
-		this.trial_id = trial_id;
-		this.date = date;
-		this.language_from = language_from;
-		this.language_to = language_to;
+		this.trial_id		= trial_id;
+		this.date			= date;
+		this.language_from	= language_from;
+		this.language_to	= language_to;
 	}
-
+	
 	public static final void createTable()
 	{
 		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS trial("
-				+ "trial_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-				+ "datetime VARCHAR(23), "
-				+ "language_code_from VARCHAR(2), "
-				+ "language_code_to VARCHAR(2), "
-				+ "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
-				+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE)");
+			+ "trial_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+			+ "datetime VARCHAR(23), "
+			+ "language_code_from VARCHAR(2), "
+			+ "language_code_to VARCHAR(2), "
+			+ "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
+			+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE)");
 	}
-
+	
 	public static final void clearCache()
 	{
 		Trial.cache.clear();
 	}
-
+	
 	public static final Trial get(final Integer trial_id)
 	{
 		if (Trial.cache.containsKey(trial_id))
@@ -58,25 +58,25 @@ public final class Trial
 		}
 		return Trial.readEntity(trial_id);
 	}
-
+	
 	public static final Trial createTrial(final Date date, final Language language_from, final Language language_to)
 	{
-		final Trial t = new Trial(-1, date, language_from, language_to);
-		final Integer trial_id = Trial.writeEntity(t);
+		final Trial		t			= new Trial(-1, date, language_from, language_to);
+		final Integer	trial_id	= Trial.writeEntity(t);
 		t.setTrial_id(trial_id);
 		Trial.cache.put(trial_id, t);
 		TrialComponent.repopulateAllTrials();
 		return t;
 	}
-
+	
 	public static final void removeTrial(final Integer trial_id)
 	{
 		Trial.cache.remove(trial_id);
-		final String query = "DELETE FROM trial "
-				+ "WHERE trial_id = ?";
-		final String connString = ConnectionDetails.getInstance().getConnectionString();
+		final String	query		= "DELETE FROM trial "
+			+ "WHERE trial_id = ?";
+		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
 		try (final Connection conn = DriverManager.getConnection(connString);
-				final PreparedStatement pstmt = conn.prepareStatement(query))
+			final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, trial_id);
 			pstmt.execute();
@@ -86,33 +86,33 @@ public final class Trial
 			e.printStackTrace();
 		}
 	}
-
+	
 	public static final void removeAllTrials()
 	{
 		Trial.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
 	}
-
+	
 	private static final Trial readEntity(final Integer trial_id)
 	{
-		final String query = "SELECT * "
-				+ "FROM trial "
-				+ "WHERE trial_id = ?";
-		final String connString = ConnectionDetails.getInstance().getConnectionString();
+		final String	query		= "SELECT * "
+			+ "FROM trial "
+			+ "WHERE trial_id = ?";
+		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
 		try (final Connection conn = DriverManager.getConnection(connString);
-				final PreparedStatement pstmt = conn.prepareStatement(query))
+			final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, trial_id);
 			final ResultSet rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				final String dateString = rs.getString("datetime");
-				final Date date = Trial.getDateFormatter().parse(dateString);
-				final String l_fromString = rs.getString("language_code_from");
-				final Language l_from = Language.get(l_fromString);
-				final String l_toString = rs.getString("language_code_to");
-				final Language l_to = Language.get(l_toString);
-				final Trial t = new Trial(trial_id, date, l_from, l_to);
+				final String	dateString		= rs.getString("datetime");
+				final Date		date			= Trial.getDateFormatter().parse(dateString);
+				final String	l_fromString	= rs.getString("language_code_from");
+				final Language	l_from			= Language.get(l_fromString);
+				final String	l_toString		= rs.getString("language_code_to");
+				final Language	l_to			= Language.get(l_toString);
+				final Trial		t				= new Trial(trial_id, date, l_from, l_to);
 				Trial.cache.put(trial_id, t);
 				rs.close();
 				return t;
@@ -125,14 +125,14 @@ public final class Trial
 		}
 		return null;
 	}
-
+	
 	private static final Integer writeEntity(final Trial trial)
 	{
-		final String query = "INSERT INTO trial(datetime, language_code_from, language_code_to) "
-				+ "VALUES(?, ?, ?)";
-		final String connString = ConnectionDetails.getInstance().getConnectionString();
+		final String	query		= "INSERT INTO trial(datetime, language_code_from, language_code_to) "
+			+ "VALUES(?, ?, ?)";
+		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
 		try (final Connection conn = DriverManager.getConnection(connString);
-				final PreparedStatement pstmt = conn.prepareStatement(query))
+			final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			final String dateString = Trial.getDateFormatter().format(trial.getDate());
 			pstmt.setString(1, dateString);
@@ -150,25 +150,25 @@ public final class Trial
 		}
 		return -1;
 	}
-
+	
 	public static final List<Trial> getTrials(final Language l_from, final Language l_to)
 	{
-		final List<Trial> trials = new ArrayList<>();
-		final String query = "SELECT trial_id "
-				+ "FROM trial "
-				+ "WHERE language_code_from = ? "
-				+ "AND language_code_to = ?";
-		final String connString = ConnectionDetails.getInstance().getConnectionString();
+		final List<Trial>	trials		= new ArrayList<>();
+		final String		query		= "SELECT trial_id "
+			+ "FROM trial "
+			+ "WHERE language_code_from = ? "
+			+ "AND language_code_to = ?";
+		final String		connString	= ConnectionDetails.getInstance().getConnectionString();
 		try (final Connection conn = DriverManager.getConnection(connString);
-				final PreparedStatement pstmt = conn.prepareStatement(query))
+			final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setString(1, l_from.getLanguage_code());
 			pstmt.setString(2, l_to.getLanguage_code());
 			final ResultSet rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				final int trial_id = rs.getInt("trial_id");
-				final Trial t = Trial.get(trial_id);
+				final int	trial_id	= rs.getInt("trial_id");
+				final Trial	t			= Trial.get(trial_id);
 				trials.add(t);
 			}
 			rs.close();
@@ -179,53 +179,53 @@ public final class Trial
 		}
 		return trials;
 	}
-
+	
 	public static final SimpleDateFormat getDateFormatter()
 	{
 		return new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
 	}
-
+	
 	public final Integer getTrial_id()
 	{
 		return trial_id;
 	}
-
+	
 	private final void setTrial_id(final Integer trial_id)
 	{
 		this.trial_id = trial_id;
 	}
-
+	
 	public final Date getDate()
 	{
 		return date;
 	}
-
+	
 	public final Language getLanguage_from()
 	{
 		return language_from;
 	}
-
+	
 	public Language getLanguage_to()
 	{
 		return language_to;
 	}
-
+	
 	public final List<WordCheck> getWordChecks()
 	{
-		final List<WordCheck> wordchecks = new ArrayList<>();
-		final String query = "SELECT * "
-				+ "FROM wordcheck "
-				+ "WHERE trial_id = ?";
-		final String connString = ConnectionDetails.getInstance().getConnectionString();
+		final List<WordCheck>	wordchecks	= new ArrayList<>();
+		final String			query		= "SELECT * "
+			+ "FROM wordcheck "
+			+ "WHERE trial_id = ?";
+		final String			connString	= ConnectionDetails.getInstance().getConnectionString();
 		try (final Connection conn = DriverManager.getConnection(connString);
-				final PreparedStatement pstmt = conn.prepareStatement(query))
+			final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, this.trial_id);
 			final ResultSet rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				final Integer word_id = rs.getInt("word_id");
-				final WordCheck wc = WordCheck.get(Word.get(word_id), this);
+				final Integer	word_id	= rs.getInt("word_id");
+				final WordCheck	wc		= WordCheck.get(Word.get(word_id), this);
 				wordchecks.add(wc);
 			}
 		}
@@ -235,5 +235,5 @@ public final class Trial
 		}
 		return wordchecks;
 	}
-
+	
 }

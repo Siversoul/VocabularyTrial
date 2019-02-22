@@ -5,14 +5,14 @@ import java.util.List;
 
 public interface LanguageComponent
 {
-
+	
 	List<LanguageComponent> instances = new ArrayList<>();
-
+	
 	static void repopulateAllLanguages()
 	{
 		LanguageComponent.instances.forEach(i -> i.repopulateLanguages());
 	}
-
+	
 	void repopulateLanguages();
-
+	
 }

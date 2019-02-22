@@ -21,13 +21,13 @@ import com.visparu.vocabularytrial.util.C11N;
 
 public final class ConnectionDetails
 {
-
-	private static ConnectionDetails	instance;
-
-	private String						driver;
-	private String						protocol;
-	private String						filename;
-
+	
+	private static ConnectionDetails instance;
+	
+	private String	driver;
+	private String	protocol;
+	private String	filename;
+	
 	static
 	{
 		try
@@ -42,23 +42,23 @@ public final class ConnectionDetails
 	
 	private ConnectionDetails(final String driver, final String protocol, final String filename)
 	{
-		this.driver = driver;
-		this.protocol = protocol;
-		this.filename = filename;
+		this.driver		= driver;
+		this.protocol	= protocol;
+		this.filename	= filename;
 	}
-
+	
 	public static final ConnectionDetails getInstance()
 	{
 		if (ConnectionDetails.instance == null)
 		{
 			return ConnectionDetails.getInstance(
-					C11N.getDriver(),
-					C11N.getProtocol(),
-					C11N.getDatabasePath().getAbsolutePath());
+				C11N.getDriver(),
+				C11N.getProtocol(),
+				C11N.getDatabasePath().getAbsolutePath());
 		}
 		return ConnectionDetails.instance;
 	}
-
+	
 	private static final ConnectionDetails getInstance(final String driver, final String protocol, final String filename)
 	{
 		ConnectionDetails.instance = new ConnectionDetails(driver, protocol, filename);
@@ -67,12 +67,12 @@ public final class ConnectionDetails
 		Language.clearCache();
 		return ConnectionDetails.instance;
 	}
-
+	
 	public final void activateForeignKeyPragma()
 	{
 		this.executeSimpleStatement("PRAGMA foreign_keys = ON");
 	}
-
+	
 	public final void changeDatabase(final String driver, final String protocol, final String filename)
 	{
 		ConnectionDetails.getInstance(driver, protocol, filename);
@@ -82,7 +82,7 @@ public final class ConnectionDetails
 		Trial.createTable();
 		WordCheck.createTable();
 	}
-
+	
 	public final void copyDatabase(final File newFile)
 	{
 		try
@@ -94,7 +94,7 @@ public final class ConnectionDetails
 			e.printStackTrace();
 		}
 	}
-
+	
 	public final void executeSimpleStatement(final String query)
 	{
 		final String connString = this.getConnectionString();
@@ -107,10 +107,10 @@ public final class ConnectionDetails
 			e.printStackTrace();
 		}
 	}
-
+	
 	public final String getConnectionString()
 	{
 		return String.format("%s:%s:%s", this.driver, this.protocol, this.filename);
 	}
-
+	
 }

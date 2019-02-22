@@ -13,19 +13,19 @@ import javafx.stage.Stage;
 
 public final class GUIUtil
 {
-
+	
 	public static final Stage createNewStage(final String fxmlName, final VokAbfController vac, final StringBinding title)
 	{
 		try
 		{
-			final Stage stage = new Stage();
-			final URL url = GUIUtil.class.getResource(String.format("/com/visparu/vocabularytrial/gui/fxml/%s.fxml", fxmlName));
-			final FXMLLoader loader = new FXMLLoader(url);
+			final Stage			stage	= new Stage();
+			final URL			url		= GUIUtil.class.getResource(String.format("/com/visparu/vocabularytrial/gui/fxml/%s.fxml", fxmlName));
+			final FXMLLoader	loader	= new FXMLLoader(url);
 			vac.setStage(stage);
 			loader.setController(vac);
 			loader.setResources(I18N.getResources());
-			final Parent root = loader.load();
-			final Scene scene = new Scene(root);
+			final Parent	root	= loader.load();
+			final Scene		scene	= new Scene(root);
 			stage.setScene(scene);
 			stage.titleProperty().bind(title);
 			stage.show();
@@ -37,5 +37,5 @@ public final class GUIUtil
 		}
 		return null;
 	}
-
+	
 }

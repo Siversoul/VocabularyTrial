@@ -46,18 +46,18 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	private TableColumn<TrialView, String>	tc_percentage;
 	@FXML
 	private TableColumn<TrialView, Void>	tc_view;
-
-	private Stage							stage;
-
-	private final Language						init_l_from;
-	private final Language						init_l_to;
-
+	
+	private Stage stage;
+	
+	private final Language	init_l_from;
+	private final Language	init_l_to;
+	
 	public TrialListController(final Language init_l_from, final Language init_l_to)
 	{
-		this.init_l_from = init_l_from;
-		this.init_l_to = init_l_to;
+		this.init_l_from	= init_l_from;
+		this.init_l_to		= init_l_to;
 	}
-
+	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
@@ -70,7 +70,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 			LanguageComponent.instances.remove(this);
 			TrialComponent.instances.remove(this);
 		});
-
+		
 		this.repopulateLanguages_from();
 		this.cb_language_from.getSelectionModel().select(this.init_l_from);
 		this.repopulateLanguages_to();
@@ -84,9 +84,9 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		{
 			this.repopulateTrials();
 		});
-
+		
 		this.repopulateTrials();
-
+		
 		this.tc_date.setCellValueFactory(new PropertyValueFactory<TrialView, String>("date"));
 		this.tc_count.setCellValueFactory(new PropertyValueFactory<TrialView, String>("count"));
 		this.tc_correct.setCellValueFactory(new PropertyValueFactory<TrialView, String>("correct"));
@@ -96,19 +96,19 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		{
 			final TableCell<TrialView, Void> cell = new TableCell<TrialView, Void>()
 			{
-
+				
 				private final Button btn = new Button();
 				{
 					this.btn.textProperty().bind(I18N.createStringBinding("gui.triallist.table.data.view"));
 					this.btn.setOnAction((ActionEvent event) ->
 					{
-						final TrialResultController trc = new TrialResultController(
-								Trial.get(((TrialView) this.getTableRow().getItem()).getTrial_id()));
-						final StringBinding title = I18N.createStringBinding("gui.result.title");
+						final TrialResultController	trc		= new TrialResultController(
+							Trial.get(((TrialView) this.getTableRow().getItem()).getTrial_id()));
+						final StringBinding			title	= I18N.createStringBinding("gui.result.title");
 						GUIUtil.createNewStage("TrialResult", trc, title);
 					});
 				}
-
+				
 				@Override
 				public final void updateItem(Void item, boolean empty)
 				{
@@ -126,19 +126,19 @@ public final class TrialListController implements Initializable, VokAbfControlle
 			return cell;
 		});
 	}
-
+	
 	@Override
 	public final void repopulateLanguages()
 	{
 		this.repopulateLanguages_from();
 		this.repopulateLanguages_to();
 	}
-
+	
 	private final void repopulateLanguages_from()
 	{
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
 	}
-
+	
 	private final void repopulateLanguages_to()
 	{
 		final Language l_prev = this.cb_language_to.getSelectionModel().getSelectedItem();
@@ -149,12 +149,12 @@ public final class TrialListController implements Initializable, VokAbfControlle
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
 	}
-
+	
 	@Override
 	public final void repopulateTrials()
 	{
-		final Language l_from = this.cb_language_from.getSelectionModel().getSelectedItem();
-		final Language l_to = this.cb_language_to.getSelectionModel().getSelectedItem();
+		final Language	l_from	= this.cb_language_from.getSelectionModel().getSelectedItem();
+		final Language	l_to	= this.cb_language_to.getSelectionModel().getSelectedItem();
 		if (l_from == null || l_to == null)
 		{
 			this.tv_trials.getItems().clear();
@@ -164,25 +164,25 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		Trial.getTrials(l_from, l_to).forEach(t -> trialViews.add(new TrialView(t)));
 		this.tv_trials.setItems(FXCollections.observableArrayList(trialViews));
 	}
-
+	
 	@Override
 	public final void setStage(final Stage stage)
 	{
 		this.stage = stage;
 	}
-
+	
 	@Override
 	public final void close()
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 	@FXML
 	public final void close(final ActionEvent event)
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
-
+	
 }

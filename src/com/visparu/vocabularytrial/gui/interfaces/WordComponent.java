@@ -5,14 +5,14 @@ import java.util.List;
 
 public interface WordComponent
 {
-
+	
 	List<WordComponent> instances = new ArrayList<>();
-
+	
 	static void repopulateAllWords()
 	{
 		WordComponent.instances.forEach(i -> i.repopulateWords());
 	}
-
+	
 	void repopulateWords();
-
+	
 }

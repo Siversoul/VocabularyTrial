@@ -3,7 +3,7 @@
  *
  */
 module visparu.vocabularytrial
-{	
+{
 	requires java.sql;
 	requires sqlite.jdbc;
 	requires json.simple;
@@ -16,5 +16,6 @@ module visparu.vocabularytrial
 	opens com.visparu.vocabularytrial.gui.controllers to javafx.fxml;
 	opens com.visparu.vocabularytrial.model.views to javafx.base;
 	opens com.visparu.vocabularytrial.model.templates to javafx.base;
+	
 	exports com.visparu.vocabularytrial.root;
 }
