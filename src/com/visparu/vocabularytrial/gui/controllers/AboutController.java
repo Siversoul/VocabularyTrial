@@ -30,6 +30,8 @@ public final class AboutController implements Initializable, VokAbfController
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new stage with AboutController...");
+		
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
@@ -42,6 +44,8 @@ public final class AboutController implements Initializable, VokAbfController
 		this.lb_version.setText(Main.VERSION);
 		this.lb_author.setText(Main.AUTHOR);
 		this.lb_date.setText(Main.RELEASE_DATE);
+		
+		LogItem.debug("Finished initializing new stage");
 		LogItem.exit();
 	}
 	
@@ -59,6 +63,8 @@ public final class AboutController implements Initializable, VokAbfController
 		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		
+		LogItem.debug("Closed stage");
 		LogItem.exit();
 	}
 	
@@ -66,8 +72,7 @@ public final class AboutController implements Initializable, VokAbfController
 	public final void close(final ActionEvent event)
 	{
 		LogItem.enter();
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
 		LogItem.exit();
 	}
 }

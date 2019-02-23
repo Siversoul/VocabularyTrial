@@ -99,12 +99,72 @@ public final class LogItem
 	
 	public final static LogItem enter()
 	{
-		return LogItem.createLogItem(Severity.TRACE, "Entered method");
+		return LogItem.trace("Entered method (Depth: " + Thread.currentThread().getStackTrace().length + ")");
 	}
 	
 	public final static LogItem exit()
 	{
-		return LogItem.createLogItem(Severity.TRACE, "Exited method");
+		return LogItem.trace("Exited method (Depth: " + Thread.currentThread().getStackTrace().length + ")");
+	}
+	
+	public final static LogItem trace(String message)
+	{
+		return LogItem.createLogItem(Severity.TRACE, message);
+	}
+	
+	public final static LogItem trace(String message, String description)
+	{
+		return LogItem.createLogItem(Severity.TRACE, message, description);
+	}
+	
+	public final static LogItem debug(String message)
+	{
+		return LogItem.createLogItem(Severity.DEBUG, message);
+	}
+	
+	public final static LogItem debug(String message, String description)
+	{
+		return LogItem.createLogItem(Severity.DEBUG, message, description);
+	}
+	
+	public final static LogItem info(String message)
+	{
+		return LogItem.createLogItem(Severity.INFO, message);
+	}
+	
+	public final static LogItem info(String message, String description)
+	{
+		return LogItem.createLogItem(Severity.INFO, message, description);
+	}
+	
+	public final static LogItem warning(String message)
+	{
+		return LogItem.createLogItem(Severity.WARNING, message);
+	}
+	
+	public final static LogItem warning(String message, String description)
+	{
+		return LogItem.createLogItem(Severity.WARNING, message, description);
+	}
+	
+	public final static LogItem error(String message)
+	{
+		return LogItem.createLogItem(Severity.ERROR, message);
+	}
+	
+	public final static LogItem error(String message, String description)
+	{
+		return LogItem.createLogItem(Severity.ERROR, message, description);
+	}
+	
+	public final static LogItem critical(String message)
+	{
+		return LogItem.createLogItem(Severity.CRITICAL, message);
+	}
+	
+	public final static LogItem critical(String message, String description)
+	{
+		return LogItem.createLogItem(Severity.CRITICAL, message, description);
 	}
 	
 	public final static LogItem createLogItem(final Severity severity, final String message)

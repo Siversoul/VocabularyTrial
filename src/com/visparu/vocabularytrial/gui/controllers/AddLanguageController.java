@@ -30,6 +30,8 @@ public final class AddLanguageController implements Initializable, VokAbfControl
 	public void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new stage with AddLanguageController");
+		
 		VokAbfController.instances.add(this);
 		AddLanguageController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
@@ -39,6 +41,8 @@ public final class AddLanguageController implements Initializable, VokAbfControl
 			AddLanguageController.instances.remove(this);
 			LogItem.exit();
 		});
+		
+		LogItem.debug("Finished initializing new stage");
 		LogItem.exit();
 	}
 	
@@ -48,6 +52,8 @@ public final class AddLanguageController implements Initializable, VokAbfControl
 		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	
@@ -64,8 +70,8 @@ public final class AddLanguageController implements Initializable, VokAbfControl
 	{
 		LogItem.enter();
 		Language.createLanguage(this.tf_language_code.getText(), this.tf_language.getText());
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		LogItem.info("Language " + this.tf_language + " created");
+		this.close();
 		LogItem.exit();
 	}
 	
@@ -73,8 +79,7 @@ public final class AddLanguageController implements Initializable, VokAbfControl
 	public final void cancel(final ActionEvent event)
 	{
 		LogItem.enter();
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
 		LogItem.exit();
 	}
 }

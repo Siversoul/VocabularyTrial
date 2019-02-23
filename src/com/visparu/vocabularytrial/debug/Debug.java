@@ -50,6 +50,9 @@ public final class Debug
 			return;
 		}
 		
+		LogItem.debug("Starting to randomly fill up database...");
+		LogItem.debug("Creating languages...");
+		
 		final Random rand = new Random();
 		for (int i = 0; i < 5; i++)
 		{
@@ -72,6 +75,9 @@ public final class Debug
 			Language.createLanguage(lc_sb.toString(), ln_sb.toString());
 		}
 		
+		LogItem.debug("Finished creating languages");
+		LogItem.debug("Creating words...");
+		
 		final List<Language>	l_list	= Language.getAll();
 		final List<Word>		w_list	= new ArrayList<>();
 		for (int i = 0; i < 1000; i++)
@@ -90,11 +96,17 @@ public final class Debug
 			w_list.add(w);
 		}
 		
+		LogItem.debug("Finished creating words");
+		LogItem.debug("Creating language map of all words...");
+		
 		final Map<Language, List<Word>> w_map = new HashMap<>();
 		for (final Language l : l_list)
 		{
 			w_map.put(l, l.getWords());
 		}
+		
+		LogItem.debug("Finished creating language map of all words");
+		LogItem.debug("Creating translations for all words...");
 		
 		final List<Word> wu_list = new ArrayList<>(w_list);
 		while (!wu_list.isEmpty())
@@ -103,6 +115,9 @@ public final class Debug
 			final Word	w2	= w_list.get(rand.nextInt(w_list.size()));
 			Translation.createTranslation(w1, w2);
 		}
+		
+		LogItem.debug("Finished creating translations");
+		LogItem.debug("Creating trials and checks...");
 		
 		for (int i = 0; i < 50; i++)
 		{
@@ -154,6 +169,10 @@ public final class Debug
 				WordCheck.createWordCheck(w, t, as, correct);
 			}
 		}
+		
+		LogItem.debug("Finished creating trials and checks");
+		LogItem.debug("Finished filling up database");
+		
 		LogItem.exit();
 	}
 	

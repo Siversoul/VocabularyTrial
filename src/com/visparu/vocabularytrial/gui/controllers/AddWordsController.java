@@ -62,6 +62,8 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new stage with AddWordsController...");
+		
 		LanguageComponent.instances.add(this);
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
@@ -85,6 +87,8 @@ public final class AddWordsController implements Initializable, LanguageComponen
 			this.repopulateLanguages_to();
 			LogItem.exit();
 		});
+		
+		LogItem.debug("Finished initializing new stage");
 		LogItem.exit();
 	}
 	
@@ -101,6 +105,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	{
 		LogItem.enter();
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
+		LogItem.debug("Languages_from repopulated");
 		LogItem.exit();
 	}
 	
@@ -114,6 +119,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		{
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
+		LogItem.debug("Languages_to repopulated");
 		LogItem.exit();
 	}
 	
@@ -131,6 +137,8 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	
@@ -151,6 +159,8 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		wt.setTranslationsString(this.tf_translations.getText());
 		this.tv_vocabulary.getItems().add(wt);
 		
+		LogItem.debug("Word + " + wt.getName() + " added to temporary list");
+		
 		this.tf_word.setText("");
 		this.tf_translations.setText("");
 		
@@ -162,6 +172,8 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	public final void confirm(final ActionEvent event)
 	{
 		LogItem.enter();
+		LogItem.debug("Words confirmed");
+		
 		final Language	l_from	= this.cb_language_from.getValue();
 		final Language	l_to	= this.cb_language_to.getValue();
 		if (l_from == null || l_to == null)
@@ -173,6 +185,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 			return;
 		}
 		final List<WordTemplate> wordTemplates = this.tv_vocabulary.getItems();
+		int count = 0;
 		for (final WordTemplate wt : wordTemplates)
 		{
 			final String	name	= wt.getName();
@@ -194,12 +207,17 @@ public final class AddWordsController implements Initializable, LanguageComponen
 				if (t == null)
 				{
 					Translation.createTranslation(w, tw);
+					count++;
 				}
 			}
 		}
 		WordComponent.repopulateAllWords();
+		
+		LogItem.info(count + " words added");
+		
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	
@@ -219,8 +237,12 @@ public final class AddWordsController implements Initializable, LanguageComponen
 				return;
 			}
 		}
+		
+		LogItem.info("Aborted adding translations");
+		
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 }

@@ -93,6 +93,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new stage with MainMenuController");
+		
 		LanguageComponent.instances.add(this);
 		WordComponent.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
@@ -160,6 +162,9 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		
 		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordView, String>("name"));
 		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordView, String>("translationsString"));
+		
+		LogItem.debug("Finished initializing new stage");
+		LogItem.exit();
 	}
 	
 	private final void removeAllSelectedWords()
@@ -170,11 +175,13 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final Optional<ButtonType>	result	= alert.showAndWait();
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
+			int count = this.tv_vocabulary.getSelectionModel().getSelectedItems().size();
 			for (final WordView wv : this.tv_vocabulary.getSelectionModel().getSelectedItems())
 			{
 				Word.removeWord(wv.getWord_id());
 				this.tv_vocabulary.getItems().remove(wv);
 			}
+			LogItem.info("Removed " + count + " words");
 		}
 		LogItem.exit();
 	}
@@ -192,6 +199,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	{
 		LogItem.enter();
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
+		LogItem.debug("Languages_from repopulated");
 		LogItem.exit();
 	}
 	
@@ -205,6 +213,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
+		LogItem.debug("Languages_to repopulated");
 		LogItem.exit();
 	}
 	
@@ -225,6 +234,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty())
 			.forEach(w -> wordViews.add(new WordView(w, language_to)));
 		this.tv_vocabulary.setItems(wordViews);
+		LogItem.debug("Words repopulated");
 		LogItem.exit();
 	}
 	
