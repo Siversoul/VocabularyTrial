@@ -72,6 +72,7 @@ public final class TrialController implements Initializable, VokAbfController
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new stage with TrialController");
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
@@ -95,6 +96,7 @@ public final class TrialController implements Initializable, VokAbfController
 		this.ta_answer.requestFocus();
 		
 		this.cycle(State.QUESTION);
+		LogItem.debug("Finished initializing new stage");
 		LogItem.exit();
 	}
 	
@@ -112,6 +114,7 @@ public final class TrialController implements Initializable, VokAbfController
 		LogItem.enter();
 		this.stage.setOnCloseRequest(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	
@@ -119,8 +122,7 @@ public final class TrialController implements Initializable, VokAbfController
 	public final void exit(final ActionEvent event)
 	{
 		LogItem.enter();
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
 		LogItem.exit();
 	}
 	
@@ -130,6 +132,7 @@ public final class TrialController implements Initializable, VokAbfController
 		LogItem.enter();
 		final Word word = this.words.get(this.currentIndex);
 		WordCheck.createWordCheck(word, this.trial, this.ta_answer.getText(), true);
+		LogItem.debug("Created correct WordCheck for word " + word.getName());
 		this.cycle(State.QUESTION);
 		LogItem.exit();
 	}
@@ -140,6 +143,7 @@ public final class TrialController implements Initializable, VokAbfController
 		LogItem.enter();
 		final Word word = this.words.get(this.currentIndex);
 		WordCheck.createWordCheck(word, this.trial, this.ta_answer.getText(), false);
+		LogItem.debug("Created wrong WordCheck for word " + word.getName());
 		this.cycle(State.QUESTION);
 		LogItem.exit();
 	}
@@ -148,6 +152,7 @@ public final class TrialController implements Initializable, VokAbfController
 	public final void solution(final ActionEvent event)
 	{
 		LogItem.enter();
+		LogItem.debug("Showing solution");
 		this.cycle(State.SOLUTION);
 		LogItem.exit();
 	}
@@ -187,12 +192,14 @@ public final class TrialController implements Initializable, VokAbfController
 		LogItem.enter();
 		if (this.currentState == State.INIT)
 		{
+			LogItem.debug("Cycling from INIT to QUESTION");
 			this.currentState = State.QUESTION;
 			this.setQuestion(this.words.get(this.currentIndex));
 			LogItem.exit();
 			return;
 		}
 		
+		LogItem.debug("Cycling from " + this.currentState.name() + " to " + nextState.name());
 		switch (nextState)
 		{
 			case QUESTION:
@@ -200,6 +207,7 @@ public final class TrialController implements Initializable, VokAbfController
 				this.currentIndex++;
 				if (this.currentIndex >= this.words.size())
 				{
+					LogItem.info("Trial completed");
 					this.exit(null);
 					LogItem.exit();
 					return;
@@ -227,6 +235,7 @@ public final class TrialController implements Initializable, VokAbfController
 			}
 		}
 		this.currentState = nextState;
+		LogItem.debug("State switched");
 		LogItem.exit();
 	}
 	

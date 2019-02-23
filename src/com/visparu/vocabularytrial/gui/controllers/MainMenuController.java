@@ -265,6 +265,11 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				C11N.getProtocol(),
 				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
+			LogItem.info("New database file created", "New database file created under " + selectedFile.getAbsolutePath());
+		}
+		else
+		{
+			LogItem.debug("New file creation aborted");
 		}
 		LogItem.exit();
 	}
@@ -286,6 +291,11 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				C11N.getProtocol(),
 				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
+			LogItem.info("Switched to existing database", "Switched to existing database under " + selectedFile.getAbsolutePath());
+		}
+		else
+		{
+			LogItem.debug("File opening aborted");
 		}
 		LogItem.exit();
 	}
@@ -313,6 +323,11 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				C11N.getProtocol(),
 				C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
+			LogItem.info("Saved database to new file", "Saved database to " + selectedFile.getAbsolutePath());
+		}
+		else
+		{
+			LogItem.debug("Aborted saving the database");
 		}
 		LogItem.exit();
 	}
@@ -323,6 +338,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	
@@ -336,6 +352,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			this.cb_language_to.getSelectionModel().getSelectedItem());
 		final StringBinding			title		= I18N.createStringBinding("gui.addwords.title");
 		GUIUtil.createNewStage(fxmlName, awc, title);
+		LogItem.debug("New stage created");
 		LogItem.exit();
 	}
 	
@@ -363,6 +380,11 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				WordComponent.repopulateAllWords();
 				TrialComponent.repopulateAllTrials();
 			}
+			LogItem.info("Cleared the entire database");
+		}
+		else
+		{
+			LogItem.debug("Aborted clearing the database");
 		}
 		LogItem.exit();
 	}
@@ -375,6 +397,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final ManageLanguagesController	mlc			= new ManageLanguagesController();
 		final StringBinding				title		= I18N.createStringBinding("gui.languages.title");
 		GUIUtil.createNewStage(fxmlName, mlc, title);
+		LogItem.debug("New stage created");
 		LogItem.exit();
 	}
 	
@@ -386,6 +409,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			this.cb_language_to.getValue());
 		final StringBinding			title	= I18N.createStringBinding("gui.triallist.title");
 		GUIUtil.createNewStage("TrialList", tlc, title);
+		LogItem.debug("New stage created");
 		LogItem.exit();
 	}
 	
@@ -469,6 +493,11 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
 			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
+			LogItem.info("Deleted all trial data");
+		}
+		else
+		{
+			LogItem.debug("Aborted deleting trial data");
 		}
 		LogItem.exit();
 	}
@@ -481,6 +510,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			final Alert alert = new Alert(AlertType.ERROR,
 				I18N.createStringBinding("gui.mainmenu.alert.noapplicablewords").get(), ButtonType.OK);
 			alert.showAndWait();
+			LogItem.debug("No words were provided for the trial");
 			LogItem.exit();
 			return;
 		}
@@ -494,12 +524,14 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				randomizedList.add(trialWords.remove(randIndex));
 			}
 			trialWords = randomizedList;
+			LogItem.debug("Randomized trial words");
 		}
 		final Language			l_from	= this.cb_language_from.getSelectionModel().getSelectedItem();
 		final Language			l_to	= this.cb_language_to.getSelectionModel().getSelectedItem();
 		final TrialController	tc		= new TrialController(l_from, l_to, trialWords);
 		final StringBinding		title	= I18N.createStringBinding("gui.trial.title");
 		GUIUtil.createNewStage("Trial", tc, title);
+		LogItem.debug("New stage created");
 		LogItem.exit();
 	}
 	
@@ -511,11 +543,13 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		Optional<ButtonType>	result	= alert.showAndWait();
 		if (!result.isPresent() || result.get() != ButtonType.YES)
 		{
+			LogItem.debug("Aborted changing language");
 			LogItem.exit();
 			return;
 		}
 		
 		List<MenuItem> items = this.mn_languages.getItems();
+		Locale l_before = C11N.getLocale();
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = items.get(i);
@@ -546,7 +580,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				((CheckMenuItem) item).setSelected(false);
 			}
 		}
-		
+		Locale l_after = C11N.getLocale();
+				
 		VokAbfController.closeAll();
 		try
 		{
@@ -560,11 +595,14 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			this.stage.setScene(scene);
 			this.stage.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.title"));
 			this.stage.show();
+			LogItem.debug("Reinitialized main menu");
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+		
+		LogItem.info("Changed language from " + l_before.getDisplayLanguage() + " to " + l_after.getDisplayLanguage());
 		LogItem.exit();
 	}
 	
@@ -587,6 +625,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		LogItem.enter();
 		final StringBinding title = I18N.createStringBinding("gui.about.title");
 		GUIUtil.createNewStage("About", new AboutController(), title);
+		LogItem.debug("New stage created");
 		LogItem.exit();
 	}
 }

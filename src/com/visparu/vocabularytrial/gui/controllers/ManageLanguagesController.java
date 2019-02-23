@@ -45,6 +45,8 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new Stage with ManageLanguagesController");
+		
 		LanguageComponent.instances.add(this);
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
@@ -98,6 +100,8 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 		});
 		
 		this.repopulateLanguages();
+		
+		LogItem.debug("Finished initializing new stage");
 		LogItem.exit();
 	}
 	
@@ -108,6 +112,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 		final ObservableList<LanguageView> lv_list = FXCollections.observableArrayList();
 		Language.getAll().forEach(l -> lv_list.add(new LanguageView(l.getLanguage_code(), l.getName())));
 		this.tv_languages.setItems(lv_list);
+		LogItem.debug("Repopulated languages");
 		LogItem.exit();
 	}
 	
@@ -125,10 +130,12 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 			if (!result.isPresent() || (result.isPresent() && result.get() != ButtonType.YES))
 			{
 				LogItem.exit();
+				LogItem.debug("Aborted removing language");
 				return;
 			}
 		}
 		Language.removeLanguage(l.getLanguage_code());
+		LogItem.info("Language " + l.getName() + " removed");
 		LogItem.exit();
 	}
 	
@@ -138,6 +145,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	
@@ -157,6 +165,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 		final AddLanguageController	alc			= new AddLanguageController();
 		final StringBinding			title		= I18N.createStringBinding("gui.addlanguage.title");
 		GUIUtil.createNewStage(fxmlName, alc, title);
+		LogItem.debug("New stage created");
 		LogItem.exit();
 	}
 	
@@ -164,8 +173,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 	public final void close(final ActionEvent event)
 	{
 		LogItem.enter();
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
 		LogItem.exit();
 	}
 	
