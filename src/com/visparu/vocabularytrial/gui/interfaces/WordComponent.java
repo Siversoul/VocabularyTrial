@@ -14,6 +14,7 @@ public interface WordComponent
 	{
 		LogItem.enter();
 		WordComponent.instances.forEach(i -> i.repopulateWords());
+		LogItem.debug("All words repopulated");
 		LogItem.exit();
 	}
 	

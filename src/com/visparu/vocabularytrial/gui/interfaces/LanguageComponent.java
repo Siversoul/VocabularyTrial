@@ -14,6 +14,7 @@ public interface LanguageComponent
 	{
 		LogItem.enter();
 		LanguageComponent.instances.forEach(i -> i.repopulateLanguages());
+		LogItem.debug("All languages repopulated");
 		LogItem.exit();
 	}
 	

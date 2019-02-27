@@ -14,6 +14,7 @@ public interface TrialComponent
 	{
 		LogItem.enter();
 		TrialComponent.instances.forEach(i -> i.repopulateTrials());
+		LogItem.debug("All trials repopulated");
 		LogItem.exit();
 	}
 	

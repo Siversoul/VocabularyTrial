@@ -27,6 +27,7 @@ public final class Language
 		LogItem.enter();
 		this.language_code	= language_code;
 		this.name			= name;
+		LogItem.debug("Initialized new language '" + name + "'");
 		LogItem.exit();
 	}
 	
@@ -42,6 +43,7 @@ public final class Language
 	{
 		LogItem.enter();
 		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS language (language_code VARCHAR(2) PRIMARY KEY, name VARCHAR(30))");
+		LogItem.debug("Language table created");
 		LogItem.exit();
 	}
 	
@@ -49,6 +51,7 @@ public final class Language
 	{
 		LogItem.enter();
 		Language.cache.clear();
+		LogItem.debug("Cleared language cache");
 		LogItem.exit();
 	}
 	
@@ -112,6 +115,10 @@ public final class Language
 			Language.writeEntity(l);
 			Language.cache.put(language_code, l);
 		}
+		else
+		{
+			LogItem.warning("Language with language code '" + language_code + "' already exists!");
+		}
 		LanguageComponent.repopulateAllLanguages();
 		LogItem.exit();
 		return l;
@@ -134,6 +141,7 @@ public final class Language
 			e.printStackTrace();
 		}
 		LanguageComponent.repopulateAllLanguages();
+		LogItem.info("Language with code '" + language_code + "' removed");
 		LogItem.exit();
 	}
 	
@@ -142,6 +150,7 @@ public final class Language
 		LogItem.enter();
 		Language.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM language");
+		LogItem.info("All languages removed");
 		LanguageComponent.repopulateAllLanguages();
 		LogItem.exit();
 	}

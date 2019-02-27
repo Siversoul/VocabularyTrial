@@ -65,6 +65,8 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new stage with TrialListController...");
+		
 		VokAbfController.instances.add(this);
 		LanguageComponent.instances.add(this);
 		TrialComponent.instances.add(this);
@@ -142,6 +144,8 @@ public final class TrialListController implements Initializable, VokAbfControlle
 			LogItem.exit();
 			return cell;
 		});
+		
+		LogItem.debug("New stage initialized");
 		LogItem.exit();
 	}
 	
@@ -158,6 +162,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	{
 		LogItem.enter();
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
+		LogItem.debug("Languages_from repopulated");
 		LogItem.exit();
 	}
 	
@@ -171,6 +176,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		{
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
+		LogItem.debug("Languages_to repopulated");
 		LogItem.exit();
 	}
 	
@@ -189,6 +195,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		final List<TrialView> trialViews = FXCollections.observableArrayList();
 		Trial.getTrials(l_from, l_to).forEach(t -> trialViews.add(new TrialView(t)));
 		this.tv_trials.setItems(FXCollections.observableArrayList(trialViews));
+		LogItem.debug("Trials repopulated");
 		LogItem.exit();
 	}
 	
@@ -206,6 +213,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	
@@ -213,8 +221,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	public final void close(final ActionEvent event)
 	{
 		LogItem.enter();
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
 		LogItem.exit();
 	}
 	

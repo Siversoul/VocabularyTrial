@@ -14,6 +14,7 @@ public interface LogComponent
 	{
 		LogItem.enter();
 		LogComponent.instances.forEach(i -> i.repopulateLogs());
+		LogItem.debug("All logs repopulated");
 		LogItem.exit();
 	}
 	

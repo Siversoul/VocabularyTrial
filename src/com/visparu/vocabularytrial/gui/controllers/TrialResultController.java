@@ -63,6 +63,8 @@ public final class TrialResultController implements Initializable, VokAbfControl
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.enter();
+		LogItem.debug("Initializing new stage with TrialResultController");
+		
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
@@ -95,6 +97,8 @@ public final class TrialResultController implements Initializable, VokAbfControl
 		this.lb_correct.setText(String.valueOf(correct));
 		this.lb_wrong.setText(String.valueOf(wrong));
 		this.lb_perc.setText(String.format("%.2f", perc * 100));
+		
+		LogItem.debug("New stage initialized");
 		LogItem.exit();
 	}
 	
@@ -102,8 +106,8 @@ public final class TrialResultController implements Initializable, VokAbfControl
 	public final void exit(final ActionEvent event)
 	{
 		LogItem.enter();
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
+		LogItem.debug("Stage closed");
 		LogItem.exit();
 	}
 	

@@ -47,6 +47,7 @@ public final class ConnectionDetails
 		this.driver		= driver;
 		this.protocol	= protocol;
 		this.filename	= filename;
+		LogItem.debug("Created new database connection: " + this.getConnectionString());
 		LogItem.exit();
 	}
 	
@@ -96,6 +97,7 @@ public final class ConnectionDetails
 		Trial.createTable();
 		WordCheck.createTable();
 		LogItem.createTable();
+		LogItem.debug("All tables created for " + filename);
 		LogItem.exit();
 	}
 	
@@ -105,6 +107,7 @@ public final class ConnectionDetails
 		try
 		{
 			Files.copy(Paths.get(this.filename), new FileOutputStream(newFile));
+			LogItem.debug("Database copied to location " + newFile);
 		}
 		catch (IOException e)
 		{
@@ -120,6 +123,7 @@ public final class ConnectionDetails
 		try (final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
 		{
 			stmt.execute(query);
+			LogItem.debug("Simple statement executed", query);
 		}
 		catch (SQLException e)
 		{

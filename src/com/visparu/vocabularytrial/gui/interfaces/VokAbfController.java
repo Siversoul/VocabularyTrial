@@ -19,6 +19,7 @@ public interface VokAbfController
 		WordComponent.repopulateAllWords();
 		TrialComponent.repopulateAllTrials();
 		LogComponent.repopulateAllLogs();
+		LogItem.debug("All components repopulated");
 		LogItem.exit();
 	}
 	
@@ -29,6 +30,7 @@ public interface VokAbfController
 		{
 			VokAbfController.instances.get(0).close();
 		}
+		LogItem.debug("All stages closed");
 		LogItem.exit();
 	}
 	
