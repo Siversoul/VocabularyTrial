@@ -36,6 +36,7 @@ public final class C11N
 	{
 		LogItem.enter();
 		C11N.setValue("driver", driver);
+		LogItem.debug("Database driver changed to " + driver);
 		LogItem.exit();
 	}
 	
@@ -56,6 +57,7 @@ public final class C11N
 	{
 		LogItem.enter();
 		C11N.setValue("protocol", protocol);
+		LogItem.debug("Database protocol changed to " + protocol);
 		LogItem.exit();
 	}
 	
@@ -78,6 +80,7 @@ public final class C11N
 	{
 		LogItem.enter();
 		C11N.setValue("dbPath", databasePath);
+		LogItem.debug("Database path changed to " + databasePath);
 		LogItem.exit();
 	}
 	
@@ -101,6 +104,7 @@ public final class C11N
 		LogItem.enter();
 		C11N.setValue("locale", locale.toLanguageTag());
 		I18N.localeProperty().set(locale);
+		LogItem.debug("Locale changed to " + locale.getDisplayName());
 		LogItem.exit();
 	}
 	

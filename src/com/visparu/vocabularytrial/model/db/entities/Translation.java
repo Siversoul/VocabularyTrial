@@ -34,6 +34,7 @@ public final class Translation
 		}
 		this.word1_id	= word1_id;
 		this.word2_id	= word2_id;
+		LogItem.debug("Initialized new translation '" + Word.get(word1_id).getName() + "/" + Word.get(word2_id).getName() + "'");
 		LogItem.exit();
 	}
 	
@@ -48,6 +49,7 @@ public final class Translation
 				+ "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, "
 				+ "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE"
 				+ ")");
+		LogItem.debug("Translation table created");
 		LogItem.exit();
 	}
 	
@@ -55,6 +57,7 @@ public final class Translation
 	{
 		LogItem.enter();
 		Translation.cache.clear();
+		LogItem.debug("Cleared translation cache");
 		LogItem.exit();
 	}
 	
@@ -112,6 +115,7 @@ public final class Translation
 			pstmt.setInt(1, word1_id);
 			pstmt.setInt(2, word2_id);
 			pstmt.executeUpdate();
+			LogItem.debug("Translation '" + w1.getName() + "/" + w2.getName() + "' removed");
 		}
 		catch (SQLException e)
 		{
@@ -125,6 +129,7 @@ public final class Translation
 		LogItem.enter();
 		Translation.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM translation");
+		LogItem.debug("All translations removed");
 		LogItem.exit();
 	}
 	
@@ -174,6 +179,7 @@ public final class Translation
 			pstmt.setInt(1, t.getWord1_id());
 			pstmt.setInt(2, t.getWord2_id());
 			pstmt.executeUpdate();
+			LogItem.debug("Inserted new translation entity " + t.getWord1().getName() + "/" + t.getWord2().getName());
 		}
 		catch (SQLException e)
 		{

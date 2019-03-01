@@ -36,12 +36,12 @@ public final class Main extends Application
 	
 	private final void initializeDatabase()
 	{
-		LogItem.enter();
 		ConnectionDetails.getInstance().activateForeignKeyPragma();
 		ConnectionDetails.getInstance().changeDatabase(
 			C11N.getDriver(),
 			C11N.getProtocol(),
 			C11N.getDatabasePath().getAbsolutePath());
+		LogItem.enter();
 		LogItem.exit();
 	}
 	
@@ -65,6 +65,7 @@ public final class Main extends Application
 		{
 			e.printStackTrace();
 		}
+		LogItem.debug("Main stage initialized");
 		LogItem.exit();
 	}
 	

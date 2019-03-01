@@ -31,6 +31,7 @@ public final class GUIUtil
 			stage.setScene(scene);
 			stage.titleProperty().bind(title);
 			stage.show();
+			LogItem.debug("Created new default stage");
 			LogItem.exit();
 			return stage;
 		}

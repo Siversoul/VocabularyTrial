@@ -73,7 +73,9 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 					this.btn.setOnAction((ActionEvent event) ->
 					{
 						LogItem.enter();
-						ManageLanguagesController.this.removeLanguage((LanguageView) this.getTableRow().getItem());
+						LanguageView lv = (LanguageView) this.getTableRow().getItem();
+						ManageLanguagesController.this.removeLanguage(lv);
+						LogItem.info("Removed language " + lv.getName());
 						LogItem.exit();
 					});
 					LogItem.exit();

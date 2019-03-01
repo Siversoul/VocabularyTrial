@@ -33,6 +33,7 @@ public final class Trial
 		this.date			= date;
 		this.language_from	= language_from;
 		this.language_to	= language_to;
+		LogItem.debug("Initialized new trial " + Trial.getDateFormatter().format(date) + "");
 		LogItem.exit();
 	}
 	
@@ -46,6 +47,7 @@ public final class Trial
 			+ "language_code_to VARCHAR(2), "
 			+ "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
 			+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE)");
+		LogItem.debug("Trial table created");
 		LogItem.exit();
 	}
 	
@@ -53,6 +55,7 @@ public final class Trial
 	{
 		LogItem.enter();
 		Trial.cache.clear();
+		LogItem.debug("Cleared trial cache");
 		LogItem.exit();
 	}
 	
@@ -85,6 +88,7 @@ public final class Trial
 	public static final void removeTrial(final Integer trial_id)
 	{
 		LogItem.enter();
+		String date = Trial.getDateFormatter().format(Trial.get(trial_id));
 		Trial.cache.remove(trial_id);
 		final String	query		= "DELETE FROM trial "
 			+ "WHERE trial_id = ?";
@@ -94,6 +98,7 @@ public final class Trial
 		{
 			pstmt.setInt(1, trial_id);
 			pstmt.execute();
+			LogItem.debug("Trial at " + date + " removed");
 		}
 		catch (SQLException e)
 		{
@@ -107,6 +112,7 @@ public final class Trial
 		LogItem.enter();
 		Trial.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
+		LogItem.debug("All trials removed");
 		LogItem.exit();
 	}
 	
@@ -163,6 +169,7 @@ public final class Trial
 			final ResultSet rs = pstmt.getGeneratedKeys();
 			rs.next();
 			Integer trial_id = rs.getInt(1);
+			LogItem.debug("Inserted new trial entity at " + dateString);
 			LogItem.exit();
 			return trial_id;
 		}

@@ -37,6 +37,7 @@ public final class IOUtil
 		{
 			Files.write(absolutePath, data.getBytes(Charset.defaultCharset()), StandardOpenOption.CREATE,
 				StandardOpenOption.TRUNCATE_EXISTING);
+			LogItem.debug("Wrote string to " + file, "Wrote the following string to " + file + ":\n\n" + data);
 		}
 		catch (IOException e)
 		{

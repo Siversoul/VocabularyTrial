@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,7 @@ public final class Word
 		this.word_id	= word_id;
 		this.name		= name;
 		this.language	= language;
+		LogItem.debug("Initialized new word '" + name + "'");
 		LogItem.exit();
 	}
 	
@@ -40,15 +40,8 @@ public final class Word
 			+ "language_code VARCHAR(2), "
 			+ "FOREIGN KEY(language_code) REFERENCES language(language_code) ON UPDATE CASCADE"
 			+ ")";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
-		{
-			stmt.execute(query);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		ConnectionDetails.getInstance().executeSimpleStatement(query);
+		LogItem.debug("Word table created");
 		LogItem.exit();
 	}
 	
@@ -56,6 +49,7 @@ public final class Word
 	{
 		LogItem.enter();
 		Word.cache.clear();
+		LogItem.debug("Cleared word cache");
 		LogItem.exit();
 	}
 	
@@ -107,6 +101,7 @@ public final class Word
 		{
 			pstmt.setInt(1, word_id);
 			pstmt.execute();
+			LogItem.debug("Word with id '" + word_id + "' removed");
 		}
 		catch (SQLException e)
 		{
@@ -127,6 +122,7 @@ public final class Word
 		{
 			pstmt.setInt(1, Word.get(name, l).getWord_id());
 			pstmt.executeUpdate();
+			LogItem.debug("Word '" + name + "' removed");
 		}
 		catch (SQLException e)
 		{
@@ -140,6 +136,7 @@ public final class Word
 		LogItem.enter();
 		Word.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM word");
+		LogItem.debug("All words removed");
 		LogItem.exit();
 	}
 	
@@ -225,6 +222,7 @@ public final class Word
 			final ResultSet rs = pstmt.getGeneratedKeys();
 			rs.next();
 			final Integer word_id = rs.getInt(1);
+			LogItem.debug("Inserted new word entity " + word.getName());
 			LogItem.exit();
 			return word_id;
 		}
@@ -247,6 +245,7 @@ public final class Word
 	{
 		LogItem.enter();
 		this.word_id = word_id;
+		LogItem.debug("Updated word_id for word " + this.getName());
 		LogItem.exit();
 	}
 	
@@ -270,6 +269,7 @@ public final class Word
 			pstmt.setString(1, name);
 			pstmt.setInt(2, this.word_id);
 			pstmt.executeUpdate();
+			LogItem.debug("Updated name for word " + this.getName());
 			this.name = name;
 		}
 		catch (SQLException e)
@@ -299,6 +299,7 @@ public final class Word
 			pstmt.setString(1, l.getLanguage_code());
 			pstmt.setInt(2, this.word_id);
 			pstmt.executeUpdate();
+			LogItem.debug("Updated language for word " + this.getName());
 			this.language = l;
 		}
 		catch (SQLException e)

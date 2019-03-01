@@ -54,6 +54,7 @@ public final class I18N
 		LogItem.enter();
 		localeProperty().set(locale);
 		Locale.setDefault(locale);
+		LogItem.debug("Set internal locale to " + locale.getDisplayName());
 		LogItem.exit();
 	}
 	

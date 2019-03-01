@@ -141,7 +141,7 @@ public final class Language
 			e.printStackTrace();
 		}
 		LanguageComponent.repopulateAllLanguages();
-		LogItem.info("Language with code '" + language_code + "' removed");
+		LogItem.debug("Language with code '" + language_code + "' removed");
 		LogItem.exit();
 	}
 	
@@ -150,7 +150,7 @@ public final class Language
 		LogItem.enter();
 		Language.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM language");
-		LogItem.info("All languages removed");
+		LogItem.debug("All languages removed");
 		LanguageComponent.repopulateAllLanguages();
 		LogItem.exit();
 	}
@@ -195,6 +195,7 @@ public final class Language
 			pstmt.setString(1, language.getLanguage_code());
 			pstmt.setString(2, language.getName());
 			pstmt.executeUpdate();
+			LogItem.debug("Inserted new language entity " + language.getName());
 		}
 		catch (SQLException e)
 		{
@@ -224,6 +225,7 @@ public final class Language
 			Language.cache.remove(this.language_code);
 			Language.cache.put(language_code, this);
 			this.language_code = language_code;
+			LogItem.debug("Updated language_code for language " + this.getName());
 		}
 		catch (SQLException e)
 		{
@@ -250,6 +252,7 @@ public final class Language
 			pstmt.setString(1, name);
 			pstmt.setString(2, this.language_code);
 			pstmt.executeUpdate();
+			LogItem.debug("Updated name for language " + this.getName());
 			this.name = name;
 		}
 		catch (SQLException e)

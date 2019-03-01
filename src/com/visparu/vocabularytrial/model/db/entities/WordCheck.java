@@ -28,6 +28,7 @@ public final class WordCheck
 		this.trial			= trial;
 		this.answerString	= answerString;
 		this.correct		= correct;
+		LogItem.debug("Initialized new wordcheck '" + word.getName() + "' (" + correct + ")");
 		LogItem.exit();
 	}
 	
@@ -42,6 +43,7 @@ public final class WordCheck
 			+ "PRIMARY KEY(word_id, trial_id), "
 			+ "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, "
 			+ "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE)");
+		LogItem.debug("Wordcheck table created");
 		LogItem.exit();
 	}
 	
@@ -49,6 +51,7 @@ public final class WordCheck
 	{
 		LogItem.enter();
 		WordCheck.cache.clear();
+		LogItem.debug("Cleared wordcheck cache");
 		LogItem.exit();
 	}
 	
@@ -98,6 +101,7 @@ public final class WordCheck
 			pstmt.setInt(1, word.getWord_id());
 			pstmt.setInt(2, trial.getTrial_id());
 			pstmt.execute();
+			LogItem.debug("Wordcheck for word '" + word.getName() + "' and trial at " + Trial.getDateFormatter().format(trial.getDate()) + " removed");
 		}
 		catch (SQLException e)
 		{
@@ -111,6 +115,7 @@ public final class WordCheck
 		LogItem.enter();
 		WordCheck.clearCache();
 		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
+		LogItem.debug("All wordchecks removed");
 		LogItem.exit();
 	}
 	
@@ -162,6 +167,7 @@ public final class WordCheck
 			pstmt.setString(3, check.getAnswerString());
 			pstmt.setInt(4, check.isCorrect() ? 1 : 0);
 			pstmt.executeUpdate();
+			LogItem.debug("Inserted new wordcheck entity " + check.getWord() + " (" + check.isCorrect() + ") at " + Trial.getDateFormatter().format(check.getTrial().getDate()));
 		}
 		catch (SQLException e)
 		{
