@@ -21,14 +21,11 @@ public final class C11N
 	
 	public static final String getDriver()
 	{
-		LogItem.enter();
 		final String driver = C11N.getValue("driver");
 		if (driver == null)
 		{
-			LogItem.exit();
 			return C11N.DEFAULT_DRIVER;
 		}
-		LogItem.exit();
 		return driver;
 	}
 	
@@ -42,14 +39,11 @@ public final class C11N
 	
 	public static final String getProtocol()
 	{
-		LogItem.enter();
 		final String protocol = C11N.getValue("protocol");
 		if (protocol == null)
 		{
-			LogItem.exit();
 			return C11N.DEFAULT_PROTOCOL;
 		}
-		LogItem.exit();
 		return protocol;
 	}
 	
@@ -63,16 +57,13 @@ public final class C11N
 	
 	public static final File getDatabasePath()
 	{
-		LogItem.enter();
 		final String dbPath = C11N.getValue("dbPath");
 		if (dbPath == null)
 		{
 			File f = Paths.get(C11N.DEFAULT_FILENAME).toFile();
-			LogItem.exit();
 			return f;
 		}
 		File f = Paths.get(dbPath).toFile();
-		LogItem.exit();
 		return f;
 	}
 	
@@ -86,16 +77,13 @@ public final class C11N
 	
 	public static final Locale getLocale()
 	{
-		LogItem.enter();
 		final String localeString = C11N.getValue("locale");
 		if (localeString == null)
 		{
 			Locale l = I18N.getDefaultLocale();
-			LogItem.exit();
 			return l;
 		}
 		Locale l = Locale.forLanguageTag(localeString);
-		LogItem.exit();
 		return l;
 	}
 	
@@ -111,11 +99,9 @@ public final class C11N
 	@SuppressWarnings("unchecked")
 	private static final <V> V getValue(String key)
 	{
-		LogItem.enter();
 		final String jsonString = IOUtil.readString(C11N.DEFAULT_CONFIG_FILE);
 		if (jsonString == null)
 		{
-			LogItem.exit();
 			return null;
 		}
 		final JSONParser parser = new JSONParser();
@@ -123,21 +109,18 @@ public final class C11N
 		{
 			final JSONObject	obj		= (JSONObject) parser.parse(jsonString);
 			final V				value	= (V) obj.get(key);
-			LogItem.exit();
 			return value;
 		}
 		catch (ParseException | ClassCastException e)
 		{
 			e.printStackTrace();
 		}
-		LogItem.exit();
 		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
 	private static final void setValue(Object key, Object value)
 	{
-		LogItem.enter();
 		final String		jsonString	= IOUtil.readString(C11N.DEFAULT_CONFIG_FILE);
 		final JSONObject	obj;
 		if (jsonString == null)
@@ -153,13 +136,11 @@ public final class C11N
 			catch (ParseException e)
 			{
 				e.printStackTrace();
-				LogItem.exit();
 				return;
 			}
 		}
 		obj.put(key, value);
 		IOUtil.writeString(obj.toJSONString(), C11N.DEFAULT_CONFIG_FILE);
-		LogItem.exit();
 	}
 	
 }

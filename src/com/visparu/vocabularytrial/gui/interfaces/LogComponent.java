@@ -3,8 +3,6 @@ package com.visparu.vocabularytrial.gui.interfaces;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.visparu.vocabularytrial.model.db.entities.LogItem;
-
 public interface LogComponent
 {
 	
@@ -12,10 +10,7 @@ public interface LogComponent
 	
 	static void repopulateAllLogs()
 	{
-		LogItem.enter();
 		LogComponent.instances.forEach(i -> i.repopulateLogs());
-		LogItem.debug("All logs repopulated");
-		LogItem.exit();
 	}
 	
 	void repopulateLogs();

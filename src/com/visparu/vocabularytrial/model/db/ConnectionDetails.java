@@ -43,40 +43,32 @@ public final class ConnectionDetails
 	
 	private ConnectionDetails(final String driver, final String protocol, final String filename)
 	{
-		LogItem.enter();
 		this.driver		= driver;
 		this.protocol	= protocol;
 		this.filename	= filename;
-		LogItem.debug("Created new database connection: " + this.getConnectionString());
-		LogItem.exit();
 	}
 	
 	public static final ConnectionDetails getInstance()
 	{
-		LogItem.enter();
 		if (ConnectionDetails.instance == null)
 		{
 			ConnectionDetails instance = ConnectionDetails.getInstance(
 				C11N.getDriver(),
 				C11N.getProtocol(),
 				C11N.getDatabasePath().getAbsolutePath());
-			LogItem.exit();
 			return instance;
 		}
 		ConnectionDetails instance = ConnectionDetails.instance;
-		LogItem.exit();
 		return instance;
 	}
 	
 	private static final ConnectionDetails getInstance(final String driver, final String protocol, final String filename)
 	{
-		LogItem.enter();
 		ConnectionDetails.instance = new ConnectionDetails(driver, protocol, filename);
 		Translation.clearCache();
 		Word.clearCache();
 		Language.clearCache();
 		ConnectionDetails instance = ConnectionDetails.instance;
-		LogItem.exit();
 		return instance;
 	}
 	
@@ -89,14 +81,14 @@ public final class ConnectionDetails
 	
 	public final void changeDatabase(final String driver, final String protocol, final String filename)
 	{
-		LogItem.enter();
 		ConnectionDetails.getInstance(driver, protocol, filename);
+		LogItem.createTable();
+		LogItem.enter();
 		Language.createTable();
 		Word.createTable();
 		Translation.createTable();
 		Trial.createTable();
 		WordCheck.createTable();
-		LogItem.createTable();
 		LogItem.debug("All tables created for " + filename);
 		LogItem.exit();
 	}
@@ -134,9 +126,7 @@ public final class ConnectionDetails
 	
 	public final String getConnectionString()
 	{
-		LogItem.enter();
 		String ret = String.format("%s:%s:%s", this.driver, this.protocol, this.filename);
-		LogItem.exit();
 		return ret;
 	}
 	

@@ -48,18 +48,15 @@ public final class IOUtil
 	
 	public static final String readString(String file)
 	{
-		LogItem.enter();
 		final String	absolutePathString	= IOUtil.DATA_PATH + file;
 		final Path		absolutePath		= Paths.get(absolutePathString);
 		try
 		{
 			final String data = new String(Files.readAllBytes(absolutePath), Charset.defaultCharset());
-			LogItem.exit();
 			return data;
 		}
 		catch (IOException e)
 		{
-			LogItem.exit();
 			return null;
 		}
 	}

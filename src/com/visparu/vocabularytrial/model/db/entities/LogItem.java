@@ -8,8 +8,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import com.visparu.vocabularytrial.gui.interfaces.LogComponent;
 import com.visparu.vocabularytrial.model.db.ConnectionDetails;
@@ -51,7 +54,7 @@ public final class LogItem
 			+ "log_id INTEGER, "
 			+ "severity VARCHAR(20), "
 			+ "datetime VARCHAR(23), "
-			+ "threadName VARCHAR(100), "
+			+ "threadname VARCHAR(100), "
 			+ "function VARCHAR(100), "
 			+ "message VARCHAR(200), "
 			+ "description VARCHAR(500)");
@@ -233,7 +236,7 @@ public final class LogItem
 			if (rs.next())
 			{
 				final Integer		log_id		= rs.getInt("log_id");
-				final Severity		severity	= Severity.valueOf(rs.getString("severity"));
+				final Severity		severity	= Severity.values()[rs.getInt("severity")];
 				final LocalDateTime	datetime	= LocalDateTime.parse(rs.getString("datetime"));
 				final String		threadName	= rs.getString("threadname");
 				final String		function	= rs.getString("function");
@@ -260,7 +263,7 @@ public final class LogItem
 		try (final Connection conn = DriverManager.getConnection(connString);
 			final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
-			pstmt.setString(1, logitem.getSeverity().toString());
+			pstmt.setInt(1, logitem.getSeverity().ordinal());
 			pstmt.setString(2, logitem.getDatetime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 			pstmt.setString(3, logitem.getThreadName());
 			pstmt.setString(4, logitem.getFunction());
@@ -280,6 +283,11 @@ public final class LogItem
 		return -1;
 	}
 	
+	public static final Integer getSessionLog_id()
+	{
+		return LogItem.session_log_id;
+	}
+	
 	public final Integer getLogitem_id()
 	{
 		return this.logitem_id;
@@ -290,17 +298,17 @@ public final class LogItem
 		this.logitem_id = logitem_id;
 	}
 	
-	public Integer getLog_id()
+	public final Integer getLog_id()
 	{
 		return this.log_id;
 	}
 	
-	public Severity getSeverity()
+	public final Severity getSeverity()
 	{
 		return this.severity;
 	}
 	
-	public void setSeverity(Severity severity)
+	public final void setSeverity(Severity severity)
 	{
 		final String	query		= "UPDATE logitem "
 			+ "SET severity = ? "
@@ -320,12 +328,12 @@ public final class LogItem
 		}
 	}
 	
-	public LocalDateTime getDatetime()
+	public final LocalDateTime getDatetime()
 	{
 		return this.datetime;
 	}
 	
-	public void setDatetime(LocalDateTime datetime)
+	public final void setDatetime(LocalDateTime datetime)
 	{
 		final String	query		= "UPDATE logitem "
 			+ "SET datetime = ? "
@@ -345,12 +353,12 @@ public final class LogItem
 		}
 	}
 	
-	public String getThreadName()
+	public final String getThreadName()
 	{
 		return this.threadName;
 	}
 	
-	public void setThreadName(String threadName)
+	public final void setThreadName(String threadName)
 	{
 		final String	query		= "UPDATE logitem "
 			+ "SET threadname = ? "
@@ -370,12 +378,12 @@ public final class LogItem
 		}
 	}
 	
-	public String getFunction()
+	public final String getFunction()
 	{
 		return function;
 	}
 	
-	public void setFunction(String function)
+	public final void setFunction(String function)
 	{
 		final String	query		= "UPDATE logitem "
 			+ "SET function = ? "
@@ -395,12 +403,12 @@ public final class LogItem
 		}
 	}
 	
-	public String getMessage()
+	public final String getMessage()
 	{
 		return this.message;
 	}
 	
-	public void setMessage(String message)
+	public final void setMessage(String message)
 	{
 		final String	query		= "UPDATE logitem "
 			+ "SET message = ? "
@@ -420,12 +428,12 @@ public final class LogItem
 		}
 	}
 	
-	public String getDescription()
+	public final String getDescription()
 	{
 		return this.description;
 	}
 	
-	public void setDescription(String description)
+	public final void setDescription(String description)
 	{
 		final String	query		= "UPDATE logitem "
 			+ "SET description = ? "
@@ -443,6 +451,125 @@ public final class LogItem
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public static final List<Integer> getAllLogIds()
+	{
+		final List<Integer> log_ids = new ArrayList<>();
+		final String query = "SELECT DISTINCT log_id FROM logitem";
+		final String connString = ConnectionDetails.getInstance().getConnectionString();
+		try (final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
+		{
+			final ResultSet rs = stmt.executeQuery(query);
+			while(rs.next())
+			{
+				log_ids.add(rs.getInt("log_id"));
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return log_ids;
+	}
+	
+	public static final List<LogItem> getAllLogItemsForLog(Integer log_id)
+	{
+		List<LogItem> logitems = new ArrayList<>();
+		String query = "SELECT logitem_id FROM logitem WHERE log_id = ? AND severity >= ?";
+		String connString = ConnectionDetails.getInstance().getConnectionString();
+		try (Connection conn = DriverManager.getConnection(connString); PreparedStatement pstmt = conn.prepareStatement(query))
+		{
+			pstmt.setInt(1, log_id);
+			ResultSet rs = pstmt.executeQuery();
+			while(rs.next())
+			{
+				LogItem li = LogItem.get(rs.getInt("logitem_id"));
+				logitems.add(li);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return logitems;
+	}
+	
+	public static final List<LogItem> getFilteredLogItems(Integer log_id, Severity min_severity, String thread, String function, String message, boolean description)
+	{
+		List<LogItem> logitems = new ArrayList<>();
+		
+		StringJoiner sj_filter = new StringJoiner(" AND ");
+		if(log_id != null)
+		{
+			sj_filter.add("log_id = ?");
+		}
+		if(min_severity != null)
+		{
+			sj_filter.add("severity >= ?");
+		}
+		if(thread != null)
+		{
+			sj_filter.add("threadname = ?");
+		}
+		if(function != null)
+		{
+			sj_filter.add("function = ?");
+		}
+		if(message != null)
+		{
+			if(description)
+			{
+				sj_filter.add("(message LIKE %?% OR description LIKE %?%)");
+			}
+			else
+			{
+				sj_filter.add("message LIKE %?%");
+			}
+		}
+		
+		String query = "SELECT logitem_id FROM logitem WHERE " + sj_filter.toString();
+		String connString = ConnectionDetails.getInstance().getConnectionString();
+		try (Connection conn = DriverManager.getConnection(connString); PreparedStatement pstmt = conn.prepareStatement(query))
+		{
+			int index = 1;
+			if(log_id != null)
+			{
+				pstmt.setInt(index++, log_id);
+			}
+			if(min_severity != null)
+			{
+				pstmt.setInt(index++, min_severity.ordinal());
+			}
+			if(thread != null)
+			{
+				pstmt.setString(index++, thread);
+			}
+			if(function != null)
+			{
+				pstmt.setString(index++, function);
+			}
+			if(message != null)
+			{
+				pstmt.setString(index++, message);
+				if(description)
+				{
+					pstmt.setString(index++, message);
+				}
+			}
+			ResultSet rs = pstmt.executeQuery();
+			while(rs.next())
+			{
+				LogItem li = LogItem.get(rs.getInt("logitem_id"));
+				logitems.add(li);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return logitems;
 	}
 	
 }
