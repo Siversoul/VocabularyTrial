@@ -64,16 +64,16 @@ public final class LogController implements Initializable, VokAbfController, Log
 	@Override
 	public final void initialize(URL location, ResourceBundle resources)
 	{
-		this.cb_severity.getItems().add("All");
 		for (Severity s : Severity.values())
 		{
-			this.cb_severity.getItems().add(s.toString());
+			this.cb_severity.getItems().add(s.name());
 		}
 		this.cb_severity.getSelectionModel().selectedItemProperty().addListener(e ->
 		{
 			this.repopulateThreads();
+			this.repopulateFunctions();
 		});
-		this.cb_severity.getSelectionModel().select("All");
+		this.cb_severity.getSelectionModel().select("INFO");
 		
 		this.tc_time.setCellValueFactory(new PropertyValueFactory<LogItemView, String>("datetime"));
 		this.tc_thread.setCellValueFactory(new PropertyValueFactory<LogItemView, String>("thread"));
@@ -87,6 +87,11 @@ public final class LogController implements Initializable, VokAbfController, Log
 				@Override
 				protected void updateItem(String s, boolean empty)
 				{
+					super.updateItem(s, empty);
+					if(s == null || empty)
+					{
+						return;
+					}
 					LogItemView	liv	= this.getTableRow().getItem();
 					Color		c;
 					switch (liv.getSeverity())
@@ -123,7 +128,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 						}
 						default:
 						{
-							c = Color.ALICEBLUE;
+							c = Color.BLUE;
 							break;
 						}
 					}
@@ -142,16 +147,17 @@ public final class LogController implements Initializable, VokAbfController, Log
 	
 	private final void repopulateThreads()
 	{
+		String before = this.cb_thread.getSelectionModel().getSelectedItem();
 		this.cb_thread.getItems().clear();
 		this.cb_thread.getItems().add("All");
-		final String	query_thread		= "SELECT DISTINCT thread FROM logitem";
+		final String	query_thread		= "SELECT DISTINCT threadname FROM logitem";
 		final String	connString_thread	= ConnectionDetails.getInstance().getConnectionString();
 		try (final Connection conn = DriverManager.getConnection(connString_thread); final Statement stmt = conn.createStatement())
 		{
 			final ResultSet rs = stmt.executeQuery(query_thread);
 			while (rs.next())
 			{
-				this.cb_thread.getItems().add(rs.getString("thread"));
+				this.cb_thread.getItems().add(rs.getString("threadname"));
 			}
 			rs.close();
 		}
@@ -159,11 +165,19 @@ public final class LogController implements Initializable, VokAbfController, Log
 		{
 			e.printStackTrace();
 		}
-		this.repopulateFunctions();
+		if(this.cb_thread.getItems().contains(before))
+		{
+			this.cb_thread.getSelectionModel().select(before);
+		}
+		else
+		{
+			this.cb_thread.getSelectionModel().select(0);
+		}
 	}
 	
 	private final void repopulateFunctions()
 	{
+		String before = this.cb_function.getSelectionModel().getSelectedItem();
 		this.cb_function.getItems().clear();
 		this.cb_function.getItems().add("All");
 		final String	query_func		= "SELECT DISTINCT function FROM logitem";
@@ -180,6 +194,14 @@ public final class LogController implements Initializable, VokAbfController, Log
 		catch (final SQLException e)
 		{
 			e.printStackTrace();
+		}
+		if(this.cb_function.getItems().contains(before))
+		{
+			this.cb_function.getSelectionModel().select(before);
+		}
+		else
+		{
+			this.cb_function.getSelectionModel().select(0);
 		}
 	}
 	
@@ -206,22 +228,23 @@ public final class LogController implements Initializable, VokAbfController, Log
 	{
 		Severity severity = Severity.valueOf(this.cb_severity.getSelectionModel().getSelectedItem());
 		String thread = this.cb_thread.getSelectionModel().getSelectedItem();
-		if(thread.equals("All"))
+		if(thread != null && thread.equals("All"))
 		{
 			thread = null;
 		}
 		String function = this.cb_function.getSelectionModel().getSelectedItem();
-		if(function.equals("All"))
+		if(function != null && function.equals("All"))
 		{
 			function = null;
 		}
 		String message = this.tf_search.getText();
-		if(message.isEmpty())
+		if(message != null && message.isEmpty())
 		{
 			message = null;
 		}
 		boolean description = this.cb_includedescription.isSelected();
 		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function, message, description);
+		
 		final ObservableList<LogItemView>	logitemviews	= FXCollections.observableArrayList();
 		logitems.forEach(li -> logitemviews.add(new LogItemView(li)));
 		this.tv_log.setItems(logitemviews);

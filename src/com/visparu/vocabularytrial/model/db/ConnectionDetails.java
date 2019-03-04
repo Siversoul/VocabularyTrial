@@ -120,6 +120,7 @@ public final class ConnectionDetails
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			System.exit(1);
 		}
 		LogItem.exit();
 	}

@@ -607,6 +607,14 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	}
 	
 	@FXML
+	public final void debug_openlog(final ActionEvent event)
+	{
+		LogItem.enter();
+		GUIUtil.createNewStage("Log", new LogController(), I18N.createStringBinding("gui.log.title"));
+		LogItem.exit();
+	}
+	
+	@FXML
 	public final void debug_fillrandomly(final ActionEvent event)
 	{
 		LogItem.enter();
