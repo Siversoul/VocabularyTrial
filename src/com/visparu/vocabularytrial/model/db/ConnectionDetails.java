@@ -13,6 +13,7 @@ import java.sql.Statement;
 import org.sqlite.JDBC;
 
 import com.visparu.vocabularytrial.model.db.entities.Language;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.Word;
@@ -21,18 +22,16 @@ import com.visparu.vocabularytrial.util.C11N;
 
 public final class ConnectionDetails
 {
-	
-	private static ConnectionDetails instance;
-	
-	private String	driver;
-	private String	protocol;
-	private String	filename;
-	
+	private static ConnectionDetails	instance;
+	private String						driver;
+	private String						protocol;
+	private String						filename;
+	private Connection					connection;
 	static
 	{
 		try
 		{
-			DriverManager.deregisterDriver(new JDBC());
+			DriverManager.registerDriver(new JDBC());
 		}
 		catch (SQLException e)
 		{
@@ -45,18 +44,25 @@ public final class ConnectionDetails
 		this.driver		= driver;
 		this.protocol	= protocol;
 		this.filename	= filename;
+		try
+		{
+			this.connection = DriverManager.getConnection(this.getConnectionString());
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public static final ConnectionDetails getInstance()
 	{
 		if (ConnectionDetails.instance == null)
 		{
-			return ConnectionDetails.getInstance(
-				C11N.getDriver(),
-				C11N.getProtocol(),
-				C11N.getDatabasePath().getAbsolutePath());
+			ConnectionDetails instance = ConnectionDetails.getInstance(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			return instance;
 		}
-		return ConnectionDetails.instance;
+		ConnectionDetails instance = ConnectionDetails.instance;
+		return instance;
 	}
 	
 	private static final ConnectionDetails getInstance(final String driver, final String protocol, final String filename)
@@ -65,7 +71,8 @@ public final class ConnectionDetails
 		Translation.clearCache();
 		Word.clearCache();
 		Language.clearCache();
-		return ConnectionDetails.instance;
+		ConnectionDetails instance = ConnectionDetails.instance;
+		return instance;
 	}
 	
 	public final void activateForeignKeyPragma()
@@ -76,11 +83,13 @@ public final class ConnectionDetails
 	public final void changeDatabase(final String driver, final String protocol, final String filename)
 	{
 		ConnectionDetails.getInstance(driver, protocol, filename);
+		LogItem.createTable();
 		Language.createTable();
 		Word.createTable();
 		Translation.createTable();
 		Trial.createTable();
 		WordCheck.createTable();
+		LogItem.debug("All tables created for " + filename);
 	}
 	
 	public final void copyDatabase(final File newFile)
@@ -88,6 +97,7 @@ public final class ConnectionDetails
 		try
 		{
 			Files.copy(Paths.get(this.filename), new FileOutputStream(newFile));
+			LogItem.debug("Database copied to location " + newFile);
 		}
 		catch (IOException e)
 		{
@@ -101,16 +111,23 @@ public final class ConnectionDetails
 		try (final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
 		{
 			stmt.execute(query);
+			LogItem.debug("Simple statement executed", query);
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 	
-	public final String getConnectionString()
+	private final String getConnectionString()
 	{
-		return String.format("%s:%s:%s", this.driver, this.protocol, this.filename);
+		String ret = String.format("%s:%s:%s", this.driver, this.protocol, this.filename);
+		return ret;
 	}
 	
+	public final Connection getConnection()
+	{
+		return this.connection;
+	}
 }

@@ -2,7 +2,6 @@ package com.visparu.vocabularytrial.model.views;
 
 public final class LanguageView
 {
-	
 	private String	language_code;
 	private String	name;
 	
@@ -31,5 +30,4 @@ public final class LanguageView
 	{
 		this.name = name;
 	}
-	
 }

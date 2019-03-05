@@ -8,6 +8,7 @@ import com.visparu.vocabularytrial.gui.interfaces.LanguageComponent;
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
 import com.visparu.vocabularytrial.model.db.entities.Language;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.views.TrialView;
 import com.visparu.vocabularytrial.util.GUIUtil;
@@ -46,11 +47,9 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	private TableColumn<TrialView, String>	tc_percentage;
 	@FXML
 	private TableColumn<TrialView, Void>	tc_view;
-	
-	private Stage stage;
-	
-	private final Language	init_l_from;
-	private final Language	init_l_to;
+	private Stage							stage;
+	private final Language					init_l_from;
+	private final Language					init_l_to;
 	
 	public TrialListController(final Language init_l_from, final Language init_l_to)
 	{
@@ -61,6 +60,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
+		LogItem.debug("Initializing new stage with TrialListController...");
 		VokAbfController.instances.add(this);
 		LanguageComponent.instances.add(this);
 		TrialComponent.instances.add(this);
@@ -70,7 +70,6 @@ public final class TrialListController implements Initializable, VokAbfControlle
 			LanguageComponent.instances.remove(this);
 			TrialComponent.instances.remove(this);
 		});
-		
 		this.repopulateLanguages_from();
 		this.cb_language_from.getSelectionModel().select(this.init_l_from);
 		this.repopulateLanguages_to();
@@ -84,9 +83,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		{
 			this.repopulateTrials();
 		});
-		
 		this.repopulateTrials();
-		
 		this.tc_date.setCellValueFactory(new PropertyValueFactory<TrialView, String>("date"));
 		this.tc_count.setCellValueFactory(new PropertyValueFactory<TrialView, String>("count"));
 		this.tc_correct.setCellValueFactory(new PropertyValueFactory<TrialView, String>("correct"));
@@ -96,14 +93,12 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		{
 			final TableCell<TrialView, Void> cell = new TableCell<TrialView, Void>()
 			{
-				
 				private final Button btn = new Button();
 				{
 					this.btn.textProperty().bind(I18N.createStringBinding("gui.triallist.table.data.view"));
 					this.btn.setOnAction((ActionEvent event) ->
 					{
-						final TrialResultController	trc		= new TrialResultController(
-							Trial.get(((TrialView) this.getTableRow().getItem()).getTrial_id()));
+						final TrialResultController	trc		= new TrialResultController(Trial.get(((TrialView) this.getTableRow().getItem()).getTrial_id()));
 						final StringBinding			title	= I18N.createStringBinding("gui.result.title");
 						GUIUtil.createNewStage("TrialResult", trc, title);
 					});
@@ -125,6 +120,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 			};
 			return cell;
 		});
+		LogItem.debug("New stage initialized");
 	}
 	
 	@Override
@@ -137,6 +133,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	private final void repopulateLanguages_from()
 	{
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
+		LogItem.debug("Languages_from repopulated");
 	}
 	
 	private final void repopulateLanguages_to()
@@ -148,6 +145,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		{
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
+		LogItem.debug("Languages_to repopulated");
 	}
 	
 	@Override
@@ -163,6 +161,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 		final List<TrialView> trialViews = FXCollections.observableArrayList();
 		Trial.getTrials(l_from, l_to).forEach(t -> trialViews.add(new TrialView(t)));
 		this.tv_trials.setItems(FXCollections.observableArrayList(trialViews));
+		LogItem.debug("Trials repopulated");
 	}
 	
 	@Override
@@ -176,13 +175,12 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 	}
 	
 	@FXML
 	public final void close(final ActionEvent event)
 	{
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
 	}
-	
 }
