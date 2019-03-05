@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 public final class Main extends Application
 {
 	public static final String	NAME			= I18N.createStringBinding("root.name").get();
-	public static final String	VERSION			= "0.3.0";
+	public static final String	VERSION			= "0.3.1";
 	public static final String	AUTHOR			= "Oliver Stiller";
 	public static final String	RELEASE_DATE	= "05.03.2019";
 	
