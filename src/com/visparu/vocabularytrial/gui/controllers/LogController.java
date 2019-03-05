@@ -15,6 +15,8 @@ import com.visparu.vocabularytrial.model.db.ConnectionDetails;
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.log.Severity;
 import com.visparu.vocabularytrial.model.views.LogItemView;
+import com.visparu.vocabularytrial.util.GUIUtil;
+import com.visparu.vocabularytrial.util.I18N;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -63,11 +65,24 @@ public final class LogController implements Initializable, VokAbfController, Log
 	private TableColumn<LogItemView, String>	tc_function;
 	@FXML
 	private TableColumn<LogItemView, String>	tc_message;
+		
 	private Stage								stage;
 	
 	@Override
 	public final void initialize(URL location, ResourceBundle resources)
 	{
+		VokAbfController.instances.add(this);
+		LogComponent.instances.add(this);
+		this.stage.setOnCloseRequest(e ->
+		{
+			VokAbfController.instances.remove(this);
+			LogComponent.instances.remove(this);
+			while(!LogDetailController.instances.isEmpty())
+			{
+				LogDetailController.instances.get(0).close();
+			}
+		});
+		
 		this.cb_severity.getItems().addAll(Severity.values());
 		this.cb_severity.getSelectionModel().selectedItemProperty().addListener(e ->
 		{
@@ -84,7 +99,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 		this.cb_severity.getSelectionModel().select(Severity.INFO);
 		final Callback<TableColumn<LogItemView, String>, TableCell<LogItemView, String>> cb = (c ->
 		{
-			TableCell<LogItemView, String> tc = new TableCell<LogItemView, String>()
+			final TableCell<LogItemView, String> tc = new TableCell<>()
 			{
 				@Override
 				protected void updateItem(String s, boolean empty)
@@ -267,7 +282,10 @@ public final class LogController implements Initializable, VokAbfController, Log
 	}
 	
 	private final void openDetailView(LogItemView liv)
-	{}
+	{
+		final LogDetailController ldc = new LogDetailController(liv);
+		GUIUtil.createNewStage("LogDetail", ldc, I18N.createStringBinding("gui.logdetail.title"));
+	}
 	
 	@Override
 	public final void repopulateLogs()
@@ -284,6 +302,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 	@Override
 	public final void close()
 	{
+		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 	}
 	
@@ -307,7 +326,8 @@ public final class LogController implements Initializable, VokAbfController, Log
 			message = null;
 		}
 		boolean								description		= this.cb_includedescription.isSelected();
-		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function, message, description);
+		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function,
+				message, description);
 		final ObservableList<LogItemView>	logitemviews	= FXCollections.observableArrayList();
 		logitems.forEach(li -> logitemviews.add(new LogItemView(li)));
 		this.tv_log.getItems().removeAll(this.tv_log.getItems());

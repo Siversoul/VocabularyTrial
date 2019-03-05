@@ -19,21 +19,23 @@ import com.visparu.vocabularytrial.model.log.Severity;
 
 public final class LogItem
 {
-	private static final Map<Integer, LogItem>	cache						= new HashMap<>();
-	private static Integer						session_log_id				= -1;
-	private static boolean						initialized					= false;
-	private static List<LogItem>				preinitialization_logitems	= new ArrayList<>();
-	private Integer								logitem_id;
-	private Integer								log_id;
-	private Severity							severity;
-	private LocalDateTime						datetime;
-	private String								threadName;
-	private String								function;
-	private String								message;
-	private String								description;
+	private static final Map<Integer, LogItem> cache = new HashMap<>();
 	
-	private LogItem(final Integer logitem_id, final Integer log_id, final Severity severity, final LocalDateTime datetime, final String threadName, final String function, final String message,
-		final String description)
+	private static Integer			session_log_id				= -1;
+	private static boolean			initialized					= false;
+	private static List<LogItem>	preinitialization_logitems	= new ArrayList<>();
+	
+	private Integer			logitem_id;
+	private Integer			log_id;
+	private Severity		severity;
+	private LocalDateTime	datetime;
+	private String			threadName;
+	private String			function;
+	private String			message;
+	private String			description;
+	
+	private LogItem(final Integer logitem_id, final Integer log_id, final Severity severity, final LocalDateTime datetime, final String threadName,
+			final String function, final String message, final String description)
 	{
 		this.logitem_id		= logitem_id;
 		this.log_id			= log_id;
@@ -47,8 +49,15 @@ public final class LogItem
 	
 	public final static void createTable()
 	{
-		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS logitem (" + "logitem_id INTEGER PRIMARY KEY AUTOINCREMENT, " + "log_id INTEGER, " + "severity VARCHAR(20), "
-			+ "datetime VARCHAR(23), " + "threadname VARCHAR(100), " + "function VARCHAR(100), " + "message VARCHAR(200), " + "description VARCHAR(500))");
+		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS logitem ("
+				+ "logitem_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+				+ "log_id INTEGER, "
+				+ "severity VARCHAR(20), "
+				+ "datetime VARCHAR(23), "
+				+ "threadname VARCHAR(100), "
+				+ "function VARCHAR(100), "
+				+ "message VARCHAR(200), "
+				+ "description VARCHAR(500))");
 	}
 	
 	public final static void initializeNewLogSession()
@@ -173,7 +182,8 @@ public final class LogItem
 		return LogItem.createLogItem(severity, datetime, threadname, function, message, description);
 	}
 	
-	public final static LogItem createLogItem(final Severity severity, final LocalDateTime datetime, final String threadname, final String function, final String message, final String description)
+	public final static LogItem createLogItem(final Severity severity, final LocalDateTime datetime, final String threadname, final String function,
+			final String message, final String description)
 	{
 		final LogItem li = new LogItem(-1, LogItem.session_log_id, severity, datetime, threadname, function, message, description);
 		LogItem.preinitialization_logitems.add(li);
@@ -472,7 +482,8 @@ public final class LogItem
 		return logitems;
 	}
 	
-	public static final List<LogItem> getFilteredLogItems(Integer log_id, Severity min_severity, String thread, String function, String message, boolean description)
+	public static final List<LogItem> getFilteredLogItems(Integer log_id, Severity min_severity, String thread, String function, String message,
+			boolean description)
 	{
 		List<LogItem>	logitems	= new ArrayList<>();
 		StringJoiner	sj_filter	= new StringJoiner(" AND ");
