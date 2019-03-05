@@ -1,7 +1,6 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,14 +34,9 @@ public final class WordCheck
 	public static final void createTable()
 	{
 		LogItem.enter();
-		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS wordcheck("
-			+ "word_id INTEGER, "
-			+ "trial_id INTEGER, "
-			+ "answerString VARCHAR(200), "
-			+ "correct INTEGER, "
-			+ "PRIMARY KEY(word_id, trial_id), "
-			+ "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, "
-			+ "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE)");
+		ConnectionDetails.getInstance().executeSimpleStatement(
+			"CREATE TABLE IF NOT EXISTS wordcheck(" + "word_id INTEGER, " + "trial_id INTEGER, " + "answerString VARCHAR(200), " + "correct INTEGER, " + "PRIMARY KEY(word_id, trial_id), "
+				+ "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, " + "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE)");
 		LogItem.debug("Wordcheck table created");
 		LogItem.exit();
 	}
@@ -91,12 +85,9 @@ public final class WordCheck
 	{
 		LogItem.enter();
 		WordCheck.cache.remove(WordCheck.createKeyHash(word.getWord_id(), trial.getTrial_id()));
-		final String	query		= "DELETE FROM wordcheck "
-			+ "WHERE word_id = ? "
-			+ "AND trial_id = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String		query	= "DELETE FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
+		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, word.getWord_id());
 			pstmt.setInt(2, trial.getTrial_id());
@@ -122,13 +113,9 @@ public final class WordCheck
 	private static final WordCheck readEntity(final Integer word_id, final Integer trial_id)
 	{
 		LogItem.enter();
-		final String	query		= "SELECT * "
-			+ "FROM wordcheck "
-			+ "WHERE word_id = ? "
-			+ "AND trial_id = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String		query	= "SELECT * " + "FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
+		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, word_id);
 			pstmt.setInt(2, trial_id);
@@ -156,11 +143,9 @@ public final class WordCheck
 	private static final void writeEntity(final WordCheck check)
 	{
 		LogItem.enter();
-		final String	query		= "INSERT INTO wordcheck "
-			+ "VALUES(?, ?, ?, ?)";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String		query	= "INSERT INTO wordcheck " + "VALUES(?, ?, ?, ?)";
+		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, check.getWord().getWord_id());
 			pstmt.setInt(2, check.getTrial().getTrial_id());

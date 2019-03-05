@@ -1,7 +1,6 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -74,8 +73,8 @@ public final class Language
 		LogItem.enter();
 		final List<Language>	languages	= new ArrayList<>();
 		final String			query		= "SELECT language_code FROM language";
-		final String			connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
+		final Connection		conn		= ConnectionDetails.getInstance().getConnection();
+		try (final Statement stmt = conn.createStatement())
 		{
 			final ResultSet rs = stmt.executeQuery(query);
 			while (rs.next())
@@ -128,10 +127,9 @@ public final class Language
 	{
 		LogItem.enter();
 		Language.cache.remove(language_code);
-		final String	query		= "DELETE FROM language WHERE language_code = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String		query	= "DELETE FROM language WHERE language_code = ?";
+		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setString(1, language_code);
 			pstmt.executeUpdate();
@@ -158,10 +156,9 @@ public final class Language
 	private final static Language readEntity(final String language_code)
 	{
 		LogItem.enter();
-		final String	query		= "SELECT * FROM language WHERE language_code = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String		query	= "SELECT * FROM language WHERE language_code = ?";
+		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setString(1, language_code);
 			final ResultSet rs = pstmt.executeQuery();
@@ -188,9 +185,8 @@ public final class Language
 	{
 		LogItem.enter();
 		final String	query		= "INSERT INTO language VALUES(?, ?)";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final Connection conn = ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setString(1, language.getLanguage_code());
 			pstmt.setString(2, language.getName());
@@ -215,9 +211,8 @@ public final class Language
 	{
 		LogItem.enter();
 		final String	query		= "UPDATE language SET language_code = ? WHERE language_code = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final Connection conn = ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setString(1, language_code);
 			pstmt.setString(2, this.language_code);
@@ -245,9 +240,8 @@ public final class Language
 	{
 		LogItem.enter();
 		final String	query		= "UPDATE language SET name = ? WHERE language_code = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final Connection conn = ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setString(1, name);
 			pstmt.setString(2, this.language_code);
@@ -267,9 +261,8 @@ public final class Language
 		LogItem.enter();
 		final List<Word>	words		= new ArrayList<>();
 		final String		query		= "SELECT * FROM word WHERE language_code = ? ORDER BY word.name";
-		final String		connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final Connection conn = ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setString(1, this.language_code);
 			final ResultSet rs = pstmt.executeQuery();

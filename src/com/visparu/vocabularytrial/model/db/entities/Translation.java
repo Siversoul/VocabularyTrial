@@ -1,7 +1,6 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,14 +40,8 @@ public final class Translation
 	public final static void createTable()
 	{
 		LogItem.enter();
-		ConnectionDetails.getInstance().executeSimpleStatement(
-			"CREATE TABLE IF NOT EXISTS translation("
-				+ "word1_id INTEGER, "
-				+ "word2_id INTEGER, "
-				+ "PRIMARY KEY(word1_id, word2_id), "
-				+ "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, "
-				+ "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE"
-				+ ")");
+		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS translation(" + "word1_id INTEGER, " + "word2_id INTEGER, " + "PRIMARY KEY(word1_id, word2_id), "
+			+ "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, " + "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE" + ")");
 		LogItem.debug("Translation table created");
 		LogItem.exit();
 	}
@@ -105,12 +98,9 @@ public final class Translation
 		final Integer	word1_id	= w1.getWord_id();
 		final Integer	word2_id	= w2.getWord_id();
 		Translation.cache.remove(Translation.createKeyHash(word1_id, word2_id));
-		final String	query		= "DELETE FROM translation "
-			+ "WHERE word1_id = ? "
-			+ "AND word2_id = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String		query	= "DELETE FROM translation " + "WHERE word1_id = ? " + "AND word2_id = ?";
+		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, word1_id);
 			pstmt.setInt(2, word2_id);
@@ -136,15 +126,11 @@ public final class Translation
 	public final static Translation readEntity(Word w1, Word w2)
 	{
 		LogItem.enter();
-		final Integer	word1_id	= w1.getWord_id();
-		final Integer	word2_id	= w2.getWord_id();
-		final String	query		= "SELECT * "
-			+ "FROM translation "
-			+ "WHERE word1_id = ? "
-			+ "AND word2_id = ?";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final Integer		word1_id	= w1.getWord_id();
+		final Integer		word2_id	= w2.getWord_id();
+		final String		query		= "SELECT * " + "FROM translation " + "WHERE word1_id = ? " + "AND word2_id = ?";
+		final Connection	conn		= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, word1_id);
 			pstmt.setInt(2, word2_id);
@@ -170,11 +156,9 @@ public final class Translation
 	private final static void writeEntity(final Translation t)
 	{
 		LogItem.enter();
-		final String	query		= "INSERT INTO translation "
-			+ "VALUES(?, ?)";
-		final String	connString	= ConnectionDetails.getInstance().getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString);
-			final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String		query	= "INSERT INTO translation " + "VALUES(?, ?)";
+		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
+		try (final PreparedStatement pstmt = conn.prepareStatement(query))
 		{
 			pstmt.setInt(1, t.getWord1_id());
 			pstmt.setInt(2, t.getWord2_id());

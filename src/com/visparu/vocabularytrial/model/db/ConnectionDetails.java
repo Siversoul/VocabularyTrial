@@ -29,6 +29,8 @@ public final class ConnectionDetails
 	private String	protocol;
 	private String	filename;
 	
+	private Connection connection;
+	
 	static
 	{
 		try
@@ -46,6 +48,14 @@ public final class ConnectionDetails
 		this.driver		= driver;
 		this.protocol	= protocol;
 		this.filename	= filename;
+		try
+		{
+			this.connection = DriverManager.getConnection(this.getConnectionString());
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public static final ConnectionDetails getInstance()
@@ -125,10 +135,15 @@ public final class ConnectionDetails
 		LogItem.exit();
 	}
 	
-	public final String getConnectionString()
+	private final String getConnectionString()
 	{
 		String ret = String.format("%s:%s:%s", this.driver, this.protocol, this.filename);
 		return ret;
+	}
+	
+	public final Connection getConnection()
+	{
+		return this.connection;
 	}
 	
 }
