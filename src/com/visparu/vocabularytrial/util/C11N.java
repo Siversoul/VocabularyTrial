@@ -8,11 +8,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
+
 public final class C11N
 {
-	
-	private static final String DEFAULT_CONFIG_FILE = "config.json";
-	
+	private static final String	DEFAULT_CONFIG_FILE	= "config.json";
 	private static final String	DEFAULT_DRIVER		= "jdbc";
 	private static final String	DEFAULT_PROTOCOL	= "sqlite";
 	private static final String	DEFAULT_FILENAME	= IOUtil.DATA_PATH + "temp.db";
@@ -30,6 +30,7 @@ public final class C11N
 	public static final void setDriver(String driver)
 	{
 		C11N.setValue("driver", driver);
+		LogItem.debug("Database driver changed to " + driver);
 	}
 	
 	public static final String getProtocol()
@@ -45,6 +46,7 @@ public final class C11N
 	public static final void setProtocol(String protocol)
 	{
 		C11N.setValue("protocol", protocol);
+		LogItem.debug("Database protocol changed to " + protocol);
 	}
 	
 	public static final File getDatabasePath()
@@ -52,14 +54,17 @@ public final class C11N
 		final String dbPath = C11N.getValue("dbPath");
 		if (dbPath == null)
 		{
-			return Paths.get(C11N.DEFAULT_FILENAME).toFile();
+			File f = Paths.get(C11N.DEFAULT_FILENAME).toFile();
+			return f;
 		}
-		return Paths.get(dbPath).toFile();
+		File f = Paths.get(dbPath).toFile();
+		return f;
 	}
 	
 	public static final void setDatabasePath(String databasePath)
 	{
 		C11N.setValue("dbPath", databasePath);
+		LogItem.debug("Database path changed to " + databasePath);
 	}
 	
 	public static final Locale getLocale()
@@ -67,15 +72,18 @@ public final class C11N
 		final String localeString = C11N.getValue("locale");
 		if (localeString == null)
 		{
-			return I18N.getDefaultLocale();
+			Locale l = I18N.getDefaultLocale();
+			return l;
 		}
-		return Locale.forLanguageTag(localeString);
+		Locale l = Locale.forLanguageTag(localeString);
+		return l;
 	}
 	
 	public static final void setLocale(Locale locale)
 	{
 		C11N.setValue("locale", locale.toLanguageTag());
 		I18N.localeProperty().set(locale);
+		LogItem.debug("Locale changed to " + locale.getDisplayName());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -124,5 +132,4 @@ public final class C11N
 		obj.put(key, value);
 		IOUtil.writeString(obj.toJSONString(), C11N.DEFAULT_CONFIG_FILE);
 	}
-	
 }

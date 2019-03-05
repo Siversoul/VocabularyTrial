@@ -2,7 +2,6 @@ package com.visparu.vocabularytrial.model.templates;
 
 public final class WordTemplate
 {
-	
 	private String	name;
 	private String	translationsString;
 	
@@ -25,5 +24,4 @@ public final class WordTemplate
 	{
 		this.translationsString = translationsString;
 	}
-	
 }

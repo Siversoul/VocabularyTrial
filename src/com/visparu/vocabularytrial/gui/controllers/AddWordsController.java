@@ -9,6 +9,7 @@ import com.visparu.vocabularytrial.gui.interfaces.LanguageComponent;
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
 import com.visparu.vocabularytrial.gui.interfaces.WordComponent;
 import com.visparu.vocabularytrial.model.db.entities.Language;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 import com.visparu.vocabularytrial.model.templates.WordTemplate;
@@ -44,10 +45,9 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	private ChoiceBox<Language>					cb_language_from;
 	@FXML
 	private ChoiceBox<Language>					cb_language_to;
-	
-	private Stage			stage;
-	private final Language	init_l_from;
-	private final Language	init_l_to;
+	private Stage								stage;
+	private final Language						init_l_from;
+	private final Language						init_l_to;
 	
 	public AddWordsController(final Language l_from, final Language l_to)
 	{
@@ -58,6 +58,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
+		LogItem.debug("Initializing new stage with AddWordsController...");
 		LanguageComponent.instances.add(this);
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
@@ -65,10 +66,8 @@ public final class AddWordsController implements Initializable, LanguageComponen
 			LanguageComponent.instances.remove(this);
 			VokAbfController.instances.remove(this);
 		});
-		
 		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordTemplate, String>("name"));
 		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordTemplate, String>("translationsString"));
-		
 		this.repopulateLanguages_from();
 		this.cb_language_from.getSelectionModel().select(this.init_l_from);
 		this.repopulateLanguages_to();
@@ -77,6 +76,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		{
 			this.repopulateLanguages_to();
 		});
+		LogItem.debug("Finished initializing new stage");
 	}
 	
 	@Override
@@ -89,6 +89,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	private final void repopulateLanguages_from()
 	{
 		this.cb_language_from.setItems(FXCollections.observableArrayList(Language.getAll()));
+		LogItem.debug("Languages_from repopulated");
 	}
 	
 	private final void repopulateLanguages_to()
@@ -100,6 +101,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		{
 			this.cb_language_to.getSelectionModel().select(l_prev);
 		}
+		LogItem.debug("Languages_to repopulated");
 	}
 	
 	@Override
@@ -113,6 +115,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 	}
 	
 	@FXML
@@ -128,26 +131,26 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		wt.setName(this.tf_word.getText());
 		wt.setTranslationsString(this.tf_translations.getText());
 		this.tv_vocabulary.getItems().add(wt);
-		
+		LogItem.debug("Word + " + wt.getName() + " added to temporary list");
 		this.tf_word.setText("");
 		this.tf_translations.setText("");
-		
 		this.tf_word.requestFocus();
 	}
 	
 	@FXML
 	public final void confirm(final ActionEvent event)
 	{
+		LogItem.debug("Words confirmed");
 		final Language	l_from	= this.cb_language_from.getValue();
 		final Language	l_to	= this.cb_language_to.getValue();
 		if (l_from == null || l_to == null)
 		{
-			final Alert alert = new Alert(AlertType.ERROR, I18N.createStringBinding("gui.addwords.alert.languages").get(),
-				ButtonType.OK);
+			final Alert alert = new Alert(AlertType.ERROR, I18N.createStringBinding("gui.addwords.alert.languages").get(), ButtonType.OK);
 			alert.showAndWait();
 			return;
 		}
-		final List<WordTemplate> wordTemplates = this.tv_vocabulary.getItems();
+		final List<WordTemplate>	wordTemplates	= this.tv_vocabulary.getItems();
+		int							count			= 0;
 		for (final WordTemplate wt : wordTemplates)
 		{
 			final String	name	= wt.getName();
@@ -169,12 +172,15 @@ public final class AddWordsController implements Initializable, LanguageComponen
 				if (t == null)
 				{
 					Translation.createTranslation(w, tw);
+					count++;
 				}
 			}
 		}
 		WordComponent.repopulateAllWords();
+		LogItem.info(count + " words added");
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 	}
 	
 	@FXML
@@ -182,16 +188,16 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	{
 		if (!this.tv_vocabulary.getItems().isEmpty())
 		{
-			final Alert					alert	= new Alert(AlertType.WARNING, I18N.createStringBinding("gui.addwords.alert.unsaved").get(),
-				ButtonType.YES,
-				ButtonType.NO);
+			final Alert					alert	= new Alert(AlertType.WARNING, I18N.createStringBinding("gui.addwords.alert.unsaved").get(), ButtonType.YES, ButtonType.NO);
 			final Optional<ButtonType>	result	= alert.showAndWait();
 			if (!result.isPresent() || result.get() != ButtonType.YES)
 			{
 				return;
 			}
 		}
+		LogItem.info("Aborted adding translations");
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Stage closed");
 	}
 }
