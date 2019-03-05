@@ -63,8 +63,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 	private TableColumn<LogItemView, String>	tc_function;
 	@FXML
 	private TableColumn<LogItemView, String>	tc_message;
-	
-	private Stage stage;
+	private Stage								stage;
 	
 	@Override
 	public final void initialize(URL location, ResourceBundle resources)
@@ -83,7 +82,6 @@ public final class LogController implements Initializable, VokAbfController, Log
 			this.filter(null);
 		});
 		this.cb_severity.getSelectionModel().select(Severity.INFO);
-		
 		final Callback<TableColumn<LogItemView, String>, TableCell<LogItemView, String>> cb = (c ->
 		{
 			TableCell<LogItemView, String> tc = new TableCell<LogItemView, String>()
@@ -92,7 +90,6 @@ public final class LogController implements Initializable, VokAbfController, Log
 				protected void updateItem(String s, boolean empty)
 				{
 					super.updateItem(s, empty);
-					
 					if (s == null || empty)
 					{
 						this.setText(null);
@@ -102,61 +99,55 @@ public final class LogController implements Initializable, VokAbfController, Log
 					{
 						this.setText(s);
 						final LogItemView liv = this.getTableRow().getItem();
-						if(liv == null)
+						if (liv == null)
 						{
 							this.setBackground(new Background(new BackgroundFill(Color.DARKBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 							this.setTextFill(Color.WHITE);
 							return;
 						}
-						Color bc;
-						Color fc;
+						Color	bc;
+						Color	fc;
 						switch (Severity.valueOf(liv.getSeverity()))
 						{
-							case TRACE:
-							{
-								bc = Color.WHITE;
-								fc = Color.BLACK;
-								break;
-							}
 							case DEBUG:
 							{
-								bc = Color.GRAY;
-								fc = Color.WHITE;
+								bc	= Color.GRAY;
+								fc	= Color.WHITE;
 								break;
 							}
 							case INFO:
 							{
-								bc = Color.LIGHTGREEN;
-								fc = Color.BLACK;
+								bc	= Color.LIGHTGREEN;
+								fc	= Color.BLACK;
 								break;
 							}
 							case WARNING:
 							{
-								bc = Color.YELLOW;
-								fc = Color.BLACK;
+								bc	= Color.YELLOW;
+								fc	= Color.BLACK;
 								break;
 							}
 							case ERROR:
 							{
-								bc = Color.ORANGE;
-								fc = Color.BLACK;
+								bc	= Color.ORANGE;
+								fc	= Color.BLACK;
 								break;
 							}
 							case CRITICAL:
 							{
-								bc = Color.RED;
-								fc = Color.WHITE;
+								bc	= Color.RED;
+								fc	= Color.WHITE;
 								break;
 							}
 							default:
 							{
-								bc = Color.PURPLE;
-								fc = Color.WHITE;
+								bc	= Color.PURPLE;
+								fc	= Color.WHITE;
 								break;
 							}
 						}
 						this.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-						if(this.isSelected())
+						if (this.isSelected())
 						{
 							this.setBackground(new Background(new BackgroundFill(Color.GOLD, CornerRadii.EMPTY, Insets.EMPTY)));
 							this.setTextFill(Color.BLACK);
@@ -171,24 +162,21 @@ public final class LogController implements Initializable, VokAbfController, Log
 			};
 			tc.setOnMouseClicked(e ->
 			{
-				if(e.getClickCount() == 2)
+				if (e.getClickCount() == 2)
 				{
 					this.openDetailView(tc.getTableRow().getItem());
 				}
 			});
 			return tc;
 		});
-		
 		this.tc_time.setCellFactory(cb);
 		this.tc_thread.setCellFactory(cb);
 		this.tc_function.setCellFactory(cb);
 		this.tc_message.setCellFactory(cb);
-		
 		this.tc_time.setCellValueFactory(new PropertyValueFactory<LogItemView, String>("datetime"));
 		this.tc_thread.setCellValueFactory(new PropertyValueFactory<LogItemView, String>("thread"));
 		this.tc_function.setCellValueFactory(new PropertyValueFactory<LogItemView, String>("function"));
 		this.tc_message.setCellValueFactory(new PropertyValueFactory<LogItemView, String>("message"));
-		
 		this.repopulateLogs();
 	}
 	
@@ -196,8 +184,8 @@ public final class LogController implements Initializable, VokAbfController, Log
 	{
 		final String before = this.cb_thread.getSelectionModel().getSelectedItem();
 		this.cb_thread.getItems().clear();
-		final String	query_thread		= "SELECT DISTINCT threadname FROM logitem WHERE log_id = ? AND severity >= ?";
-		final Connection conn = ConnectionDetails.getInstance().getConnection();
+		final String		query_thread	= "SELECT DISTINCT threadname FROM logitem WHERE log_id = ? AND severity >= ?";
+		final Connection	conn			= ConnectionDetails.getInstance().getConnection();
 		try (final PreparedStatement pstmt = conn.prepareStatement(query_thread))
 		{
 			pstmt.setInt(1, LogItem.getSessionLog_id());
@@ -213,8 +201,6 @@ public final class LogController implements Initializable, VokAbfController, Log
 		{
 			e.printStackTrace();
 		}
-
-		
 		this.cb_thread.getItems().sort(Comparator.comparing(String::toString));
 		this.cb_thread.getItems().add(0, "All");
 		if (this.cb_thread.getItems().contains(before))
@@ -225,17 +211,16 @@ public final class LogController implements Initializable, VokAbfController, Log
 		{
 			this.cb_thread.getSelectionModel().select(0);
 		}
-		
 		this.repopulateFunctions();
 	}
 	
 	private final void repopulateFunctions()
 	{
-		final String before = this.cb_function.getSelectionModel().getSelectedItem();
-		String threadname = this.cb_thread.getSelectionModel().getSelectedItem();
+		final String	before		= this.cb_function.getSelectionModel().getSelectedItem();
+		String			threadname	= this.cb_thread.getSelectionModel().getSelectedItem();
 		this.cb_function.getItems().clear();
-		final String	query_func;
-		if(threadname == null || threadname.contentEquals("All"))
+		final String query_func;
+		if (threadname == null || threadname.contentEquals("All"))
 		{
 			query_func = "SELECT DISTINCT function FROM logitem WHERE log_id = ? AND severity >= ?";
 		}
@@ -246,7 +231,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 		final Connection conn = ConnectionDetails.getInstance().getConnection();
 		try (final PreparedStatement pstmt = conn.prepareStatement(query_func))
 		{
-			if(threadname == null || threadname.contentEquals("All"))
+			if (threadname == null || threadname.contentEquals("All"))
 			{
 				pstmt.setInt(1, LogItem.getSessionLog_id());
 				pstmt.setInt(2, this.cb_severity.getSelectionModel().getSelectedItem().ordinal());
@@ -278,14 +263,11 @@ public final class LogController implements Initializable, VokAbfController, Log
 		{
 			this.cb_function.getSelectionModel().select(0);
 		}
-		
 		this.filter(null);
 	}
 	
 	private final void openDetailView(LogItemView liv)
-	{
-		
-	}
+	{}
 	
 	@Override
 	public final void repopulateLogs()
@@ -324,10 +306,9 @@ public final class LogController implements Initializable, VokAbfController, Log
 		{
 			message = null;
 		}
-		boolean				description	= this.cb_includedescription.isSelected();
-		final List<LogItem>	logitems	= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function, message, description);
-		
-		final ObservableList<LogItemView> logitemviews = FXCollections.observableArrayList();
+		boolean								description		= this.cb_includedescription.isSelected();
+		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function, message, description);
+		final ObservableList<LogItemView>	logitemviews	= FXCollections.observableArrayList();
 		logitems.forEach(li -> logitemviews.add(new LogItemView(li)));
 		this.tv_log.getItems().removeAll(this.tv_log.getItems());
 		logitemviews.forEach(liv -> this.tv_log.getItems().add(liv));

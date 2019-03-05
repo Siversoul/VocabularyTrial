@@ -7,17 +7,13 @@ import com.visparu.vocabularytrial.model.db.entities.LogItem;
 
 public interface TrialComponent
 {
-	
 	List<TrialComponent> instances = new ArrayList<>();
 	
 	static void repopulateAllTrials()
 	{
-		LogItem.enter();
 		TrialComponent.instances.forEach(i -> i.repopulateTrials());
 		LogItem.debug("All trials repopulated");
-		LogItem.exit();
 	}
 	
 	void repopulateTrials();
-	
 }

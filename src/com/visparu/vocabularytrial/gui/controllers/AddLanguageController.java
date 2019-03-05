@@ -18,68 +18,51 @@ import javafx.stage.Stage;
 public final class AddLanguageController implements Initializable, VokAbfController
 {
 	@FXML
-	private TextField	tf_language_code;
+	private TextField								tf_language_code;
 	@FXML
-	private TextField	tf_language;
-	
-	public static final List<AddLanguageController> instances = new ArrayList<>();
-	
-	private Stage stage;
+	private TextField								tf_language;
+	public static final List<AddLanguageController>	instances	= new ArrayList<>();
+	private Stage									stage;
 	
 	@Override
 	public void initialize(final URL location, final ResourceBundle resources)
 	{
-		LogItem.enter();
 		LogItem.debug("Initializing new stage with AddLanguageController");
-		
 		VokAbfController.instances.add(this);
 		AddLanguageController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
-			LogItem.enter();
 			VokAbfController.instances.remove(this);
 			AddLanguageController.instances.remove(this);
-			LogItem.exit();
 		});
-		
 		LogItem.debug("Finished initializing new stage");
-		LogItem.exit();
 	}
 	
 	@Override
 	public final void close()
 	{
-		LogItem.enter();
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
-		
 		LogItem.debug("Stage closed");
-		LogItem.exit();
 	}
 	
 	@Override
 	public final void setStage(final Stage stage)
 	{
-		LogItem.enter();
 		this.stage = stage;
-		LogItem.exit();
 	}
 	
 	@FXML
 	public final void confirm(final ActionEvent event)
 	{
-		LogItem.enter();
 		Language.createLanguage(this.tf_language_code.getText(), this.tf_language.getText());
 		LogItem.info("Language " + this.tf_language + " created");
 		this.close();
-		LogItem.exit();
 	}
 	
 	@FXML
 	public final void cancel(final ActionEvent event)
 	{
-		LogItem.enter();
 		this.close();
-		LogItem.exit();
 	}
 }

@@ -12,9 +12,7 @@ import com.visparu.vocabularytrial.model.db.entities.LogItem;
 
 public final class C11N
 {
-	
-	private static final String DEFAULT_CONFIG_FILE = "config.json";
-	
+	private static final String	DEFAULT_CONFIG_FILE	= "config.json";
 	private static final String	DEFAULT_DRIVER		= "jdbc";
 	private static final String	DEFAULT_PROTOCOL	= "sqlite";
 	private static final String	DEFAULT_FILENAME	= IOUtil.DATA_PATH + "temp.db";
@@ -31,10 +29,8 @@ public final class C11N
 	
 	public static final void setDriver(String driver)
 	{
-		LogItem.enter();
 		C11N.setValue("driver", driver);
 		LogItem.debug("Database driver changed to " + driver);
-		LogItem.exit();
 	}
 	
 	public static final String getProtocol()
@@ -49,10 +45,8 @@ public final class C11N
 	
 	public static final void setProtocol(String protocol)
 	{
-		LogItem.enter();
 		C11N.setValue("protocol", protocol);
 		LogItem.debug("Database protocol changed to " + protocol);
-		LogItem.exit();
 	}
 	
 	public static final File getDatabasePath()
@@ -69,10 +63,8 @@ public final class C11N
 	
 	public static final void setDatabasePath(String databasePath)
 	{
-		LogItem.enter();
 		C11N.setValue("dbPath", databasePath);
 		LogItem.debug("Database path changed to " + databasePath);
-		LogItem.exit();
 	}
 	
 	public static final Locale getLocale()
@@ -89,11 +81,9 @@ public final class C11N
 	
 	public static final void setLocale(Locale locale)
 	{
-		LogItem.enter();
 		C11N.setValue("locale", locale.toLanguageTag());
 		I18N.localeProperty().set(locale);
 		LogItem.debug("Locale changed to " + locale.getDisplayName());
-		LogItem.exit();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -142,5 +132,4 @@ public final class C11N
 		obj.put(key, value);
 		IOUtil.writeString(obj.toJSONString(), C11N.DEFAULT_CONFIG_FILE);
 	}
-	
 }

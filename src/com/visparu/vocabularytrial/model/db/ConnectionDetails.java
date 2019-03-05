@@ -22,15 +22,11 @@ import com.visparu.vocabularytrial.util.C11N;
 
 public final class ConnectionDetails
 {
-	
-	private static ConnectionDetails instance;
-	
-	private String	driver;
-	private String	protocol;
-	private String	filename;
-	
-	private Connection connection;
-	
+	private static ConnectionDetails	instance;
+	private String						driver;
+	private String						protocol;
+	private String						filename;
+	private Connection					connection;
 	static
 	{
 		try
@@ -62,10 +58,7 @@ public final class ConnectionDetails
 	{
 		if (ConnectionDetails.instance == null)
 		{
-			ConnectionDetails instance = ConnectionDetails.getInstance(
-				C11N.getDriver(),
-				C11N.getProtocol(),
-				C11N.getDatabasePath().getAbsolutePath());
+			ConnectionDetails instance = ConnectionDetails.getInstance(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			return instance;
 		}
 		ConnectionDetails instance = ConnectionDetails.instance;
@@ -84,28 +77,23 @@ public final class ConnectionDetails
 	
 	public final void activateForeignKeyPragma()
 	{
-		LogItem.enter();
 		this.executeSimpleStatement("PRAGMA foreign_keys = ON");
-		LogItem.exit();
 	}
 	
 	public final void changeDatabase(final String driver, final String protocol, final String filename)
 	{
 		ConnectionDetails.getInstance(driver, protocol, filename);
 		LogItem.createTable();
-		LogItem.enter();
 		Language.createTable();
 		Word.createTable();
 		Translation.createTable();
 		Trial.createTable();
 		WordCheck.createTable();
 		LogItem.debug("All tables created for " + filename);
-		LogItem.exit();
 	}
 	
 	public final void copyDatabase(final File newFile)
 	{
-		LogItem.enter();
 		try
 		{
 			Files.copy(Paths.get(this.filename), new FileOutputStream(newFile));
@@ -115,12 +103,10 @@ public final class ConnectionDetails
 		{
 			e.printStackTrace();
 		}
-		LogItem.exit();
 	}
 	
 	public final void executeSimpleStatement(final String query)
 	{
-		LogItem.enter();
 		final String connString = this.getConnectionString();
 		try (final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
 		{
@@ -132,7 +118,6 @@ public final class ConnectionDetails
 			e.printStackTrace();
 			System.exit(1);
 		}
-		LogItem.exit();
 	}
 	
 	private final String getConnectionString()
@@ -145,5 +130,4 @@ public final class ConnectionDetails
 	{
 		return this.connection;
 	}
-	
 }

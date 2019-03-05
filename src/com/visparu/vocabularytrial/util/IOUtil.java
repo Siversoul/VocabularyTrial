@@ -12,10 +12,7 @@ import com.visparu.vocabularytrial.model.db.entities.LogItem;
 
 public final class IOUtil
 {
-	
-	public static final String DATA_PATH = System.getProperty("user.home") + File.separator + "Documents"
-		+ File.separator + "Visparu" + File.separator + "VocabularyTrial" + File.separator;
-	
+	public static final String DATA_PATH = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "Visparu" + File.separator + "VocabularyTrial" + File.separator;
 	static
 	{
 		try
@@ -30,20 +27,17 @@ public final class IOUtil
 	
 	public static final void writeString(String data, String file)
 	{
-		LogItem.enter();
 		final String	absolutePathString	= IOUtil.DATA_PATH + file;
 		final Path		absolutePath		= Paths.get(absolutePathString);
 		try
 		{
-			Files.write(absolutePath, data.getBytes(Charset.defaultCharset()), StandardOpenOption.CREATE,
-				StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(absolutePath, data.getBytes(Charset.defaultCharset()), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 			LogItem.debug("Wrote string to " + file, "Wrote the following string to " + file + ":\n\n" + data);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		LogItem.exit();
 	}
 	
 	public static final String readString(String file)
@@ -60,5 +54,4 @@ public final class IOUtil
 			return null;
 		}
 	}
-	
 }

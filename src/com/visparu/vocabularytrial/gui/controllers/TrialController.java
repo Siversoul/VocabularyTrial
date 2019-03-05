@@ -47,158 +47,122 @@ public final class TrialController implements Initializable, VokAbfController
 		INIT, QUESTION, SOLUTION
 	}
 	
-	private Stage stage;
-	
-	private final Language language_to;
-	
-	private final Trial trial;
-	
+	private Stage				stage;
+	private final Language		language_to;
+	private final Trial			trial;
 	private final List<Word>	words;
 	private int					currentIndex	= 0;
-	
-	private State currentState = State.INIT;
+	private State				currentState	= State.INIT;
 	
 	public TrialController(final Language language_from, final Language language_to, final List<Word> words)
 	{
-		LogItem.enter();
 		this.language_to	= language_to;
 		this.words			= words;
-		
-		this.trial = Trial.createTrial(Date.from(Instant.now()), language_from, language_to);
-		LogItem.exit();
+		this.trial			= Trial.createTrial(Date.from(Instant.now()), language_from, language_to);
 	}
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
-		LogItem.enter();
 		LogItem.debug("Initializing new stage with TrialController");
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
-			LogItem.enter();
 			VokAbfController.instances.remove(this);
-			
 			if (this.trial.getWordChecks().isEmpty())
 			{
-				LogItem.exit();
 				return;
 			}
 			final TrialResultController	trc		= new TrialResultController(this.trial);
 			final StringBinding			title	= I18N.createStringBinding("gui.result.title");
 			GUIUtil.createNewStage("TrialResult", trc, title);
-			LogItem.exit();
 		});
-		
 		this.bt_correct.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.correct.tooltip").get()));
 		this.bt_wrong.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.wrong.tooltip").get()));
-		
 		this.ta_answer.requestFocus();
-		
 		this.cycle(State.QUESTION);
 		LogItem.debug("Finished initializing new stage");
-		LogItem.exit();
 	}
 	
 	@Override
 	public final void setStage(final Stage stage)
 	{
-		LogItem.enter();
 		this.stage = stage;
-		LogItem.exit();
 	}
 	
 	@Override
 	public final void close()
 	{
-		LogItem.enter();
 		this.stage.setOnCloseRequest(null);
 		this.stage.close();
 		LogItem.debug("Stage closed");
-		LogItem.exit();
 	}
 	
 	@FXML
 	public final void exit(final ActionEvent event)
 	{
-		LogItem.enter();
 		this.close();
-		LogItem.exit();
 	}
 	
 	@FXML
 	public final void correct(final ActionEvent event)
 	{
-		LogItem.enter();
 		final Word word = this.words.get(this.currentIndex);
 		WordCheck.createWordCheck(word, this.trial, this.ta_answer.getText(), true);
 		LogItem.debug("Created correct WordCheck for word " + word.getName());
 		this.cycle(State.QUESTION);
-		LogItem.exit();
 	}
 	
 	@FXML
 	public final void wrong(final ActionEvent event)
 	{
-		LogItem.enter();
 		final Word word = this.words.get(this.currentIndex);
 		WordCheck.createWordCheck(word, this.trial, this.ta_answer.getText(), false);
 		LogItem.debug("Created wrong WordCheck for word " + word.getName());
 		this.cycle(State.QUESTION);
-		LogItem.exit();
 	}
 	
 	@FXML
 	public final void solution(final ActionEvent event)
 	{
-		LogItem.enter();
 		LogItem.debug("Showing solution");
 		this.cycle(State.SOLUTION);
-		LogItem.exit();
 	}
 	
 	@FXML
 	public final void keyPressed(final KeyEvent event)
 	{
-		LogItem.enter();
 		if (event.getCode() == KeyCode.ESCAPE)
 		{
 			this.exit(null);
-			LogItem.exit();
 			return;
 		}
 		if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.ENTER)
 		{
 			this.solution(null);
-			LogItem.exit();
 			return;
 		}
 		if (event.isControlDown() && event.getCode() == KeyCode.ENTER)
 		{
 			this.correct(null);
-			LogItem.exit();
 			return;
 		}
 		if (event.isControlDown() && event.getCode() == KeyCode.BACK_SPACE)
 		{
 			this.wrong(null);
-			LogItem.exit();
 			return;
 		}
 	}
 	
 	private final void cycle(final State nextState)
 	{
-		LogItem.enter();
 		if (this.currentState == State.INIT)
 		{
 			LogItem.debug("Cycling from INIT to QUESTION");
 			this.currentState = State.QUESTION;
 			this.setQuestion(this.words.get(this.currentIndex));
-			LogItem.exit();
 			return;
 		}
-		
 		LogItem.debug("Cycling from " + this.currentState.name() + " to " + nextState.name());
 		switch (nextState)
 		{
@@ -209,7 +173,6 @@ public final class TrialController implements Initializable, VokAbfController
 				{
 					LogItem.info("Trial completed");
 					this.exit(null);
-					LogItem.exit();
 					return;
 				}
 				this.ta_answer.setEditable(true);
@@ -223,32 +186,25 @@ public final class TrialController implements Initializable, VokAbfController
 			{
 				this.ta_answer.setEditable(false);
 				this.bt_solution.setDisable(true);
-				
 				this.setSolution(this.words.get(this.currentIndex));
-				
 				break;
 			}
 			default:
 			{
-				LogItem.exit();
 				throw new IllegalStateException();
 			}
 		}
 		this.currentState = nextState;
 		LogItem.debug("State switched");
-		LogItem.exit();
 	}
 	
 	private final void setQuestion(final Word question)
 	{
-		LogItem.enter();
 		this.ta_question.setText(question.getName());
-		LogItem.exit();
 	}
 	
 	private final void setSolution(final Word question)
 	{
-		LogItem.enter();
 		if (question == null)
 		{
 			this.ta_solution.setText("");
@@ -277,6 +233,5 @@ public final class TrialController implements Initializable, VokAbfController
 			}
 			this.ta_solution.setText(sb.toString());
 		}
-		LogItem.exit();
 	}
 }

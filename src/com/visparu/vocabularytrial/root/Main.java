@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 
 public final class Main extends Application
 {
-	
 	public static final String	NAME			= I18N.createStringBinding("root.name").get();
 	public static final String	VERSION			= "0.2.2";
 	public static final String	AUTHOR			= "Oliver Stiller";
@@ -29,25 +28,17 @@ public final class Main extends Application
 		this.initializeDatabase();
 		LogItem.initializeNewLogSession();
 		LogItem.createLogItem(Severity.INFO, "Initialized database and log");
-		LogItem.enter();
 		this.initializeStage(primaryStage);
-		LogItem.exit();
 	}
 	
 	private final void initializeDatabase()
 	{
 		ConnectionDetails.getInstance().activateForeignKeyPragma();
-		ConnectionDetails.getInstance().changeDatabase(
-			C11N.getDriver(),
-			C11N.getProtocol(),
-			C11N.getDatabasePath().getAbsolutePath());
-		LogItem.enter();
-		LogItem.exit();
+		ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 	}
 	
 	private final void initializeStage(final Stage primaryStage)
 	{
-		LogItem.enter();
 		try
 		{
 			final URL					url		= this.getClass().getResource("/com/visparu/vocabularytrial/gui/fxml/MainMenu.fxml");
@@ -66,7 +57,6 @@ public final class Main extends Application
 			e.printStackTrace();
 		}
 		LogItem.debug("Main stage initialized");
-		LogItem.exit();
 	}
 	
 	public static final void main(String[] args)
