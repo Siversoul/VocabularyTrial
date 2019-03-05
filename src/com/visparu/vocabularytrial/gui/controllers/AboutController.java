@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.root.Main;
 
 import javafx.event.ActionEvent;
@@ -22,22 +23,22 @@ public final class AboutController implements Initializable, VokAbfController
 	private Label	lb_author;
 	@FXML
 	private Label	lb_date;
-	
-	private Stage stage;
+	private Stage	stage;
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
+		LogItem.debug("Initializing new stage with AboutController...");
 		VokAbfController.instances.add(this);
 		this.stage.setOnCloseRequest(e ->
 		{
 			VokAbfController.instances.remove(this);
 		});
-		
 		this.lb_name.setText(Main.NAME);
 		this.lb_version.setText(Main.VERSION);
 		this.lb_author.setText(Main.AUTHOR);
 		this.lb_date.setText(Main.RELEASE_DATE);
+		LogItem.debug("Finished initializing new stage");
 	}
 	
 	@Override
@@ -51,12 +52,12 @@ public final class AboutController implements Initializable, VokAbfController
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+		LogItem.debug("Closed stage");
 	}
 	
 	@FXML
 	public final void close(final ActionEvent event)
 	{
-		this.stage.getOnCloseRequest().handle(null);
-		this.stage.close();
+		this.close();
 	}
 }
