@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<HBox prefHeight="800.0" prefWidth="1400.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="30.0">
          <children>
@@ -36,7 +36,7 @@
             <VBox>
                <children>
                   <Label text="Search:" />
-                  <TextField fx:id="tf_search" onKeyTyped="#filter" />
+                  <TextField fx:id="tf_search" onKeyTyped="#searchInput" />
                   <CheckBox fx:id="cb_includedescription" mnemonicParsing="false" onAction="#filter" text="Include long description" />
                </children>
             </VBox>

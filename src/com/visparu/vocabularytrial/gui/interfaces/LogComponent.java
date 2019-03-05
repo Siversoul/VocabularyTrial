@@ -5,7 +5,6 @@ import java.util.List;
 
 public interface LogComponent
 {
-	
 	List<LogComponent> instances = new ArrayList<>();
 	
 	static void repopulateAllLogs()
@@ -14,5 +13,4 @@ public interface LogComponent
 	}
 	
 	void repopulateLogs();
-	
 }

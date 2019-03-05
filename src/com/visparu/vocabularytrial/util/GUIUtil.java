@@ -14,10 +14,8 @@ import javafx.stage.Stage;
 
 public final class GUIUtil
 {
-	
 	public static final Stage createNewStage(final String fxmlName, final VokAbfController vac, final StringBinding title)
 	{
-		LogItem.enter();
 		try
 		{
 			final Stage			stage	= new Stage();
@@ -32,15 +30,12 @@ public final class GUIUtil
 			stage.titleProperty().bind(title);
 			stage.show();
 			LogItem.debug("Created new default stage");
-			LogItem.exit();
 			return stage;
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		LogItem.exit();
 		return null;
 	}
-	
 }

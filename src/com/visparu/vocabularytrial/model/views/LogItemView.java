@@ -6,7 +6,6 @@ import com.visparu.vocabularytrial.model.db.entities.LogItem;
 
 public class LogItemView
 {
-
 	private final LogItem logitem;
 	
 	public LogItemView(final LogItem logitem)
@@ -53,5 +52,4 @@ public class LogItemView
 	{
 		return this.logitem.getDescription();
 	}
-	
 }
