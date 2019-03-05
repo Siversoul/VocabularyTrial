@@ -9,7 +9,6 @@ import com.visparu.vocabularytrial.model.db.entities.Word;
 
 public final class WordView
 {
-	
 	private final Word		w;
 	private final Language	l;
 	
@@ -21,12 +20,14 @@ public final class WordView
 	
 	public final Integer getWord_id()
 	{
-		return w.getWord_id();
+		Integer word_id = this.w.getWord_id();
+		return word_id;
 	}
 	
 	public final String getName()
 	{
-		return w.getName();
+		String name = this.w.getName();
+		return name;
 	}
 	
 	public final String getTranslationsString()
@@ -46,7 +47,6 @@ public final class WordView
 			}
 			translationWords.add(tw);
 		}
-		
 		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < translationWords.size(); i++)
 		{
@@ -57,8 +57,7 @@ public final class WordView
 			}
 			sb.append(tw.getName());
 		}
-		
-		return sb.toString();
+		String ret = sb.toString();
+		return ret;
 	}
-	
 }

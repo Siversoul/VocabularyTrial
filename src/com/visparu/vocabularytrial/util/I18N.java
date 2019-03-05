@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.visparu.vocabularytrial.model.db.entities.LogItem;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
@@ -14,9 +16,7 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public final class I18N
 {
-	
 	private static final ObjectProperty<Locale> locale = new SimpleObjectProperty<>(C11N.getLocale());
-	
 	static
 	{
 		I18N.locale.addListener((observable, oldValue, newValue) -> Locale.setDefault(newValue));
@@ -24,24 +24,28 @@ public final class I18N
 	
 	public static final List<Locale> getSupportedLocales()
 	{
-		return new ArrayList<>(Arrays.asList(Locale.ENGLISH, Locale.GERMAN));
+		ArrayList<Locale> locales = new ArrayList<>(Arrays.asList(Locale.ENGLISH, Locale.GERMAN));
+		return locales;
 	}
 	
 	public static final Locale getDefaultLocale()
 	{
-		final Locale sysDefault = Locale.getDefault();
-		return getSupportedLocales().contains(sysDefault) ? sysDefault : Locale.ENGLISH;
+		final Locale	sysDefault	= Locale.getDefault();
+		Locale			l			= getSupportedLocales().contains(sysDefault) ? sysDefault : Locale.ENGLISH;
+		return l;
 	}
 	
 	public static final Locale getLocale()
 	{
-		return I18N.locale.get();
+		Locale l = I18N.locale.get();
+		return l;
 	}
 	
 	public static final void setLocale(final Locale locale)
 	{
 		localeProperty().set(locale);
 		Locale.setDefault(locale);
+		LogItem.debug("Set internal locale to " + locale.getDisplayName());
 	}
 	
 	public static final ObjectProperty<Locale> localeProperty()
@@ -51,8 +55,9 @@ public final class I18N
 	
 	public static final String get(final String key, final Object... args)
 	{
-		final ResourceBundle bundle = ResourceBundle.getBundle("com.visparu.vocabularytrial.gui.lang.lang", C11N.getLocale());
-		return MessageFormat.format(bundle.getString(key), args);
+		final ResourceBundle	bundle	= ResourceBundle.getBundle("com.visparu.vocabularytrial.gui.lang.lang", C11N.getLocale());
+		String					ret		= MessageFormat.format(bundle.getString(key), args);
+		return ret;
 	}
 	
 	public static final ResourceBundle getResources()
@@ -63,7 +68,7 @@ public final class I18N
 	
 	public static final StringBinding createStringBinding(final String key, final Object... args)
 	{
-		return Bindings.createStringBinding(() -> I18N.get(key, args), I18N.locale);
+		StringBinding sb = Bindings.createStringBinding(() -> I18N.get(key, args), I18N.locale);
+		return sb;
 	}
-	
 }

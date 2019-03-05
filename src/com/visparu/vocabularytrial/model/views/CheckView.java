@@ -11,7 +11,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 public final class CheckView
 {
-	
 	private final Word				word;
 	private final String			answerString;
 	private final BooleanProperty	correct;
@@ -27,7 +26,8 @@ public final class CheckView
 	
 	public final String getName()
 	{
-		return this.word.getName();
+		String name = this.word.getName();
+		return name;
 	}
 	
 	public final String getAnswerString()
@@ -57,12 +57,12 @@ public final class CheckView
 			}
 			sb.append(name);
 		}
-		return sb.toString();
+		String ret = sb.toString();
+		return ret;
 	}
 	
 	public final BooleanProperty correctProperty()
 	{
 		return this.correct;
 	}
-	
 }
