@@ -1,10 +1,8 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,8 +32,8 @@ public final class LogItem
 	private String			message;
 	private String			description;
 	
-	private LogItem(final Integer logitem_id, final Integer log_id, final Severity severity, final LocalDateTime datetime, final String threadName,
-			final String function, final String message, final String description)
+	private LogItem(final Integer logitem_id, final Integer log_id, final Severity severity, final LocalDateTime datetime, final String threadName, final String function, final String message,
+		final String description)
 	{
 		this.logitem_id		= logitem_id;
 		this.log_id			= log_id;
@@ -49,25 +47,26 @@ public final class LogItem
 	
 	public final static void createTable()
 	{
-		ConnectionDetails.getInstance().execute("CREATE TABLE IF NOT EXISTS logitem ("
-				+ "logitem_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-				+ "log_id INTEGER, "
-				+ "severity VARCHAR(20), "
-				+ "datetime VARCHAR(23), "
-				+ "threadname VARCHAR(100), "
-				+ "function VARCHAR(100), "
-				+ "message VARCHAR(200), "
-				+ "description VARCHAR(500))");
+		String query = "CREATE TABLE IF NOT EXISTS logitem (logitem_id INTEGER PRIMARY KEY AUTOINCREMENT, log_id INTEGER, severity VARCHAR(20), datetime VARCHAR(23), "
+			+ "threadname VARCHAR(100), function VARCHAR(100), message VARCHAR(200), description VARCHAR(500))";
+		
+		try (PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
+		{
+			ConnectionDetails.getInstance().execute(pstmt);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public final static void initializeNewLogSession()
 	{
-		final String		query	= "SELECT max(log_id) FROM logitem";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (Statement stmt = conn.createStatement())
+		final String query = "SELECT max(log_id) FROM logitem";
+		
+		try (PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt))
 		{
-			final ResultSet	rs	= stmt.executeQuery(query);
-			final Integer	next_log_id;
+			final Integer next_log_id;
 			if (rs.next())
 			{
 				final Integer max_log_id = rs.getInt(1);
@@ -84,14 +83,13 @@ public final class LogItem
 			{
 				next_log_id = 1;
 			}
-			rs.close();
-			LogItem.session_log_id = next_log_id;
+			LogItem.session_log_id	= next_log_id;
+			LogItem.initialized		= true;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
-		LogItem.initialized = true;
 	}
 	
 	public final static void clearCache()
@@ -182,8 +180,7 @@ public final class LogItem
 		return LogItem.createLogItem(severity, datetime, threadname, function, message, description);
 	}
 	
-	public final static LogItem createLogItem(final Severity severity, final LocalDateTime datetime, final String threadname, final String function,
-			final String message, final String description)
+	public final static LogItem createLogItem(final Severity severity, final LocalDateTime datetime, final String threadname, final String function, final String message, final String description)
 	{
 		final LogItem li = new LogItem(-1, LogItem.session_log_id, severity, datetime, threadname, function, message, description);
 		LogItem.preinitialization_logitems.add(li);
@@ -208,36 +205,42 @@ public final class LogItem
 	
 	public final static void removeLogItem(final Integer logitem_id)
 	{
-		LogItem.cache.remove(logitem_id);
-		final String		query	= "DELETE FROM logitem WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "DELETE FROM logitem WHERE logitem_id = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setInt(1, logitem_id);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, logitem_id);
+			LogItem.cache.remove(logitem_id);
+			LogComponent.repopulateAllLogs();
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
-		LogComponent.repopulateAllLogs();
 	}
 	
 	public final static void removeAllLogItems()
 	{
-		LogItem.clearCache();
-		ConnectionDetails.getInstance().execute("DELETE FROM logitem");
-		LogComponent.repopulateAllLogs();
+		String query = "DELETE FROM logitem";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
+		{
+			ConnectionDetails.getInstance().execute(pstmt);
+			LogItem.clearCache();
+			LogComponent.repopulateAllLogs();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	private final static LogItem readEntity(final Integer logitem_id)
 	{
-		final String		query	= "SELECT * FROM logitem WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "SELECT * FROM logitem WHERE logitem_id = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, logitem_id))
 		{
-			pstmt.setInt(1, logitem_id);
-			final ResultSet rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				final Integer		log_id		= rs.getInt("log_id");
@@ -252,34 +255,38 @@ public final class LogItem
 				rs.close();
 				return li;
 			}
-			rs.close();
+			else
+			{
+				return null;
+			}
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 	
 	private final static Integer writeEntity(final LogItem logitem)
 	{
-		final String		query	= "INSERT INTO logitem(log_id, severity, datetime, threadname, function, message, description) VALUES(?, ?, ?, ?, ?, ?, ?)";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "INSERT INTO logitem(log_id, severity, datetime, threadname, function, message, description) VALUES(?, ?, ?, ?, ?, ?, ?)";
+		
+		final Integer	log_id		= logitem.getLog_id();
+		final Integer	severity	= logitem.getSeverity().ordinal();
+		final String	datetime	= logitem.getDatetime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		final String	threadname	= logitem.getThreadName();
+		final String	function	= logitem.getFunction();
+		final String	message		= logitem.getMessage();
+		final String	description	= logitem.getDescription();
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setInt(1, logitem.getLog_id());
-			pstmt.setInt(2, logitem.getSeverity().ordinal());
-			pstmt.setString(3, logitem.getDatetime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-			pstmt.setString(4, logitem.getThreadName());
-			pstmt.setString(5, logitem.getFunction());
-			pstmt.setString(6, logitem.getMessage());
-			pstmt.setString(7, logitem.getDescription());
-			pstmt.executeUpdate();
-			final ResultSet rs = pstmt.getGeneratedKeys();
-			rs.next();
-			final Integer logitem_id = rs.getInt(1);
-			rs.close();
-			return logitem_id;
+			ConnectionDetails.getInstance().execute(pstmt, log_id, severity, datetime, threadname, function, message, description);
+			try (final ResultSet rsg = pstmt.getGeneratedKeys())
+			{
+				final Integer logitem_id = rsg.getInt(1);
+				return logitem_id;
+			}
 		}
 		catch (SQLException e)
 		{
@@ -315,13 +322,13 @@ public final class LogItem
 	
 	public final void setSeverity(Severity severity)
 	{
-		final String		query	= "UPDATE logitem " + "SET severity = ? " + "WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "UPDATE logitem SET severity = ? WHERE logitem_id = ?";
+		
+		final Integer severity_i = severity.ordinal();
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, severity.toString());
-			pstmt.setInt(2, this.logitem_id);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, severity_i, this.logitem_id);
 			this.severity = severity;
 		}
 		catch (SQLException e)
@@ -337,13 +344,13 @@ public final class LogItem
 	
 	public final void setDatetime(LocalDateTime datetime)
 	{
-		final String		query	= "UPDATE logitem " + "SET datetime = ? " + "WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "UPDATE logitem SET datetime = ? WHERE logitem_id = ?";
+		
+		final String datetime_s = datetime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, datetime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-			pstmt.setInt(2, this.logitem_id);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, datetime_s, this.logitem_id);
 			this.datetime = datetime;
 		}
 		catch (SQLException e)
@@ -359,13 +366,11 @@ public final class LogItem
 	
 	public final void setThreadName(String threadName)
 	{
-		final String		query	= "UPDATE logitem " + "SET threadname = ? " + "WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "UPDATE logitem SET threadname = ? WHERE logitem_id = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, threadName);
-			pstmt.setInt(2, this.logitem_id);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, threadName, this.logitem_id);
 			this.threadName = threadName;
 		}
 		catch (SQLException e)
@@ -381,13 +386,11 @@ public final class LogItem
 	
 	public final void setFunction(String function)
 	{
-		final String		query	= "UPDATE logitem " + "SET function = ? " + "WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "UPDATE logitem SET function = ? WHERE logitem_id = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, function);
-			pstmt.setInt(2, this.logitem_id);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, function, this.logitem_id);
 			this.function = function;
 		}
 		catch (SQLException e)
@@ -403,13 +406,11 @@ public final class LogItem
 	
 	public final void setMessage(String message)
 	{
-		final String		query	= "UPDATE logitem " + "SET message = ? " + "WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "UPDATE logitem SET message = ? WHERE logitem_id = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, message);
-			pstmt.setInt(2, this.logitem_id);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, message, this.logitem_id);
 			this.message = message;
 		}
 		catch (SQLException e)
@@ -425,13 +426,11 @@ public final class LogItem
 	
 	public final void setDescription(String description)
 	{
-		final String		query	= "UPDATE logitem " + "SET description = ? " + "WHERE logitem_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "UPDATE logitem SET description = ? WHERE logitem_id = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, description);
-			pstmt.setInt(2, this.logitem_id);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, description, this.logitem_id);
 			this.description = description;
 		}
 		catch (SQLException e)
@@ -442,12 +441,12 @@ public final class LogItem
 	
 	public static final List<Integer> getAllLogIds()
 	{
-		final List<Integer>	log_ids	= new ArrayList<>();
-		final String		query	= "SELECT DISTINCT log_id FROM logitem";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final Statement stmt = conn.createStatement())
+		final List<Integer> log_ids = new ArrayList<>();
+		
+		final String query = "SELECT DISTINCT log_id FROM logitem";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt))
 		{
-			final ResultSet rs = stmt.executeQuery(query);
 			while (rs.next())
 			{
 				log_ids.add(rs.getInt("log_id"));
@@ -457,21 +456,22 @@ public final class LogItem
 		{
 			e.printStackTrace();
 		}
+		
 		return log_ids;
 	}
 	
 	public static final List<LogItem> getAllLogItemsForLog(Integer log_id)
 	{
-		List<LogItem>		logitems	= new ArrayList<>();
-		String				query		= "SELECT logitem_id FROM logitem WHERE log_id = ? AND severity >= ?";
-		final Connection	conn		= ConnectionDetails.getInstance().getConnection();
-		try (PreparedStatement pstmt = conn.prepareStatement(query))
+		List<LogItem> logitems = new ArrayList<>();
+		
+		String query = "SELECT logitem_id FROM logitem WHERE log_id = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, log_id))
 		{
-			pstmt.setInt(1, log_id);
-			ResultSet rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				LogItem li = LogItem.get(rs.getInt("logitem_id"));
+				Integer	logitem_id	= rs.getInt("logitem_id");
+				LogItem	li			= LogItem.get(logitem_id);
 				logitems.add(li);
 			}
 		}
@@ -479,71 +479,80 @@ public final class LogItem
 		{
 			e.printStackTrace();
 		}
+		
 		return logitems;
 	}
 	
-	public static final List<LogItem> getFilteredLogItems(Integer log_id, Severity min_severity, String thread, String function, String message,
-			boolean description)
+	public static final List<LogItem> getFilteredLogItems(Integer log_id, Severity min_severity, String thread, String function, String message, boolean description)
 	{
-		List<LogItem>	logitems	= new ArrayList<>();
-		StringJoiner	sj_filter	= new StringJoiner(" AND ");
+		final List<LogItem> logitems = new ArrayList<>();
+		
+		int param_count = 0;
+		final StringJoiner sj_filter = new StringJoiner(" AND ");
 		if (log_id != null)
 		{
 			sj_filter.add("log_id = ?");
+			param_count++;
 		}
 		if (min_severity != null)
 		{
 			sj_filter.add("severity >= ?");
+			param_count++;
 		}
 		if (thread != null)
 		{
 			sj_filter.add("threadname = ?");
+			param_count++;
 		}
 		if (function != null)
 		{
 			sj_filter.add("function = ?");
+			param_count++;
 		}
 		if (message != null)
 		{
 			if (description)
 			{
 				sj_filter.add("(message LIKE ? OR description LIKE ?)");
+				param_count += 2;
 			}
 			else
 			{
 				sj_filter.add("message LIKE ?");
+				param_count++;
 			}
 		}
-		String				query	= "SELECT logitem_id FROM logitem WHERE " + sj_filter.toString();
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (PreparedStatement pstmt = conn.prepareStatement(query))
+		String query = "SELECT logitem_id FROM logitem WHERE " + sj_filter.toString();
+		
+		Object[] args = new Object[param_count];
+		int index = 0;
+		if (log_id != null)
 		{
-			int index = 1;
-			if (log_id != null)
+			args[index++] = log_id;
+		}
+		if (min_severity != null)
+		{
+			args[index++] = min_severity.ordinal();
+		}
+		if (thread != null)
+		{
+			args[index++] = thread;
+		}
+		if (function != null)
+		{
+			args[index++] = function;
+		}
+		if (message != null)
+		{
+			args[index++] = "%" + message + "%";
+			if (description)
 			{
-				pstmt.setInt(index++, log_id);
+				args[index++] = "%" + message + "%";
 			}
-			if (min_severity != null)
-			{
-				pstmt.setInt(index++, min_severity.ordinal());
-			}
-			if (thread != null)
-			{
-				pstmt.setString(index++, thread);
-			}
-			if (function != null)
-			{
-				pstmt.setString(index++, function);
-			}
-			if (message != null)
-			{
-				pstmt.setString(index++, "%" + message + "%");
-				if (description)
-				{
-					pstmt.setString(index++, "%" + message + "%");
-				}
-			}
-			ResultSet rs = pstmt.executeQuery();
+		}
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, args))
+		{
 			while (rs.next())
 			{
 				LogItem li = LogItem.get(rs.getInt("logitem_id"));
@@ -552,9 +561,9 @@ public final class LogItem
 		}
 		catch (SQLException e)
 		{
-			System.err.println(query);
 			e.printStackTrace();
 		}
+		
 		return logitems;
 	}
 }

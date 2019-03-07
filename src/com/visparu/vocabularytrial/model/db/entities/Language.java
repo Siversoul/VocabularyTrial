@@ -1,6 +1,5 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,7 +34,7 @@ public final class Language
 	public final static void createTable()
 	{
 		String query = "CREATE TABLE IF NOT EXISTS language (language_code VARCHAR(2) PRIMARY KEY, name VARCHAR(30))";
-		try(PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
+		try (PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
 			ConnectionDetails.getInstance().execute(pstmt);
 			LogItem.debug("Language table created");
@@ -89,7 +88,7 @@ public final class Language
 	public final static void removeLanguage(final String language_code)
 	{
 		Language.cache.remove(language_code);
-		final String		query	= "DELETE FROM language WHERE language_code = ?";
+		final String query = "DELETE FROM language WHERE language_code = ?";
 		
 		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
@@ -106,19 +105,24 @@ public final class Language
 	public final static void removeAllLanguages()
 	{
 		Language.clearCache();
-		ConnectionDetails.getInstance().execute("DELETE FROM language");
-		LogItem.debug("All languages removed");
+		try (PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement("DELETE FROM language"))
+		{
+			ConnectionDetails.getInstance().execute(pstmt);
+			LogItem.debug("All languages removed");
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 		LanguageComponent.repopulateAllLanguages();
 	}
 	
 	private final static Language readEntity(final String language_code)
 	{
-		final String		query	= "SELECT * FROM language WHERE language_code = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "SELECT * FROM language WHERE language_code = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, language_code))
 		{
-			pstmt.setString(1, language_code);
-			final ResultSet rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				final String	name	= rs.getString("name");
@@ -127,30 +131,36 @@ public final class Language
 				rs.close();
 				return l;
 			}
-			rs.close();
+			else
+			{
+				// TODO: log error
+				return null;
+			}
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 	
 	private final static void writeEntity(final Language language)
 	{
-		final String		query	= "INSERT INTO language VALUES(?, ?)";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "INSERT INTO language VALUES(?, ?)";
+		
+		final String	language_code	= language.getLanguage_code();
+		final String	name			= language.getName();
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, language.getLanguage_code());
-			pstmt.setString(2, language.getName());
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, language_code, name);
 			LogItem.debug("Inserted new language entity " + language.getName());
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
+		
 	}
 	
 	public final String getLanguage_code()
@@ -160,13 +170,11 @@ public final class Language
 	
 	public final void setLanguage_code(final String language_code)
 	{
-		final String		query	= "UPDATE language SET language_code = ? WHERE language_code = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "UPDATE language SET language_code = ? WHERE language_code = ?";
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, language_code);
-			pstmt.setString(2, this.language_code);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, language_code, this.language_code);
 			Language.cache.remove(this.language_code);
 			Language.cache.put(language_code, this);
 			this.language_code = language_code;
@@ -186,12 +194,10 @@ public final class Language
 	public final void setName(final String name)
 	{
 		final String		query	= "UPDATE language SET name = ? WHERE language_code = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, name);
-			pstmt.setString(2, this.language_code);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, name, this.language_code);
 			LogItem.debug("Updated name for language " + this.getName());
 			this.name = name;
 		}
@@ -205,11 +211,9 @@ public final class Language
 	{
 		final List<Word>	words	= new ArrayList<>();
 		final String		query	= "SELECT * FROM word WHERE language_code = ? ORDER BY word.name";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, this.language_code))
 		{
-			pstmt.setString(1, this.language_code);
-			final ResultSet rs = pstmt.executeQuery();
 			while (rs.next())
 			{
 				final String	word_name	= rs.getString("name");
@@ -219,12 +223,12 @@ public final class Language
 					words.add(word);
 				}
 			}
-			rs.close();
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
+		
 		return words;
 	}
 }
