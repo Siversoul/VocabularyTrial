@@ -35,7 +35,7 @@ public final class Trial
 	public static final void createTable()
 	{
 		ConnectionDetails.getInstance()
-			.executeSimpleStatement("CREATE TABLE IF NOT EXISTS trial(" + "trial_id INTEGER PRIMARY KEY AUTOINCREMENT," + "datetime VARCHAR(23), " + "language_code_from VARCHAR(2), "
+			.execute("CREATE TABLE IF NOT EXISTS trial(" + "trial_id INTEGER PRIMARY KEY AUTOINCREMENT," + "datetime VARCHAR(23), " + "language_code_from VARCHAR(2), "
 				+ "language_code_to VARCHAR(2), " + "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
 				+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE)");
 		LogItem.debug("Trial table created");
@@ -89,7 +89,7 @@ public final class Trial
 	public static final void removeAllTrials()
 	{
 		Trial.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
+		ConnectionDetails.getInstance().execute("DELETE FROM trial");
 		LogItem.debug("All trials removed");
 	}
 	

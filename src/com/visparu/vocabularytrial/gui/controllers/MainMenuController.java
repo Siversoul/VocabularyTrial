@@ -407,8 +407,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final Optional<ButtonType>	result	= alert.showAndWait();
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
-			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
-			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
+			ConnectionDetails.getInstance().execute("DELETE FROM wordcheck");
+			ConnectionDetails.getInstance().execute("DELETE FROM trial");
 			LogItem.info("Deleted all trial data");
 		}
 		else

@@ -49,7 +49,7 @@ public final class LogItem
 	
 	public final static void createTable()
 	{
-		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS logitem ("
+		ConnectionDetails.getInstance().execute("CREATE TABLE IF NOT EXISTS logitem ("
 				+ "logitem_id INTEGER PRIMARY KEY AUTOINCREMENT, "
 				+ "log_id INTEGER, "
 				+ "severity VARCHAR(20), "
@@ -226,7 +226,7 @@ public final class LogItem
 	public final static void removeAllLogItems()
 	{
 		LogItem.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM logitem");
+		ConnectionDetails.getInstance().execute("DELETE FROM logitem");
 		LogComponent.repopulateAllLogs();
 	}
 	

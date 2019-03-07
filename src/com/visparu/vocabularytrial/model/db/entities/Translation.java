@@ -34,7 +34,7 @@ public final class Translation
 	
 	public final static void createTable()
 	{
-		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS translation(" + "word1_id INTEGER, " + "word2_id INTEGER, " + "PRIMARY KEY(word1_id, word2_id), "
+		ConnectionDetails.getInstance().execute("CREATE TABLE IF NOT EXISTS translation(" + "word1_id INTEGER, " + "word2_id INTEGER, " + "PRIMARY KEY(word1_id, word2_id), "
 			+ "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, " + "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE" + ")");
 		LogItem.debug("Translation table created");
 	}
@@ -100,7 +100,7 @@ public final class Translation
 	public final static void removeAllTranslations()
 	{
 		Translation.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM translation");
+		ConnectionDetails.getInstance().execute("DELETE FROM translation");
 		LogItem.debug("All translations removed");
 	}
 	

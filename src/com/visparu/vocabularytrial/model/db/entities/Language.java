@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +11,7 @@ import java.util.Map;
 
 import com.visparu.vocabularytrial.gui.interfaces.LanguageComponent;
 import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.Queries;
 
 public final class Language
 {
@@ -34,8 +34,16 @@ public final class Language
 	
 	public final static void createTable()
 	{
-		ConnectionDetails.getInstance().executeSimpleStatement("CREATE TABLE IF NOT EXISTS language (language_code VARCHAR(2) PRIMARY KEY, name VARCHAR(30))");
-		LogItem.debug("Language table created");
+		String query = "CREATE TABLE IF NOT EXISTS language (language_code VARCHAR(2) PRIMARY KEY, name VARCHAR(30))";
+		try(PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
+		{
+			ConnectionDetails.getInstance().execute(pstmt);
+			LogItem.debug("Language table created");
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public final static void clearCache()
@@ -57,29 +65,8 @@ public final class Language
 	
 	public final static List<Language> getAll()
 	{
-		final List<Language>	languages	= new ArrayList<>();
-		final String			query		= "SELECT language_code FROM language";
-		final Connection		conn		= ConnectionDetails.getInstance().getConnection();
-		try (final Statement stmt = conn.createStatement())
-		{
-			final ResultSet rs = stmt.executeQuery(query);
-			while (rs.next())
-			{
-				final String	language_code	= rs.getString("language_code");
-				final Language	language		= Language.get(language_code);
-				if (language != null)
-				{
-					languages.add(language);
-				}
-			}
-			rs.close();
-			return languages;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
-		return null;
+		List<Language> languages = Queries.queryAllLanguages();
+		return languages;
 	}
 	
 	public final static Language createLanguage(final String language_code, final String name)
@@ -95,10 +82,6 @@ public final class Language
 			Language.writeEntity(l);
 			Language.cache.put(language_code, l);
 		}
-		else
-		{
-			LogItem.warning("Language with language code '" + language_code + "' already exists!");
-		}
 		LanguageComponent.repopulateAllLanguages();
 		return l;
 	}
@@ -107,11 +90,10 @@ public final class Language
 	{
 		Language.cache.remove(language_code);
 		final String		query	= "DELETE FROM language WHERE language_code = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
 		{
-			pstmt.setString(1, language_code);
-			pstmt.executeUpdate();
+			ConnectionDetails.getInstance().execute(pstmt, language_code);
 		}
 		catch (SQLException e)
 		{
@@ -124,7 +106,7 @@ public final class Language
 	public final static void removeAllLanguages()
 	{
 		Language.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM language");
+		ConnectionDetails.getInstance().execute("DELETE FROM language");
 		LogItem.debug("All languages removed");
 		LanguageComponent.repopulateAllLanguages();
 	}

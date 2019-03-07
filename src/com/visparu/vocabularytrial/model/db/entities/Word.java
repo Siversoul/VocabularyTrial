@@ -30,7 +30,7 @@ public final class Word
 	{
 		final String query = "CREATE TABLE IF NOT EXISTS word(" + "word_id INTEGER PRIMARY KEY AUTOINCREMENT, " + "name VARCHAR(100), " + "language_code VARCHAR(2), "
 			+ "FOREIGN KEY(language_code) REFERENCES language(language_code) ON UPDATE CASCADE" + ")";
-		ConnectionDetails.getInstance().executeSimpleStatement(query);
+		ConnectionDetails.getInstance().execute(query);
 		LogItem.debug("Word table created");
 	}
 	
@@ -107,7 +107,7 @@ public final class Word
 	public static final void removeAllWords()
 	{
 		Word.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM word");
+		ConnectionDetails.getInstance().execute("DELETE FROM word");
 		LogItem.debug("All words removed");
 	}
 	

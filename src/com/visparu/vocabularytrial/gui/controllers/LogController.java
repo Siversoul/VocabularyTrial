@@ -1,7 +1,6 @@
 package com.visparu.vocabularytrial.gui.controllers;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -65,8 +64,8 @@ public final class LogController implements Initializable, VokAbfController, Log
 	private TableColumn<LogItemView, String>	tc_function;
 	@FXML
 	private TableColumn<LogItemView, String>	tc_message;
-		
-	private Stage								stage;
+	
+	private Stage stage;
 	
 	@Override
 	public final void initialize(URL location, ResourceBundle resources)
@@ -77,7 +76,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 		{
 			VokAbfController.instances.remove(this);
 			LogComponent.instances.remove(this);
-			while(!LogDetailController.instances.isEmpty())
+			while (!LogDetailController.instances.isEmpty())
 			{
 				LogDetailController.instances.get(0).close();
 			}
@@ -199,23 +198,23 @@ public final class LogController implements Initializable, VokAbfController, Log
 	{
 		final String before = this.cb_thread.getSelectionModel().getSelectedItem();
 		this.cb_thread.getItems().clear();
-		final String		query_thread	= "SELECT DISTINCT threadname FROM logitem WHERE log_id = ? AND severity >= ?";
-		final Connection	conn			= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query_thread))
+		
+		final String	query_thread	= "SELECT DISTINCT threadname FROM logitem WHERE log_id = ? AND severity >= ?";
+		final Integer	log_id			= LogItem.getSessionLog_id();
+		final Integer	severity		= this.cb_severity.getSelectionModel().getSelectedItem().ordinal();
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query_thread); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, log_id, severity))
 		{
-			pstmt.setInt(1, LogItem.getSessionLog_id());
-			pstmt.setInt(2, this.cb_severity.getSelectionModel().getSelectedItem().ordinal());
-			final ResultSet rs = pstmt.executeQuery();
 			while (rs.next())
 			{
 				this.cb_thread.getItems().add(rs.getString("threadname"));
 			}
-			rs.close();
 		}
-		catch (final SQLException e)
+		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
+		
 		this.cb_thread.getItems().sort(Comparator.comparing(String::toString));
 		this.cb_thread.getItems().add(0, "All");
 		if (this.cb_thread.getItems().contains(before))
@@ -234,6 +233,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 		final String	before		= this.cb_function.getSelectionModel().getSelectedItem();
 		String			threadname	= this.cb_thread.getSelectionModel().getSelectedItem();
 		this.cb_function.getItems().clear();
+		
 		final String query_func;
 		if (threadname == null || threadname.contentEquals("All"))
 		{
@@ -243,31 +243,36 @@ public final class LogController implements Initializable, VokAbfController, Log
 		{
 			query_func = "SELECT DISTINCT function FROM logitem WHERE log_id = ? AND threadname = ? AND severity >= ?";
 		}
-		final Connection conn = ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query_func))
+		
+		int			log_id		= LogItem.getSessionLog_id();
+		int			severity	= this.cb_severity.getSelectionModel().getSelectedItem().ordinal();
+		Object[]	params;
+		if (threadname == null || threadname.contentEquals("All"))
 		{
-			if (threadname == null || threadname.contentEquals("All"))
-			{
-				pstmt.setInt(1, LogItem.getSessionLog_id());
-				pstmt.setInt(2, this.cb_severity.getSelectionModel().getSelectedItem().ordinal());
-			}
-			else
-			{
-				pstmt.setInt(1, LogItem.getSessionLog_id());
-				pstmt.setString(2, threadname);
-				pstmt.setInt(3, this.cb_severity.getSelectionModel().getSelectedItem().ordinal());
-			}
-			final ResultSet rs = pstmt.executeQuery();
+			params		= new Object[2];
+			params[0]	= log_id;
+			params[1]	= severity;
+		}
+		else
+		{
+			params		= new Object[3];
+			params[0]	= log_id;
+			params[1]	= threadname;
+			params[2]	= severity;
+		}
+		
+		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query_func); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, params))
+		{
 			while (rs.next())
 			{
 				this.cb_function.getItems().add(rs.getString("function"));
 			}
-			rs.close();
 		}
-		catch (final SQLException e)
+		catch (SQLException e)
 		{
 			e.printStackTrace();
 		}
+		
 		this.cb_function.getItems().sort(Comparator.comparing(String::toString));
 		this.cb_function.getItems().add(0, "All");
 		if (this.cb_function.getItems().contains(before))
@@ -326,8 +331,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 			message = null;
 		}
 		boolean								description		= this.cb_includedescription.isSelected();
-		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function,
-				message, description);
+		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function, message, description);
 		final ObservableList<LogItemView>	logitemviews	= FXCollections.observableArrayList();
 		logitems.forEach(li -> logitemviews.add(new LogItemView(li)));
 		this.tv_log.getItems().removeAll(this.tv_log.getItems());

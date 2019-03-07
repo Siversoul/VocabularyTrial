@@ -29,7 +29,7 @@ public final class WordCheck
 	
 	public static final void createTable()
 	{
-		ConnectionDetails.getInstance().executeSimpleStatement(
+		ConnectionDetails.getInstance().execute(
 			"CREATE TABLE IF NOT EXISTS wordcheck(" + "word_id INTEGER, " + "trial_id INTEGER, " + "answerString VARCHAR(200), " + "correct INTEGER, " + "PRIMARY KEY(word_id, trial_id), "
 				+ "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, " + "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE)");
 		LogItem.debug("Wordcheck table created");
@@ -89,7 +89,7 @@ public final class WordCheck
 	public static final void removeAllWordChecks()
 	{
 		WordCheck.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
+		ConnectionDetails.getInstance().execute("DELETE FROM wordcheck");
 		LogItem.debug("All wordchecks removed");
 	}
 	

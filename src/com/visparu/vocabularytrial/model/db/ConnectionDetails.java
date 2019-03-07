@@ -7,8 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.sqlite.JDBC;
 
@@ -77,7 +78,14 @@ public final class ConnectionDetails
 	
 	public final void activateForeignKeyPragma()
 	{
-		this.executeSimpleStatement("PRAGMA foreign_keys = ON");
+		try (final PreparedStatement pstmt = this.prepareStatement("PRAGMA foreign_keys = ON"))
+		{
+			pstmt.execute();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public final void changeDatabase(final String driver, final String protocol, final String filename)
@@ -105,19 +113,46 @@ public final class ConnectionDetails
 		}
 	}
 	
-	public final void executeSimpleStatement(final String query)
+	public final PreparedStatement prepareStatement(final String query) throws SQLException
 	{
-		final String connString = this.getConnectionString();
-		try (final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
+		final Connection		conn	= this.getConnection();
+		final PreparedStatement	pstmt	= conn.prepareStatement(query);
+		return pstmt;
+	}
+	
+	private final void fillPreparedStatement(final PreparedStatement pstmt, final Object... params) throws SQLException
+	{
+		for (int i = 0; i < params.length; i++)
 		{
-			stmt.execute(query);
-			LogItem.debug("Simple statement executed", query);
+			final Object param = params[i];
+			if (param instanceof Integer)
+			{
+				final Integer param_i = (Integer) param;
+				pstmt.setInt(i + 1, param_i);
+			}
+			else if (param instanceof String)
+			{
+				final String param_s = (String) param;
+				pstmt.setString(i + 1, param_s);
+			}
+			else
+			{
+				throw new IllegalArgumentException("Type " + param.getClass().getName() + " is not supported!");
+			}
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
+	}
+	
+	public final void execute(final PreparedStatement pstmt, final Object... params) throws SQLException
+	{
+		this.fillPreparedStatement(pstmt, params);
+		pstmt.execute();
+	}
+	
+	public final ResultSet executeQuery(final PreparedStatement pstmt, final Object... params) throws SQLException
+	{
+		this.fillPreparedStatement(pstmt, params);
+		final ResultSet rs = pstmt.executeQuery();
+		return rs;
 	}
 	
 	private final String getConnectionString()
@@ -126,7 +161,7 @@ public final class ConnectionDetails
 		return ret;
 	}
 	
-	public final Connection getConnection()
+	private final Connection getConnection()
 	{
 		return this.connection;
 	}
