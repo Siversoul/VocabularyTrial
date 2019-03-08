@@ -1,6 +1,5 @@
 package com.visparu.vocabularytrial.model.db;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,9 +18,10 @@ public final class Queries
 	public static final List<Language> queryAllLanguages()
 	{
 		final List<Language>	languages	= new ArrayList<>();
-		final String			query		= "SELECT language_code FROM language";
+		final String			query		= "SELECT language_code "
+				+ "FROM language";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt))
+		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query())
 		{
 			while (rs.next())
 			{

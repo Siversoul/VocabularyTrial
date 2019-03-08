@@ -3,7 +3,7 @@ package com.visparu.vocabularytrial.root;
 import java.net.URL;
 
 import com.visparu.vocabularytrial.gui.controllers.MainMenuController;
-import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.Database;
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.log.Severity;
 import com.visparu.vocabularytrial.util.C11N;
@@ -33,8 +33,8 @@ public final class Main extends Application
 	
 	private final void initializeDatabase()
 	{
-		ConnectionDetails.getInstance().activateForeignKeyPragma();
-		ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+		Database.get().activateForeignKeyPragma();
+		Database.get().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 	}
 	
 	private final void initializeStage(final Stage primaryStage)

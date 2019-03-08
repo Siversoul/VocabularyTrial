@@ -21,13 +21,13 @@ import com.visparu.vocabularytrial.model.db.entities.Word;
 import com.visparu.vocabularytrial.model.db.entities.WordCheck;
 import com.visparu.vocabularytrial.util.C11N;
 
-public final class ConnectionDetails
+public final class Database
 {
-	private static ConnectionDetails	instance;
-	private String						driver;
-	private String						protocol;
-	private String						filename;
-	private Connection					connection;
+	private static Database	instance;
+	private String			driver;
+	private String			protocol;
+	private String			filename;
+	private Connection		connection;
 	static
 	{
 		try
@@ -40,7 +40,7 @@ public final class ConnectionDetails
 		}
 	}
 	
-	private ConnectionDetails(final String driver, final String protocol, final String filename)
+	private Database(final String driver, final String protocol, final String filename)
 	{
 		this.driver		= driver;
 		this.protocol	= protocol;
@@ -55,24 +55,24 @@ public final class ConnectionDetails
 		}
 	}
 	
-	public static final ConnectionDetails getInstance()
+	public static final Database get()
 	{
-		if (ConnectionDetails.instance == null)
+		if (Database.instance == null)
 		{
-			ConnectionDetails instance = ConnectionDetails.getInstance(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			Database instance = Database.get(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			return instance;
 		}
-		ConnectionDetails instance = ConnectionDetails.instance;
+		Database instance = Database.instance;
 		return instance;
 	}
 	
-	private static final ConnectionDetails getInstance(final String driver, final String protocol, final String filename)
+	private static final Database get(final String driver, final String protocol, final String filename)
 	{
-		ConnectionDetails.instance = new ConnectionDetails(driver, protocol, filename);
+		Database.instance = new Database(driver, protocol, filename);
 		Translation.clearCache();
 		Word.clearCache();
 		Language.clearCache();
-		ConnectionDetails instance = ConnectionDetails.instance;
+		Database instance = Database.instance;
 		return instance;
 	}
 	
@@ -90,7 +90,7 @@ public final class ConnectionDetails
 	
 	public final void changeDatabase(final String driver, final String protocol, final String filename)
 	{
-		ConnectionDetails.getInstance(driver, protocol, filename);
+		Database.get(driver, protocol, filename);
 		LogItem.createTable();
 		Language.createTable();
 		Word.createTable();

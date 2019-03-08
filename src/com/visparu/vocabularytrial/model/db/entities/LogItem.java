@@ -1,6 +1,5 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -12,7 +11,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import com.visparu.vocabularytrial.gui.interfaces.LogComponent;
-import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.VPS;
 import com.visparu.vocabularytrial.model.log.Severity;
 
 public final class LogItem
@@ -32,8 +31,9 @@ public final class LogItem
 	private String			message;
 	private String			description;
 	
-	private LogItem(final Integer logitem_id, final Integer log_id, final Severity severity, final LocalDateTime datetime, final String threadName, final String function, final String message,
-		final String description)
+	private LogItem(final Integer logitem_id, final Integer log_id, final Severity severity, final LocalDateTime datetime, final String threadName,
+			final String function, final String message,
+			final String description)
 	{
 		this.logitem_id		= logitem_id;
 		this.log_id			= log_id;
@@ -47,42 +47,38 @@ public final class LogItem
 	
 	public final static void createTable()
 	{
-		String query = "CREATE TABLE IF NOT EXISTS logitem (logitem_id INTEGER PRIMARY KEY AUTOINCREMENT, log_id INTEGER, severity VARCHAR(20), datetime VARCHAR(23), "
-			+ "threadname VARCHAR(100), function VARCHAR(100), message VARCHAR(200), description VARCHAR(500))";
+		String query = "CREATE TABLE IF NOT EXISTS logitem ("
+				+ "logitem_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+				+ "log_id INTEGER, "
+				+ "severity VARCHAR(20), "
+				+ "datetime VARCHAR(23), "
+				+ "threadname VARCHAR(100), "
+				+ "function VARCHAR(100), "
+				+ "message VARCHAR(200), "
+				+ "description VARCHAR(500)"
+				+ ")";
 		
-		try (PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query);
 	}
 	
 	public final static void initializeNewLogSession()
 	{
-		final String query = "SELECT max(log_id) FROM logitem";
+		final String query = "SELECT max(log_id) "
+				+ "FROM logitem";
 		
-		try (PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt))
+		try (VPS vps = new VPS(query); ResultSet rs = vps.query())
 		{
-			final Integer next_log_id;
-			if (rs.next())
-			{
-				final Integer max_log_id = rs.getInt(1);
-				if (max_log_id < 1)
-				{
-					next_log_id = 1;
-				}
-				else
-				{
-					next_log_id = max_log_id + 1;
-				}
-			}
-			else
+			final Integer	next_log_id;
+			final Integer	max_log_id	= rs.getInt(1);
+			if (max_log_id < 1)
 			{
 				next_log_id = 1;
 			}
+			else
+			{
+				next_log_id = max_log_id + 1;
+			}
+			
 			LogItem.session_log_id	= next_log_id;
 			LogItem.initialized		= true;
 		}
@@ -180,7 +176,8 @@ public final class LogItem
 		return LogItem.createLogItem(severity, datetime, threadname, function, message, description);
 	}
 	
-	public final static LogItem createLogItem(final Severity severity, final LocalDateTime datetime, final String threadname, final String function, final String message, final String description)
+	public final static LogItem createLogItem(final Severity severity, final LocalDateTime datetime, final String threadname, final String function,
+			final String message, final String description)
 	{
 		final LogItem li = new LogItem(-1, LogItem.session_log_id, severity, datetime, threadname, function, message, description);
 		LogItem.preinitialization_logitems.add(li);
@@ -205,41 +202,32 @@ public final class LogItem
 	
 	public final static void removeLogItem(final Integer logitem_id)
 	{
-		final String query = "DELETE FROM logitem WHERE logitem_id = ?";
+		final String query = "DELETE FROM logitem "
+				+ "WHERE logitem_id = ?";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt, logitem_id);
-			LogItem.cache.remove(logitem_id);
-			LogComponent.repopulateAllLogs();
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query, logitem_id);
+		LogItem.cache.remove(logitem_id);
+		
+		LogComponent.repopulateAllLogs();
 	}
 	
 	public final static void removeAllLogItems()
 	{
 		String query = "DELETE FROM logitem";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt);
-			LogItem.clearCache();
-			LogComponent.repopulateAllLogs();
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query);
+		LogItem.clearCache();
+		
+		LogComponent.repopulateAllLogs();
 	}
 	
 	private final static LogItem readEntity(final Integer logitem_id)
 	{
-		final String query = "SELECT * FROM logitem WHERE logitem_id = ?";
+		final String query = "SELECT * "
+				+ "FROM logitem "
+				+ "WHERE logitem_id = ?";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, logitem_id))
+		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(logitem_id))
 		{
 			if (rs.next())
 			{
@@ -252,7 +240,7 @@ public final class LogItem
 				final String		description	= rs.getString("description");
 				final LogItem		li			= new LogItem(logitem_id, log_id, severity, datetime, threadName, function, message, description);
 				LogItem.cache.put(logitem_id, li);
-				rs.close();
+				
 				return li;
 			}
 			else
@@ -269,7 +257,8 @@ public final class LogItem
 	
 	private final static Integer writeEntity(final LogItem logitem)
 	{
-		final String query = "INSERT INTO logitem(log_id, severity, datetime, threadname, function, message, description) VALUES(?, ?, ?, ?, ?, ?, ?)";
+		final String query = "INSERT INTO logitem(log_id, severity, datetime, threadname, function, message, description) "
+				+ "VALUES(?, ?, ?, ?, ?, ?, ?)";
 		
 		final Integer	log_id		= logitem.getLog_id();
 		final Integer	severity	= logitem.getSeverity().ordinal();
@@ -279,20 +268,14 @@ public final class LogItem
 		final String	message		= logitem.getMessage();
 		final String	description	= logitem.getDescription();
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
+		List<Integer> keys = VPS.execute(query, log_id, severity, datetime, threadname, function, message, description);
+		if(keys.isEmpty())
 		{
-			ConnectionDetails.getInstance().execute(pstmt, log_id, severity, datetime, threadname, function, message, description);
-			try (final ResultSet rsg = pstmt.getGeneratedKeys())
-			{
-				final Integer logitem_id = rsg.getInt(1);
-				return logitem_id;
-			}
+			return -1;
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
-		return -1;
+		final Integer logitem_id = keys.get(0);
+		
+		return logitem_id;
 	}
 	
 	public static final Integer getSessionLog_id()
@@ -322,19 +305,13 @@ public final class LogItem
 	
 	public final void setSeverity(Severity severity)
 	{
-		final String query = "UPDATE logitem SET severity = ? WHERE logitem_id = ?";
+		final String query = "UPDATE logitem "
+				+ "SET severity = ? "
+				+ "WHERE logitem_id = ?";
 		
 		final Integer severity_i = severity.ordinal();
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt, severity_i, this.logitem_id);
-			this.severity = severity;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query, severity_i, this.logitem_id);
 	}
 	
 	public final LocalDateTime getDatetime()
@@ -344,19 +321,13 @@ public final class LogItem
 	
 	public final void setDatetime(LocalDateTime datetime)
 	{
-		final String query = "UPDATE logitem SET datetime = ? WHERE logitem_id = ?";
+		final String query = "UPDATE logitem "
+				+ "SET datetime = ? "
+				+ "WHERE logitem_id = ?";
 		
 		final String datetime_s = datetime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt, datetime_s, this.logitem_id);
-			this.datetime = datetime;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query, datetime_s, this.logitem_id);
 	}
 	
 	public final String getThreadName()
@@ -366,17 +337,11 @@ public final class LogItem
 	
 	public final void setThreadName(String threadName)
 	{
-		final String query = "UPDATE logitem SET threadname = ? WHERE logitem_id = ?";
+		final String query = "UPDATE logitem "
+				+ "SET threadname = ? "
+				+ "WHERE logitem_id = ?";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt, threadName, this.logitem_id);
-			this.threadName = threadName;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query, threadName, this.logitem_id);
 	}
 	
 	public final String getFunction()
@@ -386,17 +351,11 @@ public final class LogItem
 	
 	public final void setFunction(String function)
 	{
-		final String query = "UPDATE logitem SET function = ? WHERE logitem_id = ?";
+		final String query = "UPDATE logitem "
+				+ "SET function = ? "
+				+ "WHERE logitem_id = ?";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt, function, this.logitem_id);
-			this.function = function;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query, function, this.logitem_id);
 	}
 	
 	public final String getMessage()
@@ -406,17 +365,11 @@ public final class LogItem
 	
 	public final void setMessage(String message)
 	{
-		final String query = "UPDATE logitem SET message = ? WHERE logitem_id = ?";
+		final String query = "UPDATE logitem "
+				+ "SET message = ? "
+				+ "WHERE logitem_id = ?";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt, message, this.logitem_id);
-			this.message = message;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query, message, this.logitem_id);
 	}
 	
 	public final String getDescription()
@@ -426,69 +379,63 @@ public final class LogItem
 	
 	public final void setDescription(String description)
 	{
-		final String query = "UPDATE logitem SET description = ? WHERE logitem_id = ?";
+		final String query = "UPDATE logitem "
+				+ "SET description = ? "
+				+ "WHERE logitem_id = ?";
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query))
-		{
-			ConnectionDetails.getInstance().execute(pstmt, description, this.logitem_id);
-			this.description = description;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		VPS.execute(query, description, this.logitem_id);
 	}
 	
 	public static final List<Integer> getAllLogIds()
 	{
-		final List<Integer> log_ids = new ArrayList<>();
+		final String query = "SELECT DISTINCT log_id "
+				+ "FROM logitem";
 		
-		final String query = "SELECT DISTINCT log_id FROM logitem";
-		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt))
+		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query())
 		{
+			final List<Integer> log_ids = new ArrayList<>();
 			while (rs.next())
 			{
 				log_ids.add(rs.getInt("log_id"));
 			}
+			return log_ids;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return new ArrayList<>();
 		}
-		
-		return log_ids;
 	}
 	
 	public static final List<LogItem> getAllLogItemsForLog(Integer log_id)
 	{
-		List<LogItem> logitems = new ArrayList<>();
+		String query = "SELECT logitem_id "
+				+ "FROM logitem "
+				+ "WHERE log_id = ?";
 		
-		String query = "SELECT logitem_id FROM logitem WHERE log_id = ?";
-		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, log_id))
+		try (final VPS vps = new VPS(query); ResultSet rs = vps.query(log_id))
 		{
+			List<LogItem> logitems = new ArrayList<>();
 			while (rs.next())
 			{
 				Integer	logitem_id	= rs.getInt("logitem_id");
 				LogItem	li			= LogItem.get(logitem_id);
 				logitems.add(li);
 			}
+			return logitems;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return new ArrayList<>();
 		}
-		
-		return logitems;
 	}
 	
-	public static final List<LogItem> getFilteredLogItems(Integer log_id, Severity min_severity, String thread, String function, String message, boolean description)
+	public static final List<LogItem> getFilteredLogItems(Integer log_id, Severity min_severity, String thread, String function, String message,
+			boolean description)
 	{
-		final List<LogItem> logitems = new ArrayList<>();
-		
-		int param_count = 0;
-		final StringJoiner sj_filter = new StringJoiner(" AND ");
+		int					param_count	= 0;
+		final StringJoiner	sj_filter	= new StringJoiner(" AND ");
 		if (log_id != null)
 		{
 			sj_filter.add("log_id = ?");
@@ -522,10 +469,12 @@ public final class LogItem
 				param_count++;
 			}
 		}
-		String query = "SELECT logitem_id FROM logitem WHERE " + sj_filter.toString();
+		String query = "SELECT logitem_id "
+				+ "FROM logitem "
+				+ "WHERE " + sj_filter.toString();
 		
-		Object[] args = new Object[param_count];
-		int index = 0;
+		Object[]	args	= new Object[param_count];
+		int			index	= 0;
 		if (log_id != null)
 		{
 			args[index++] = log_id;
@@ -551,19 +500,22 @@ public final class LogItem
 			}
 		}
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query); ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, args))
+		try (final VPS vps = new VPS(query); ResultSet rs = vps.query(args))
 		{
+			final List<LogItem> logitems = new ArrayList<>();
 			while (rs.next())
 			{
-				LogItem li = LogItem.get(rs.getInt("logitem_id"));
+				Integer logitem_id = rs.getInt("logitem_id");
+				LogItem li = LogItem.get(logitem_id);
 				logitems.add(li);
 			}
+			return logitems;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return new ArrayList<>();
 		}
 		
-		return logitems;
 	}
 }

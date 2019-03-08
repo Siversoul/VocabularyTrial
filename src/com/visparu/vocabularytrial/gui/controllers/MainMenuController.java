@@ -17,7 +17,8 @@ import com.visparu.vocabularytrial.gui.interfaces.LanguageComponent;
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
 import com.visparu.vocabularytrial.gui.interfaces.WordComponent;
-import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.Database;
+import com.visparu.vocabularytrial.model.db.VPS;
 import com.visparu.vocabularytrial.model.db.entities.Language;
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
@@ -223,7 +224,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				return;
 			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
-			ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			Database.get().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 			LogItem.info("New database file created", "New database file created under " + selectedFile.getAbsolutePath());
 		}
@@ -243,7 +244,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		if (selectedFile != null)
 		{
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
-			ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			Database.get().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 			LogItem.info("Switched to existing database", "Switched to existing database under " + selectedFile.getAbsolutePath());
 		}
@@ -267,8 +268,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				return;
 			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
-			ConnectionDetails.getInstance().copyDatabase(selectedFile);
-			ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			Database.get().copyDatabase(selectedFile);
+			Database.get().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 			LogItem.info("Saved database to new file", "Saved database to " + selectedFile.getAbsolutePath());
 		}
@@ -407,8 +408,9 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final Optional<ButtonType>	result	= alert.showAndWait();
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
-			ConnectionDetails.getInstance().execute("DELETE FROM wordcheck");
-			ConnectionDetails.getInstance().execute("DELETE FROM trial");
+			VPS.execute("DELETE FROM wordcheck");
+			VPS.execute("DELETE FROM trial");
+			
 			LogItem.info("Deleted all trial data");
 		}
 		else

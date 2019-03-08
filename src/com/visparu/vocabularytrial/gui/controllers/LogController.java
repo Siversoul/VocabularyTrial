@@ -1,7 +1,6 @@
 package com.visparu.vocabularytrial.gui.controllers;
 
 import java.net.URL;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
@@ -10,7 +9,7 @@ import java.util.ResourceBundle;
 
 import com.visparu.vocabularytrial.gui.interfaces.LogComponent;
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
-import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.VPS;
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.log.Severity;
 import com.visparu.vocabularytrial.model.views.LogItemView;
@@ -199,11 +198,14 @@ public final class LogController implements Initializable, VokAbfController, Log
 		final String before = this.cb_thread.getSelectionModel().getSelectedItem();
 		this.cb_thread.getItems().clear();
 		
-		final String	query_thread	= "SELECT DISTINCT threadname FROM logitem WHERE log_id = ? AND severity >= ?";
+		final String	query_thread	= "SELECT DISTINCT threadname "
+				+ "FROM logitem "
+				+ "WHERE log_id = ? "
+				+ "AND severity >= ?";
 		final Integer	log_id			= LogItem.getSessionLog_id();
 		final Integer	severity		= this.cb_severity.getSelectionModel().getSelectedItem().ordinal();
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query_thread); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, log_id, severity))
+		try (final VPS vps = new VPS(query_thread); final ResultSet rs = vps.query(log_id, severity))
 		{
 			while (rs.next())
 			{
@@ -237,11 +239,18 @@ public final class LogController implements Initializable, VokAbfController, Log
 		final String query_func;
 		if (threadname == null || threadname.contentEquals("All"))
 		{
-			query_func = "SELECT DISTINCT function FROM logitem WHERE log_id = ? AND severity >= ?";
+			query_func = "SELECT DISTINCT function "
+					+ "FROM logitem "
+					+ "WHERE log_id = ? "
+					+ "AND severity >= ?";
 		}
 		else
 		{
-			query_func = "SELECT DISTINCT function FROM logitem WHERE log_id = ? AND threadname = ? AND severity >= ?";
+			query_func = "SELECT DISTINCT function "
+					+ "FROM logitem "
+					+ "WHERE log_id = ? "
+					+ "AND threadname = ? "
+					+ "AND severity >= ?";
 		}
 		
 		int			log_id		= LogItem.getSessionLog_id();
@@ -261,7 +270,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 			params[2]	= severity;
 		}
 		
-		try (final PreparedStatement pstmt = ConnectionDetails.getInstance().prepareStatement(query_func); final ResultSet rs = ConnectionDetails.getInstance().executeQuery(pstmt, params))
+		try (final VPS vps = new VPS(query_func); final ResultSet rs = vps.query(params))
 		{
 			while (rs.next())
 			{
@@ -331,7 +340,8 @@ public final class LogController implements Initializable, VokAbfController, Log
 			message = null;
 		}
 		boolean								description		= this.cb_includedescription.isSelected();
-		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function, message, description);
+		final List<LogItem>					logitems		= LogItem.getFilteredLogItems(LogItem.getSessionLog_id(), severity, thread, function,
+				message, description);
 		final ObservableList<LogItemView>	logitemviews	= FXCollections.observableArrayList();
 		logitems.forEach(li -> logitemviews.add(new LogItemView(li)));
 		this.tv_log.getItems().removeAll(this.tv_log.getItems());
