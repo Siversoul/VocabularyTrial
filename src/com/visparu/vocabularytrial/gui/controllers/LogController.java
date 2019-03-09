@@ -68,19 +68,7 @@ public final class LogController implements Initializable, VokAbfController, Log
 	
 	@Override
 	public final void initialize(URL location, ResourceBundle resources)
-	{
-		VokAbfController.instances.add(this);
-		LogComponent.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-			LogComponent.instances.remove(this);
-			while (!LogDetailController.instances.isEmpty())
-			{
-				LogDetailController.instances.get(0).close();
-			}
-		});
-		
+	{		
 		this.cb_severity.getItems().addAll(Severity.values());
 		this.cb_severity.getSelectionModel().selectedItemProperty().addListener(e ->
 		{
@@ -318,6 +306,12 @@ public final class LogController implements Initializable, VokAbfController, Log
 	{
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
+	}
+	
+	@Override
+	public final void closeRequest()
+	{
+		LogDetailController.instances.forEach(i -> i.close());
 	}
 	
 	@FXML

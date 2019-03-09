@@ -1,18 +1,13 @@
 package com.visparu.vocabularytrial.root;
 
-import java.net.URL;
-
-import com.visparu.vocabularytrial.gui.controllers.MainMenuController;
 import com.visparu.vocabularytrial.model.db.Database;
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.log.Severity;
 import com.visparu.vocabularytrial.util.C11N;
+import com.visparu.vocabularytrial.util.GUIUtil;
 import com.visparu.vocabularytrial.util.I18N;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public final class Main extends Application
@@ -39,24 +34,7 @@ public final class Main extends Application
 	
 	private final void initializeStage(final Stage primaryStage)
 	{
-		try
-		{
-			final URL					url		= this.getClass().getResource("/com/visparu/vocabularytrial/gui/fxml/MainMenu.fxml");
-			final FXMLLoader			loader	= new FXMLLoader(url);
-			final MainMenuController	mmc		= new MainMenuController(primaryStage);
-			loader.setController(mmc);
-			loader.setResources(I18N.getResources());
-			final Parent	root	= loader.load();
-			final Scene		scene	= new Scene(root);
-			primaryStage.setScene(scene);
-			primaryStage.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.title"));
-			primaryStage.show();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		LogItem.debug("Main stage initialized");
+		GUIUtil.createMainStage(primaryStage);
 	}
 	
 	public static final void main(String[] args)

@@ -91,14 +91,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with MainMenuController");
-		LanguageComponent.instances.add(this);
-		WordComponent.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			LanguageComponent.instances.remove(this);
-			WordComponent.instances.remove(this);
-			VokAbfController.closeAll();
-		});
+		
 		int index;
 		switch (C11N.getLocale().toLanguageTag())
 		{

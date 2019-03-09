@@ -39,7 +39,7 @@ public class VPS implements AutoCloseable
 			{
 				while (rs.next())
 				{
-					generatedKeys.add(rs.getInt(0));
+					generatedKeys.add(rs.getInt(1));
 				}
 			}
 			return generatedKeys;
