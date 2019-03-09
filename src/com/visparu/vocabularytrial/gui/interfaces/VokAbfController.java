@@ -29,6 +29,11 @@ public interface VokAbfController
 		LogItem.debug("All stages closed");
 	}
 	
+	default void closeRequest()
+	{
+		
+	}
+	
 	void setStage(Stage stage);
 	
 	void close();

@@ -59,11 +59,7 @@ public final class TrialResultController implements Initializable, VokAbfControl
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with TrialResultController");
-		VokAbfController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-		});
+
 		this.lb_date.setText(new SimpleDateFormat("dd.MM.yyyy HH:mm").format(this.trial.getDate()));
 		this.lb_language_from.setText(this.trial.getLanguage_from().getName());
 		this.lb_language_to.setText(this.trial.getLanguage_to().getName());
@@ -82,6 +78,7 @@ public final class TrialResultController implements Initializable, VokAbfControl
 		this.lb_correct.setText(String.valueOf(correct));
 		this.lb_wrong.setText(String.valueOf(wrong));
 		this.lb_perc.setText(String.format("%.2f", perc * 100));
+		
 		LogItem.debug("New stage initialized");
 	}
 	

@@ -56,14 +56,6 @@ public class LogDetailController implements Initializable, VokAbfController
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
-		VokAbfController.instances.add(this);
-		LogDetailController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-			LogDetailController.instances.remove(this);
-		});
-		
 		this.tf_logitem_id.setText(String.valueOf(this.liv.getLogitem_id()));
 		this.tf_log_id.setText(String.valueOf(this.liv.getLog_id()));
 		this.tf_message.setText(this.liv.getMessage());

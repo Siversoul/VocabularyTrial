@@ -65,22 +65,12 @@ public final class TrialController implements Initializable, VokAbfController
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with TrialController");
-		VokAbfController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-			if (this.trial.getWordChecks().isEmpty())
-			{
-				return;
-			}
-			final TrialResultController	trc		= new TrialResultController(this.trial);
-			final StringBinding			title	= I18N.createStringBinding("gui.result.title");
-			GUIUtil.createNewStage("TrialResult", trc, title);
-		});
+
 		this.bt_correct.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.correct.tooltip").get()));
 		this.bt_wrong.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.wrong.tooltip").get()));
 		this.ta_answer.requestFocus();
 		this.cycle(State.QUESTION);
+		
 		LogItem.debug("Finished initializing new stage");
 	}
 	
@@ -96,6 +86,18 @@ public final class TrialController implements Initializable, VokAbfController
 		this.stage.setOnCloseRequest(null);
 		this.stage.close();
 		LogItem.debug("Stage closed");
+	}
+	
+	@Override
+	public final void closeRequest()
+	{
+		if (this.trial.getWordChecks().isEmpty())
+		{
+			return;
+		}
+		final TrialResultController	trc		= new TrialResultController(this.trial);
+		final StringBinding			title	= I18N.createStringBinding("gui.result.title");
+		GUIUtil.createNewStage("TrialResult", trc, title);
 	}
 	
 	@FXML
