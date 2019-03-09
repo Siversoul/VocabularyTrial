@@ -1,7 +1,5 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -13,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
-import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.VPS;
 
 public final class Trial
 {
@@ -29,21 +27,30 @@ public final class Trial
 		this.date			= date;
 		this.language_from	= language_from;
 		this.language_to	= language_to;
+		
 		LogItem.debug("Initialized new trial " + Trial.getDateFormatter().format(date) + "");
 	}
 	
 	public static final void createTable()
 	{
-		ConnectionDetails.getInstance()
-			.executeSimpleStatement("CREATE TABLE IF NOT EXISTS trial(" + "trial_id INTEGER PRIMARY KEY AUTOINCREMENT," + "datetime VARCHAR(23), " + "language_code_from VARCHAR(2), "
-				+ "language_code_to VARCHAR(2), " + "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
-				+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE)");
+		String query = "CREATE TABLE IF NOT EXISTS trial("
+				+ "trial_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+				+ "datetime VARCHAR(23), "
+				+ "language_code_from VARCHAR(2), "
+				+ "language_code_to VARCHAR(2), "
+				+ "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
+				+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE"
+				+ ")";
+		
+		VPS.execute(query);
+		
 		LogItem.debug("Trial table created");
 	}
 	
 	public static final void clearCache()
 	{
 		Trial.cache.clear();
+		
 		LogItem.debug("Cleared trial cache");
 	}
 	
@@ -70,37 +77,34 @@ public final class Trial
 	
 	public static final void removeTrial(final Integer trial_id)
 	{
+		final String query = "DELETE FROM trial "
+				+ "WHERE trial_id = ?";
+		
 		String date = Trial.getDateFormatter().format(Trial.get(trial_id));
+		
+		VPS.execute(query, trial_id);
 		Trial.cache.remove(trial_id);
-		final String		query	= "DELETE FROM trial " + "WHERE trial_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
-		{
-			pstmt.setInt(1, trial_id);
-			pstmt.execute();
-			LogItem.debug("Trial at " + date + " removed");
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		
+		LogItem.debug("Trial at " + date + " removed");
 	}
 	
 	public static final void removeAllTrials()
 	{
+		String query = "DELETE FROM trial";
+		
+		VPS.execute(query);
 		Trial.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
+		
 		LogItem.debug("All trials removed");
 	}
 	
 	private static final Trial readEntity(final Integer trial_id)
 	{
-		final String		query	= "SELECT * " + "FROM trial " + "WHERE trial_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "SELECT * "
+				+ "FROM trial "
+				+ "WHERE trial_id = ?";
+		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(trial_id))
 		{
-			pstmt.setInt(1, trial_id);
-			final ResultSet rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				final String	dateString		= rs.getString("datetime");
@@ -111,65 +115,65 @@ public final class Trial
 				final Language	l_to			= Language.get(l_toString);
 				final Trial		t				= new Trial(trial_id, date, l_from, l_to);
 				Trial.cache.put(trial_id, t);
-				rs.close();
+				
 				return t;
 			}
-			rs.close();
+			return null;
 		}
 		catch (SQLException | ParseException e)
 		{
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 	
 	private static final Integer writeEntity(final Trial trial)
 	{
-		final String		query	= "INSERT INTO trial(datetime, language_code_from, language_code_to) " + "VALUES(?, ?, ?)";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "INSERT INTO trial(datetime, language_code_from, language_code_to) "
+				+ "VALUES(?, ?, ?)";
+		
+		final String	dateString			= Trial.getDateFormatter().format(trial.getDate());
+		final String	language_code_from	= trial.getLanguage_from().getLanguage_code();
+		final String	language_code_to	= trial.getLanguage_to().getLanguage_code();
+		
+		List<Integer> keys = VPS.execute(query, dateString, language_code_from, language_code_to);
+		if (keys.isEmpty())
 		{
-			final String dateString = Trial.getDateFormatter().format(trial.getDate());
-			pstmt.setString(1, dateString);
-			pstmt.setString(2, trial.getLanguage_from().getLanguage_code());
-			pstmt.setString(3, trial.getLanguage_to().getLanguage_code());
-			pstmt.executeUpdate();
-			final ResultSet rs = pstmt.getGeneratedKeys();
-			rs.next();
-			Integer trial_id = rs.getInt(1);
-			LogItem.debug("Inserted new trial entity at " + dateString);
-			return trial_id;
+			return -1;
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
-		return -1;
+		final Integer trial_id = keys.get(0);
+		
+		LogItem.debug("Inserted new trial entity at " + dateString);
+		
+		return trial_id;
 	}
 	
 	public static final List<Trial> getTrials(final Language l_from, final Language l_to)
 	{
-		final List<Trial>	trials	= new ArrayList<>();
-		final String		query	= "SELECT trial_id " + "FROM trial " + "WHERE language_code_from = ? " + "AND language_code_to = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "SELECT trial_id "
+				+ "FROM trial "
+				+ "WHERE language_code_from = ? "
+				+ "AND language_code_to = ?";
+		
+		final String	language_code_from	= l_from.getLanguage_code();
+		final String	language_code_to	= l_to.getLanguage_code();
+		
+		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(language_code_from, language_code_to))
 		{
-			pstmt.setString(1, l_from.getLanguage_code());
-			pstmt.setString(2, l_to.getLanguage_code());
-			final ResultSet rs = pstmt.executeQuery();
+			final List<Trial> trials = new ArrayList<>();
 			while (rs.next())
 			{
 				final int	trial_id	= rs.getInt("trial_id");
 				final Trial	t			= Trial.get(trial_id);
 				trials.add(t);
 			}
-			rs.close();
+			return trials;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return new ArrayList<>();
 		}
-		return trials;
 	}
 	
 	public static final SimpleDateFormat getDateFormatter()
@@ -205,24 +209,25 @@ public final class Trial
 	
 	public final List<WordCheck> getWordChecks()
 	{
-		final List<WordCheck>	wordchecks	= new ArrayList<>();
-		final String			query		= "SELECT * " + "FROM wordcheck " + "WHERE trial_id = ?";
-		final Connection		conn		= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "SELECT * "
+				+ "FROM wordcheck "
+				+ "WHERE trial_id = ?";
+		
+		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(this.trial_id))
 		{
-			pstmt.setInt(1, this.trial_id);
-			final ResultSet rs = pstmt.executeQuery();
+			final List<WordCheck> wordchecks = new ArrayList<>();
 			while (rs.next())
 			{
 				final Integer	word_id	= rs.getInt("word_id");
 				final WordCheck	wc		= WordCheck.get(Word.get(word_id), this);
 				wordchecks.add(wc);
 			}
+			return wordchecks;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return new ArrayList<>();
 		}
-		return wordchecks;
 	}
 }
