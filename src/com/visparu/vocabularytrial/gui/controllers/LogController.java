@@ -163,6 +163,11 @@ public final class LogController implements Initializable, VokAbfController, Log
 			};
 			tc.setOnMouseClicked(e ->
 			{
+				if(tc == null || tc.isEmpty() || tc.getItem() == null)
+				{
+					return;
+				}
+				
 				if (e.getClickCount() == 2)
 				{
 					this.openDetailView(tc.getTableRow().getItem());
