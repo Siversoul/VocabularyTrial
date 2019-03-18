@@ -9,34 +9,31 @@ import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
 import com.visparu.vocabularytrial.model.db.VPS;
 import com.visparu.vocabularytrial.util.ConvertUtil;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 public final class WordCheck
 {
 	private static final Map<Integer, WordCheck>	cache	= new HashMap<>();
 	private final Word								word;
 	private final Trial								trial;
 	private final String							answerString;
-	private final Boolean							correct;
+	private final BooleanProperty					correct;
 	
 	private WordCheck(final Word word, final Trial trial, final String answerString, final Boolean correct)
 	{
 		this.word			= word;
 		this.trial			= trial;
 		this.answerString	= answerString;
-		this.correct		= correct;
+		this.correct		= new SimpleBooleanProperty(correct);
 		LogItem.debug("Initialized new wordcheck '" + word.getName() + "' (" + correct + ")");
 	}
 	
 	public static final void createTable()
 	{
-		final String query = "CREATE TABLE IF NOT EXISTS wordcheck("
-				+ "word_id INTEGER, "
-				+ "trial_id INTEGER, "
-				+ "answerString VARCHAR(200), "
-				+ "correct INTEGER, "
-				+ "PRIMARY KEY(word_id, trial_id), "
-				+ "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, "
-				+ "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE"
-				+ ")";
+		final String query = "CREATE TABLE IF NOT EXISTS wordcheck(" + "word_id INTEGER, " + "trial_id INTEGER, " + "answerString VARCHAR(200), " + "correct INTEGER, "
+			+ "PRIMARY KEY(word_id, trial_id), " + "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, "
+			+ "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE" + ")";
 		
 		VPS.execute(query);
 		
@@ -80,9 +77,7 @@ public final class WordCheck
 	
 	public static final void removeWordCheck(final Word word, final Trial trial)
 	{
-		final String query = "DELETE FROM wordcheck "
-				+ "WHERE word_id = ? "
-				+ "AND trial_id = ?";
+		final String query = "DELETE FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
 		
 		final Integer	word_id		= word.getWord_id();
 		final Integer	trial_id	= trial.getTrial_id();
@@ -105,10 +100,7 @@ public final class WordCheck
 	
 	private static final WordCheck readEntity(final Integer word_id, final Integer trial_id)
 	{
-		final String query = "SELECT * "
-				+ "FROM wordcheck "
-				+ "WHERE word_id = ? "
-				+ "AND trial_id = ?";
+		final String query = "SELECT * " + "FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
 		
 		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(word_id, trial_id))
 		{
@@ -133,12 +125,11 @@ public final class WordCheck
 	
 	private static final void writeEntity(final WordCheck check)
 	{
-		final String query = "INSERT INTO wordcheck "
-				+ "VALUES(?, ?, ?, ?)";
+		final String query = "INSERT INTO wordcheck " + "VALUES(?, ?, ?, ?)";
 		
 		final Word		word			= check.getWord();
 		final Trial		trial			= check.getTrial();
-		final Boolean	correct			= check.isCorrect();
+		final Boolean	correct			= check.isCorrect().get();
 		final String	trial_datetime	= ConvertUtil.convertDateToString(trial.getDateTime());
 		
 		final Integer	word_id			= word.getWord_id();
@@ -178,7 +169,7 @@ public final class WordCheck
 		return this.answerString;
 	}
 	
-	public final Boolean isCorrect()
+	public final BooleanProperty isCorrect()
 	{
 		return this.correct;
 	}
