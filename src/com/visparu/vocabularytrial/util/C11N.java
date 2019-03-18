@@ -9,13 +9,15 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
+import com.visparu.vocabularytrial.model.log.Severity;
 
 public final class C11N
 {
-	private static final String	DEFAULT_CONFIG_FILE	= "config.json";
-	private static final String	DEFAULT_DRIVER		= "jdbc";
-	private static final String	DEFAULT_PROTOCOL	= "sqlite";
-	private static final String	DEFAULT_FILENAME	= IOUtil.DATA_PATH + "temp.db";
+	private static final String		DEFAULT_CONFIG_FILE		= "config.json";
+	private static final String		DEFAULT_DRIVER			= "jdbc";
+	private static final String		DEFAULT_PROTOCOL		= "sqlite";
+	private static final String		DEFAULT_FILENAME		= IOUtil.DATA_PATH + "temp.db";
+	private static final Severity	DEFAULT_LOGGING_LEVEL	= Severity.INFO;
 	
 	public static final String getDriver()
 	{
@@ -84,6 +86,18 @@ public final class C11N
 		C11N.setValue("locale", locale.toLanguageTag());
 		I18N.localeProperty().set(locale);
 		LogItem.debug("Locale changed to " + locale.getDisplayName());
+	}
+	
+	public static final Severity getLoggingLevel()
+	{
+		final String severityString = C11N.getValue("logging_level");
+		if (severityString == null)
+		{
+			Severity s = C11N.DEFAULT_LOGGING_LEVEL;
+			return s;
+		}
+		Severity s = Severity.valueOf(severityString);
+		return s;
 	}
 	
 	@SuppressWarnings("unchecked")

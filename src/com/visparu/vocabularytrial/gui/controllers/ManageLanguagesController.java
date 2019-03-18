@@ -38,20 +38,14 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 	private TableColumn<LanguageView, String>	tc_language;
 	@FXML
 	private TableColumn<LanguageView, Void>		tc_delete;
-	private Stage								stage;
+	
+	private Stage stage;
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new Stage with ManageLanguagesController");
-		LanguageComponent.instances.add(this);
-		VokAbfController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			LanguageComponent.instances.remove(this);
-			VokAbfController.instances.remove(this);
-			AddLanguageController.instances.forEach(i -> i.close());
-		});
+		
 		this.tc_language_code.setCellValueFactory(new PropertyValueFactory<LanguageView, String>("language_code"));
 		this.tc_language.setCellValueFactory(new PropertyValueFactory<LanguageView, String>("name"));
 		this.tc_delete.setCellFactory(e ->
@@ -86,6 +80,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 			return cell;
 		});
 		this.repopulateLanguages();
+		
 		LogItem.debug("Finished initializing new stage");
 	}
 	
@@ -93,7 +88,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 	public final void repopulateLanguages()
 	{
 		final ObservableList<LanguageView> lv_list = FXCollections.observableArrayList();
-		Language.getAll().forEach(l -> lv_list.add(new LanguageView(l.getLanguage_code(), l.getName())));
+		Language.getAll().forEach(l -> lv_list.add(new LanguageView(l)));
 		this.tv_languages.setItems(lv_list);
 		LogItem.debug("Repopulated languages");
 	}
@@ -122,6 +117,12 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 		LogItem.debug("Stage closed");
+	}
+	
+	@Override
+	public final void closeRequest()
+	{
+		AddLanguageController.instances.forEach(i -> i.close());
 	}
 	
 	@Override
