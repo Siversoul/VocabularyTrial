@@ -1,7 +1,6 @@
 package com.visparu.vocabularytrial.gui.controllers;
 
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -10,6 +9,7 @@ import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.WordCheck;
 import com.visparu.vocabularytrial.model.views.CheckView;
+import com.visparu.vocabularytrial.util.ConvertUtil;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -59,8 +59,8 @@ public final class TrialResultController implements Initializable, VokAbfControl
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with TrialResultController");
-
-		this.lb_date.setText(new SimpleDateFormat("dd.MM.yyyy HH:mm").format(this.trial.getDate()));
+	
+		this.lb_date.setText(ConvertUtil.convertDateToString(this.trial.getDateTime()));
 		this.lb_language_from.setText(this.trial.getLanguage_from().getName());
 		this.lb_language_to.setText(this.trial.getLanguage_to().getName());
 		this.tc_word.setCellValueFactory(new PropertyValueFactory<>("name"));

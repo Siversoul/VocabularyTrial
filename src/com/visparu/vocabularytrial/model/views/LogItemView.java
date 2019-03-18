@@ -1,8 +1,7 @@
 package com.visparu.vocabularytrial.model.views;
 
-import java.time.format.DateTimeFormatter;
-
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
+import com.visparu.vocabularytrial.util.ConvertUtil;
 
 public class LogItemView
 {
@@ -25,7 +24,7 @@ public class LogItemView
 	
 	public String getDatetime()
 	{
-		return this.logitem.getDatetime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		return ConvertUtil.convertDateToReadableString(this.logitem.getDatetime());
 	}
 	
 	public String getSeverity()

@@ -3,7 +3,6 @@ package com.visparu.vocabularytrial.model.db.entities;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +13,7 @@ import com.visparu.vocabularytrial.gui.interfaces.LogComponent;
 import com.visparu.vocabularytrial.model.db.VPS;
 import com.visparu.vocabularytrial.model.log.Severity;
 import com.visparu.vocabularytrial.util.C11N;
+import com.visparu.vocabularytrial.util.ConvertUtil;
 
 public final class LogItem
 {
@@ -275,7 +275,7 @@ public final class LogItem
 		
 		final Integer	log_id		= logitem.getLog_id();
 		final Integer	severity	= logitem.getSeverity().ordinal();
-		final String	datetime	= logitem.getDatetime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		final String	datetime	= ConvertUtil.convertDateToString(logitem.getDatetime());
 		final String	threadname	= logitem.getThreadName();
 		final String	function	= logitem.getFunction();
 		final String	message		= logitem.getMessage();
@@ -348,7 +348,7 @@ public final class LogItem
 				+ "SET datetime = ? "
 				+ "WHERE logitem_id = ?";
 		
-		final String datetime_s = datetime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		final String datetime_s = ConvertUtil.convertDateToString(datetime);
 		
 		VPS.execute(query, datetime_s, this.logitem_id);
 	}

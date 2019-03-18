@@ -1,8 +1,7 @@
 package com.visparu.vocabularytrial.model.views;
 
-import java.text.SimpleDateFormat;
-
 import com.visparu.vocabularytrial.model.db.entities.Trial;
+import com.visparu.vocabularytrial.util.ConvertUtil;
 
 public final class TrialView
 {
@@ -21,7 +20,7 @@ public final class TrialView
 	
 	public final String getDate()
 	{
-		String dateString = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(this.trial.getDate());
+		String dateString = ConvertUtil.convertDateToReadableString(this.trial.getDateTime());
 		return dateString;
 	}
 	
