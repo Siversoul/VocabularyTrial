@@ -81,7 +81,7 @@ public final class TrialController implements Initializable, VokAbfController
 	@Override
 	public final void close()
 	{
-		this.stage.setOnCloseRequest(null);
+		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 		LogItem.debug("Stage closed");
 	}
@@ -134,7 +134,7 @@ public final class TrialController implements Initializable, VokAbfController
 	{
 		if (event.getCode() == KeyCode.ESCAPE)
 		{
-			this.exit(null);
+			this.close();
 			return;
 		}
 		if (event.getCode() == KeyCode.UP)
