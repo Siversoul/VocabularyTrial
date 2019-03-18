@@ -126,7 +126,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		wt.setName(this.tf_word.getText());
 		wt.setTranslationsString(this.tf_translations.getText());
 		this.tv_vocabulary.getItems().add(wt);
-		LogItem.debug("Word + " + wt.getName() + " added to temporary list");
+		LogItem.debug("Word " + wt.getName() + " added to temporary list");
 		this.tf_word.setText("");
 		this.tf_translations.setText("");
 		this.tf_word.requestFocus();

@@ -39,7 +39,7 @@ public final class AddLanguageController implements VokAbfController
 	public final void confirm(final ActionEvent event)
 	{
 		Language.createLanguage(this.tf_language_code.getText(), this.tf_language.getText());
-		LogItem.info("Language " + this.tf_language + " created");
+		LogItem.info("Language " + this.tf_language.getText() + " created");
 		this.close();
 	}
 	
