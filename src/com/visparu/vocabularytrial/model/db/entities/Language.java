@@ -33,10 +33,7 @@ public final class Language
 	
 	public final static void createTable()
 	{
-		String query = "CREATE TABLE IF NOT EXISTS language ("
-				+ "language_code VARCHAR(2) PRIMARY KEY, "
-				+ "name VARCHAR(30)"
-				+ ")";
+		String query = "CREATE TABLE IF NOT EXISTS language (" + "language_code VARCHAR(2) PRIMARY KEY, " + "name VARCHAR(30)" + ")";
 		
 		VPS.execute(query);
 		
@@ -87,8 +84,7 @@ public final class Language
 	public final static void removeLanguage(final String language_code)
 	{
 		Language.cache.remove(language_code);
-		final String query = "DELETE FROM language "
-				+ "WHERE language_code = ?";
+		final String query = "DELETE FROM language " + "WHERE language_code = ?";
 		
 		VPS.execute(query, language_code);
 		
@@ -109,9 +105,7 @@ public final class Language
 	
 	private final static Language readEntity(final String language_code)
 	{
-		final String query = "SELECT * "
-				+ "FROM language "
-				+ "WHERE language_code = ?";
+		final String query = "SELECT * " + "FROM language " + "WHERE language_code = ?";
 		
 		try (final VPS vps = new VPS(query); ResultSet rs = vps.query(language_code))
 		{
@@ -137,8 +131,7 @@ public final class Language
 	
 	private final static void writeEntity(final Language language)
 	{
-		final String query = "INSERT INTO language "
-				+ "VALUES(?, ?)";
+		final String query = "INSERT INTO language " + "VALUES(?, ?)";
 		
 		final String	language_code	= language.getLanguage_code();
 		final String	name			= language.getName();
@@ -155,9 +148,7 @@ public final class Language
 	
 	public final void setLanguage_code(final String language_code)
 	{
-		final String query = "UPDATE language "
-				+ "SET language_code = ? "
-				+ "WHERE language_code = ?";
+		final String query = "UPDATE language " + "SET language_code = ? " + "WHERE language_code = ?";
 		
 		VPS.execute(query, language_code, this.language_code);
 		Language.cache.remove(this.language_code);
@@ -174,9 +165,7 @@ public final class Language
 	
 	public final void setName(final String name)
 	{
-		final String query = "UPDATE language "
-				+ "SET name = ? "
-				+ "WHERE language_code = ?";
+		final String query = "UPDATE language " + "SET name = ? " + "WHERE language_code = ?";
 		
 		VPS.execute(query, name, this.language_code);
 		this.name = name;
@@ -186,10 +175,7 @@ public final class Language
 	
 	public final List<Word> getWords()
 	{
-		final String query = "SELECT * "
-				+ "FROM word "
-				+ "WHERE language_code = ? "
-				+ "ORDER BY word.name";
+		final String query = "SELECT * " + "FROM word " + "WHERE language_code = ? " + "ORDER BY word.name";
 		
 		try (final VPS vps = new VPS(query); ResultSet rs = vps.query(this.language_code))
 		{

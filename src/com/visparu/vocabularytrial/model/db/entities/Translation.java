@@ -32,13 +32,8 @@ public final class Translation
 	
 	public final static void createTable()
 	{
-		String query = "CREATE TABLE IF NOT EXISTS translation("
-				+ "word1_id INTEGER, "
-				+ "word2_id INTEGER, "
-				+ "PRIMARY KEY(word1_id, word2_id), "
-				+ "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, "
-				+ "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE"
-				+ ")";
+		String query = "CREATE TABLE IF NOT EXISTS translation(" + "word1_id INTEGER, " + "word2_id INTEGER, " + "PRIMARY KEY(word1_id, word2_id), "
+			+ "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, " + "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE" + ")";
 		
 		VPS.execute(query);
 		
@@ -91,9 +86,7 @@ public final class Translation
 	
 	public final static void removeTranslation(final Word w1, final Word w2)
 	{
-		final String query = "DELETE FROM translation "
-				+ "WHERE word1_id = ? "
-				+ "AND word2_id = ?";
+		final String query = "DELETE FROM translation " + "WHERE word1_id = ? " + "AND word2_id = ?";
 		
 		final Integer	word1_id	= w1.getWord_id();
 		final Integer	word2_id	= w2.getWord_id();
@@ -116,10 +109,7 @@ public final class Translation
 	
 	public final static Translation readEntity(Word w1, Word w2)
 	{
-		final String query = "SELECT * "
-				+ "FROM translation "
-				+ "WHERE word1_id = ? "
-				+ "AND word2_id = ?";
+		final String query = "SELECT * " + "FROM translation " + "WHERE word1_id = ? " + "AND word2_id = ?";
 		
 		final Integer	word1_id	= w1.getWord_id();
 		final Integer	word2_id	= w2.getWord_id();
@@ -143,8 +133,7 @@ public final class Translation
 	
 	private final static void writeEntity(final Translation t)
 	{
-		final String query = "INSERT INTO translation "
-				+ "VALUES(?, ?)";
+		final String query = "INSERT INTO translation " + "VALUES(?, ?)";
 		
 		final Integer	word1_id	= t.getWord1_id();
 		final Integer	word2_id	= t.getWord2_id();

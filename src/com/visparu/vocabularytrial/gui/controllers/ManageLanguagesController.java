@@ -38,13 +38,14 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 	private TableColumn<LanguageView, String>	tc_language;
 	@FXML
 	private TableColumn<LanguageView, Void>		tc_delete;
-	private Stage								stage;
+	
+	private Stage stage;
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new Stage with ManageLanguagesController");
-
+		
 		this.tc_language_code.setCellValueFactory(new PropertyValueFactory<LanguageView, String>("language_code"));
 		this.tc_language.setCellValueFactory(new PropertyValueFactory<LanguageView, String>("name"));
 		this.tc_delete.setCellFactory(e ->
