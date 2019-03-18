@@ -26,12 +26,8 @@ public final class Word
 	
 	public static final void createTable()
 	{
-		final String query = "CREATE TABLE IF NOT EXISTS word("
-				+ "word_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-				+ "name VARCHAR(100), "
-				+ "language_code VARCHAR(2), "
-				+ "FOREIGN KEY(language_code) REFERENCES language(language_code) ON UPDATE CASCADE"
-				+ ")";
+		final String query = "CREATE TABLE IF NOT EXISTS word(" + "word_id INTEGER PRIMARY KEY AUTOINCREMENT, " + "name VARCHAR(100), " + "language_code VARCHAR(2), "
+			+ "FOREIGN KEY(language_code) REFERENCES language(language_code) ON UPDATE CASCADE" + ")";
 		
 		VPS.execute(query);
 		
@@ -77,8 +73,7 @@ public final class Word
 	
 	public static final void removeWord(final Integer word_id)
 	{
-		final String query = "DELETE FROM word "
-				+ "WHERE word_id = ?";
+		final String query = "DELETE FROM word " + "WHERE word_id = ?";
 		
 		VPS.execute(query, word_id);
 		Word.cache.remove(word_id);
@@ -88,8 +83,7 @@ public final class Word
 	
 	public static final void removeWord(final String name, final Language l)
 	{
-		final String query = "DELETE FROM word "
-				+ "WHERE word_id = ?";
+		final String query = "DELETE FROM word " + "WHERE word_id = ?";
 		
 		Word word = Word.get(name, l);
 		if (word == null)
@@ -118,9 +112,7 @@ public final class Word
 	
 	private static final Word readEntity(Integer word_id)
 	{
-		final String query = "SELECT * "
-				+ "FROM word "
-				+ "WHERE word_id = ?";
+		final String query = "SELECT * " + "FROM word " + "WHERE word_id = ?";
 		
 		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(word_id))
 		{
@@ -145,10 +137,7 @@ public final class Word
 	
 	private static final Word readEntity(final String name, final String language_code)
 	{
-		final String query = "SELECT * "
-				+ "FROM word "
-				+ "WHERE name = ? "
-				+ "AND language_code = ?";
+		final String query = "SELECT * " + "FROM word " + "WHERE name = ? " + "AND language_code = ?";
 		
 		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(name, language_code))
 		{
@@ -172,8 +161,7 @@ public final class Word
 	
 	private static final Integer writeEntity(final Word word)
 	{
-		final String query = "INSERT INTO word(name, language_code) "
-				+ "VALUES(?, ?)";
+		final String query = "INSERT INTO word(name, language_code) " + "VALUES(?, ?)";
 		
 		final String	name			= word.getName();
 		final String	language_code	= word.getLanguage().getLanguage_code();
@@ -208,9 +196,7 @@ public final class Word
 	
 	public final void setName(final String name)
 	{
-		final String query = "UPDATE word "
-				+ "SET name = ? "
-				+ "WHERE word_id = ?";
+		final String query = "UPDATE word " + "SET name = ? " + "WHERE word_id = ?";
 		
 		VPS.execute(query, name, this.word_id);
 		this.name = name;
@@ -225,9 +211,7 @@ public final class Word
 	
 	public final void setLanguage(final Language l)
 	{
-		final String query = "UPDATE word "
-				+ "SET language_code = ? "
-				+ "WHERE word_id = ?";
+		final String query = "UPDATE word " + "SET language_code = ? " + "WHERE word_id = ?";
 		
 		final String language_code = l.getLanguage_code();
 		
@@ -239,19 +223,8 @@ public final class Word
 	
 	public final List<Translation> getTranslations(final Language l)
 	{
-		final String query = "SELECT word1_id, word2_id "
-				+ "FROM translation t "
-				+ "JOIN word w2 "
-				+ "ON t.word2_id = w2.word_id "
-				+ "WHERE t.word1_id = ? "
-				+ "AND w2.language_code = ? "
-				+ "UNION "
-				+ "SELECT word1_id, word2_id "
-				+ "FROM translation t "
-				+ "JOIN word w1 "
-				+ "ON t.word1_id = w1.word_id "
-				+ "WHERE t.word2_id = ? "
-				+ "AND w1.language_code = ?";
+		final String query = "SELECT word1_id, word2_id " + "FROM translation t " + "JOIN word w2 " + "ON t.word2_id = w2.word_id " + "WHERE t.word1_id = ? " + "AND w2.language_code = ? " + "UNION "
+			+ "SELECT word1_id, word2_id " + "FROM translation t " + "JOIN word w1 " + "ON t.word1_id = w1.word_id " + "WHERE t.word2_id = ? " + "AND w1.language_code = ?";
 		
 		final String language_code = l.getLanguage_code();
 		
@@ -279,12 +252,7 @@ public final class Word
 	
 	public final List<WordCheck> getWordChecks(final Language l)
 	{
-		final String query = "SELECT c.trial_id "
-				+ "FROM wordcheck c "
-				+ "JOIN trial t "
-				+ "ON c.trial_id = t.trial_id "
-				+ "WHERE c.word_id = ? "
-				+ "AND t.language_code_to = ?";
+		final String query = "SELECT c.trial_id " + "FROM wordcheck c " + "JOIN trial t " + "ON c.trial_id = t.trial_id " + "WHERE c.word_id = ? " + "AND t.language_code_to = ?";
 		
 		final String language_code = l.getLanguage_code();
 		

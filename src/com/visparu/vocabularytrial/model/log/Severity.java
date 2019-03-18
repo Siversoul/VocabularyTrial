@@ -4,11 +4,7 @@ import javafx.scene.paint.Color;
 
 public enum Severity
 {
-	DEBUG,
-	INFO,
-	WARNING,
-	ERROR,
-	CRITICAL;
+	DEBUG, INFO, WARNING, ERROR, CRITICAL;
 	
 	public static Color getBackgroundColor(Severity severity)
 	{

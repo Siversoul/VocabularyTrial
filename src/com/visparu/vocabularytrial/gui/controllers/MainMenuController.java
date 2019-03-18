@@ -61,26 +61,27 @@ import javafx.stage.Stage;
 public final class MainMenuController implements Initializable, LanguageComponent, WordComponent
 {
 	@FXML
-	private Menu							mn_languages;
+	private Menu									mn_languages;
 	@FXML
-	private CheckMenuItem					cmi_trial_randomize;
+	private CheckMenuItem							cmi_trial_randomize;
 	@FXML
-	private ChoiceBox<Language>				cb_language_from;
+	private ChoiceBox<Language>						cb_language_from;
 	@FXML
-	private ChoiceBox<Language>				cb_language_to;
+	private ChoiceBox<Language>						cb_language_to;
 	@FXML
-	private TableView<WordToLanguageView>				tv_vocabulary;
+	private TableView<WordToLanguageView>			tv_vocabulary;
 	@FXML
 	private TableColumn<WordToLanguageView, String>	tc_word;
 	@FXML
 	private TableColumn<WordToLanguageView, String>	tc_translations;
 	@FXML
-	private HBox							hb_status_bar;
+	private HBox									hb_status_bar;
 	@FXML
-	private Label							lb_status;
+	private Label									lb_status;
 	@FXML
-	private ImageView						iv_status_icon;
-	private final Stage						stage;
+	private ImageView								iv_status_icon;
+	
+	private final Stage stage;
 	
 	public MainMenuController(final Stage stage)
 	{
@@ -191,7 +192,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			this.tv_vocabulary.getItems().clear();
 			return;
 		}
-		final List<Word>				wordsRaw	= language_from.getWords();
+		final List<Word>							wordsRaw	= language_from.getWords();
 		final ObservableList<WordToLanguageView>	wordViews	= FXCollections.observableArrayList();
 		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty()).forEach(w -> wordViews.add(new WordToLanguageView(w, language_to)));
 		this.tv_vocabulary.setItems(wordViews);

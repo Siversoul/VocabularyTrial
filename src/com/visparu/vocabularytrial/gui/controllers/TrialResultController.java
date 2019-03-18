@@ -47,8 +47,9 @@ public final class TrialResultController implements Initializable, VokAbfControl
 	private Label								lb_wrong;
 	@FXML
 	private Label								lb_perc;
-	private Stage								stage;
-	private final Trial							trial;
+	
+	private Stage		stage;
+	private final Trial	trial;
 	
 	public TrialResultController(final Trial trial)
 	{
