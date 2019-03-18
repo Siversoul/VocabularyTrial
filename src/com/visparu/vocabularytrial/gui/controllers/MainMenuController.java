@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -367,14 +367,14 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		for (Word w : words)
 		{
 			final List<WordCheck>	wordchecks	= w.getWordChecks(l_to);
-			Date					date		= null;
+			LocalDateTime			datetime	= null;
 			WordCheck				latestCheck	= null;
 			for (final WordCheck wc : wordchecks)
 			{
 				final Trial t = wc.getTrial();
-				if (date == null || date.before(t.getDate()))
+				if (datetime == null || datetime.isBefore(t.getDateTime()))
 				{
-					date		= t.getDate();
+					datetime	= t.getDateTime();
 					latestCheck	= wc;
 				}
 			}

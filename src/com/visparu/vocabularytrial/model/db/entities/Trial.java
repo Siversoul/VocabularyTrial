@@ -2,45 +2,39 @@ package com.visparu.vocabularytrial.model.db.entities;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
 import com.visparu.vocabularytrial.model.db.VPS;
+import com.visparu.vocabularytrial.util.ConvertUtil;
 
 public final class Trial
 {
 	private static final Map<Integer, Trial>	cache	= new HashMap<>();
 	private Integer								trial_id;
-	private final Date							date;
+	private final LocalDateTime					datetime;
 	private final Language						language_from;
 	private final Language						language_to;
 	
-	public Trial(final Integer trial_id, final Date date, final Language language_from, final Language language_to)
+	public Trial(final Integer trial_id, final LocalDateTime datetime, final Language language_from, final Language language_to)
 	{
 		this.trial_id		= trial_id;
-		this.date			= date;
+		this.datetime		= datetime;
 		this.language_from	= language_from;
 		this.language_to	= language_to;
 		
-		LogItem.debug("Initialized new trial " + Trial.getDateFormatter().format(date) + "");
+		LogItem.debug("Initialized new trial " + ConvertUtil.convertDateToString(datetime) + "");
 	}
 	
 	public static final void createTable()
 	{
-		String query = "CREATE TABLE IF NOT EXISTS trial("
-				+ "trial_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-				+ "datetime VARCHAR(23), "
-				+ "language_code_from VARCHAR(2), "
-				+ "language_code_to VARCHAR(2), "
-				+ "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
-				+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE"
-				+ ")";
+		String query = "CREATE TABLE IF NOT EXISTS trial(" + "trial_id INTEGER PRIMARY KEY AUTOINCREMENT," + "datetime VARCHAR(23), " + "language_code_from VARCHAR(2), "
+			+ "language_code_to VARCHAR(2), " + "FOREIGN KEY(language_code_from) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE, "
+			+ "FOREIGN KEY(language_code_to) REFERENCES language(language_code) ON UPDATE CASCADE ON DELETE CASCADE" + ")";
 		
 		VPS.execute(query);
 		
@@ -65,7 +59,7 @@ public final class Trial
 		return t;
 	}
 	
-	public static final Trial createTrial(final Date date, final Language language_from, final Language language_to)
+	public static final Trial createTrial(final LocalDateTime date, final Language language_from, final Language language_to)
 	{
 		final Trial		t			= new Trial(-1, date, language_from, language_to);
 		final Integer	trial_id	= Trial.writeEntity(t);
@@ -77,10 +71,9 @@ public final class Trial
 	
 	public static final void removeTrial(final Integer trial_id)
 	{
-		final String query = "DELETE FROM trial "
-				+ "WHERE trial_id = ?";
+		final String query = "DELETE FROM trial " + "WHERE trial_id = ?";
 		
-		String date = Trial.getDateFormatter().format(Trial.get(trial_id));
+		String date = ConvertUtil.convertDateToString(Trial.get(trial_id).getDateTime());
 		
 		VPS.execute(query, trial_id);
 		Trial.cache.remove(trial_id);
@@ -100,27 +93,25 @@ public final class Trial
 	
 	private static final Trial readEntity(final Integer trial_id)
 	{
-		final String query = "SELECT * "
-				+ "FROM trial "
-				+ "WHERE trial_id = ?";
+		final String query = "SELECT * " + "FROM trial " + "WHERE trial_id = ?";
 		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(trial_id))
 		{
 			if (rs.next())
 			{
-				final String	dateString		= rs.getString("datetime");
-				final Date		date			= Trial.getDateFormatter().parse(dateString);
-				final String	l_fromString	= rs.getString("language_code_from");
-				final Language	l_from			= Language.get(l_fromString);
-				final String	l_toString		= rs.getString("language_code_to");
-				final Language	l_to			= Language.get(l_toString);
-				final Trial		t				= new Trial(trial_id, date, l_from, l_to);
+				final String		dateString		= rs.getString("datetime");
+				final LocalDateTime	date			= ConvertUtil.convertStringToDate(dateString);
+				final String		l_fromString	= rs.getString("language_code_from");
+				final Language		l_from			= Language.get(l_fromString);
+				final String		l_toString		= rs.getString("language_code_to");
+				final Language		l_to			= Language.get(l_toString);
+				final Trial			t				= new Trial(trial_id, date, l_from, l_to);
 				Trial.cache.put(trial_id, t);
 				
 				return t;
 			}
 			return null;
 		}
-		catch (SQLException | ParseException e)
+		catch (SQLException e)
 		{
 			e.printStackTrace();
 			return null;
@@ -129,10 +120,9 @@ public final class Trial
 	
 	private static final Integer writeEntity(final Trial trial)
 	{
-		final String query = "INSERT INTO trial(datetime, language_code_from, language_code_to) "
-				+ "VALUES(?, ?, ?)";
+		final String query = "INSERT INTO trial(datetime, language_code_from, language_code_to) " + "VALUES(?, ?, ?)";
 		
-		final String	dateString			= Trial.getDateFormatter().format(trial.getDate());
+		final String	dateString			= ConvertUtil.convertDateToString(trial.getDateTime());
 		final String	language_code_from	= trial.getLanguage_from().getLanguage_code();
 		final String	language_code_to	= trial.getLanguage_to().getLanguage_code();
 		
@@ -150,10 +140,7 @@ public final class Trial
 	
 	public static final List<Trial> getTrials(final Language l_from, final Language l_to)
 	{
-		final String query = "SELECT trial_id "
-				+ "FROM trial "
-				+ "WHERE language_code_from = ? "
-				+ "AND language_code_to = ?";
+		final String query = "SELECT trial_id " + "FROM trial " + "WHERE language_code_from = ? " + "AND language_code_to = ?";
 		
 		final String	language_code_from	= l_from.getLanguage_code();
 		final String	language_code_to	= l_to.getLanguage_code();
@@ -176,12 +163,6 @@ public final class Trial
 		}
 	}
 	
-	public static final SimpleDateFormat getDateFormatter()
-	{
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
-		return sdf;
-	}
-	
 	public final Integer getTrial_id()
 	{
 		return this.trial_id;
@@ -192,9 +173,9 @@ public final class Trial
 		this.trial_id = trial_id;
 	}
 	
-	public final Date getDate()
+	public final LocalDateTime getDateTime()
 	{
-		return this.date;
+		return this.datetime;
 	}
 	
 	public final Language getLanguage_from()
@@ -209,9 +190,7 @@ public final class Trial
 	
 	public final List<WordCheck> getWordChecks()
 	{
-		final String query = "SELECT * "
-				+ "FROM wordcheck "
-				+ "WHERE trial_id = ?";
+		final String query = "SELECT * " + "FROM wordcheck " + "WHERE trial_id = ?";
 		
 		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(this.trial_id))
 		{

@@ -1,8 +1,9 @@
 package com.visparu.vocabularytrial.debug;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,16 +108,14 @@ public final class Debug
 			final Language			l_from	= l_list.get(rand.nextInt(l_list.size()));
 			final List<Language>	lt_list	= new ArrayList<>(l_list);
 			lt_list.remove(l_from);
-			final Language	l_to		= lt_list.get(rand.nextInt(lt_list.size()));
-			final Calendar	cal			= Calendar.getInstance();
-			final int		year		= rand.nextInt(2) + Calendar.getInstance().get(Calendar.YEAR);
-			final int		month		= rand.nextInt(12);
-			final int		date		= rand.nextInt(28) + 1;
-			final int		hourOfDay	= rand.nextInt(24);
-			final int		minute		= rand.nextInt(60);
-			final int		second		= rand.nextInt(60);
-			cal.set(year, month, date, hourOfDay, minute, second);
-			final Date			d			= cal.getTime();
+			final Language		l_to		= lt_list.get(rand.nextInt(lt_list.size()));
+			final int			year		= rand.nextInt(2) + LocalDate.now().get(ChronoField.YEAR);
+			final int			month		= rand.nextInt(12);
+			final int			date		= rand.nextInt(28) + 1;
+			final int			hour		= rand.nextInt(24);
+			final int			minute		= rand.nextInt(60);
+			final int			second		= rand.nextInt(60);
+			final LocalDateTime	d			= LocalDateTime.of(year, month, date, hour, minute, second);
 			final Trial			t			= Trial.createTrial(d, l_from, l_to);
 			final int			wca			= rand.nextInt(80) + 20;
 			final List<Word>	wlfrom_list	= l_from.getWords().stream().filter(w -> !w.getTranslations(l_to).isEmpty()).collect(Collectors.toList());

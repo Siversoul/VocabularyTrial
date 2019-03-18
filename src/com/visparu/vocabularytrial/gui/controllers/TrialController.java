@@ -1,8 +1,7 @@
 package com.visparu.vocabularytrial.gui.controllers;
 
 import java.net.URL;
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.StringJoiner;
@@ -58,7 +57,7 @@ public final class TrialController implements Initializable, VokAbfController
 	{
 		this.language_to	= language_to;
 		this.words			= words;
-		this.trial			= Trial.createTrial(Date.from(Instant.now()), language_from, language_to);
+		this.trial			= Trial.createTrial(LocalDateTime.now(), language_from, language_to);
 	}
 	
 	@Override

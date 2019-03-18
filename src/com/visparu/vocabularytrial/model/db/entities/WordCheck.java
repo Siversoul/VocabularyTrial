@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
 import com.visparu.vocabularytrial.model.db.VPS;
+import com.visparu.vocabularytrial.util.ConvertUtil;
 
 public final class WordCheck
 {
@@ -89,7 +90,7 @@ public final class WordCheck
 		VPS.execute(query, word_id, trial_id);
 		WordCheck.cache.remove(WordCheck.createKeyHash(word.getWord_id(), trial.getTrial_id()));
 		
-		LogItem.debug("Wordcheck for word '" + word.getName() + "' and trial at " + Trial.getDateFormatter().format(trial.getDate()) + " removed");
+		LogItem.debug("Wordcheck for word '" + word.getName() + "' and trial at " + ConvertUtil.convertDateToString(trial.getDateTime()) + " removed");
 	}
 	
 	public static final void removeAllWordChecks()
@@ -138,7 +139,7 @@ public final class WordCheck
 		final Word		word			= check.getWord();
 		final Trial		trial			= check.getTrial();
 		final Boolean	correct			= check.isCorrect();
-		final String	trial_datetime	= Trial.getDateFormatter().format(trial.getDate());
+		final String	trial_datetime	= ConvertUtil.convertDateToString(trial.getDateTime());
 		
 		final Integer	word_id			= word.getWord_id();
 		final Integer	trial_id		= trial.getTrial_id();
