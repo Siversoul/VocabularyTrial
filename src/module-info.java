@@ -1,7 +1,3 @@
-/**
- * @author z003p1nj
- *
- */
 module visparu.vocabularytrial
 {
 	requires java.sql;

@@ -47,9 +47,10 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	private TableColumn<TrialView, String>	tc_percentage;
 	@FXML
 	private TableColumn<TrialView, Void>	tc_view;
-	private Stage							stage;
-	private final Language					init_l_from;
-	private final Language					init_l_to;
+	
+	private Stage			stage;
+	private final Language	init_l_from;
+	private final Language	init_l_to;
 	
 	public TrialListController(final Language init_l_from, final Language init_l_to)
 	{
@@ -61,15 +62,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with TrialListController...");
-		VokAbfController.instances.add(this);
-		LanguageComponent.instances.add(this);
-		TrialComponent.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-			LanguageComponent.instances.remove(this);
-			TrialComponent.instances.remove(this);
-		});
+		
 		this.repopulateLanguages_from();
 		this.cb_language_from.getSelectionModel().select(this.init_l_from);
 		this.repopulateLanguages_to();
@@ -120,6 +113,7 @@ public final class TrialListController implements Initializable, VokAbfControlle
 			};
 			return cell;
 		});
+		
 		LogItem.debug("New stage initialized");
 	}
 	

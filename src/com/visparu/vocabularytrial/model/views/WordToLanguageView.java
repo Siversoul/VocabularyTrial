@@ -7,12 +7,12 @@ import com.visparu.vocabularytrial.model.db.entities.Language;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 
-public final class WordView
+public final class WordToLanguageView
 {
 	private final Word		w;
 	private final Language	l;
 	
-	public WordView(final Word w, final Language l)
+	public WordToLanguageView(final Word w, final Language l)
 	{
 		this.w	= w;
 		this.l	= l;

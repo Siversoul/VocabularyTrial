@@ -1,14 +1,16 @@
 package com.visparu.vocabularytrial.model.db.entities;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
-import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.VPS;
+import com.visparu.vocabularytrial.util.ConvertUtil;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 public final class WordCheck
 {
@@ -16,28 +18,32 @@ public final class WordCheck
 	private final Word								word;
 	private final Trial								trial;
 	private final String							answerString;
-	private final Boolean							correct;
+	private final BooleanProperty					correct;
 	
 	private WordCheck(final Word word, final Trial trial, final String answerString, final Boolean correct)
 	{
 		this.word			= word;
 		this.trial			= trial;
 		this.answerString	= answerString;
-		this.correct		= correct;
+		this.correct		= new SimpleBooleanProperty(correct);
 		LogItem.debug("Initialized new wordcheck '" + word.getName() + "' (" + correct + ")");
 	}
 	
 	public static final void createTable()
 	{
-		ConnectionDetails.getInstance().executeSimpleStatement(
-			"CREATE TABLE IF NOT EXISTS wordcheck(" + "word_id INTEGER, " + "trial_id INTEGER, " + "answerString VARCHAR(200), " + "correct INTEGER, " + "PRIMARY KEY(word_id, trial_id), "
-				+ "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, " + "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE)");
+		final String query = "CREATE TABLE IF NOT EXISTS wordcheck(" + "word_id INTEGER, " + "trial_id INTEGER, " + "answerString VARCHAR(200), " + "correct INTEGER, "
+			+ "PRIMARY KEY(word_id, trial_id), " + "FOREIGN KEY(word_id) REFERENCES word(word_id) ON UPDATE CASCADE ON DELETE CASCADE, "
+			+ "FOREIGN KEY(trial_id) REFERENCES trial(trial_id) ON UPDATE CASCADE ON DELETE CASCADE" + ")";
+		
+		VPS.execute(query);
+		
 		LogItem.debug("Wordcheck table created");
 	}
 	
 	public static final void clearCache()
 	{
 		WordCheck.cache.clear();
+		
 		LogItem.debug("Cleared wordcheck cache");
 	}
 	
@@ -46,6 +52,7 @@ public final class WordCheck
 		final Integer	word_id		= word.getWord_id();
 		final Integer	trial_id	= trial.getTrial_id();
 		final int		hash		= WordCheck.createKeyHash(word_id, trial_id);
+		
 		if (WordCheck.cache.containsKey(hash))
 		{
 			WordCheck wc = WordCheck.cache.get(hash);
@@ -70,73 +77,69 @@ public final class WordCheck
 	
 	public static final void removeWordCheck(final Word word, final Trial trial)
 	{
+		final String query = "DELETE FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
+		
+		final Integer	word_id		= word.getWord_id();
+		final Integer	trial_id	= trial.getTrial_id();
+		
+		VPS.execute(query, word_id, trial_id);
 		WordCheck.cache.remove(WordCheck.createKeyHash(word.getWord_id(), trial.getTrial_id()));
-		final String		query	= "DELETE FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
-		{
-			pstmt.setInt(1, word.getWord_id());
-			pstmt.setInt(2, trial.getTrial_id());
-			pstmt.execute();
-			LogItem.debug("Wordcheck for word '" + word.getName() + "' and trial at " + Trial.getDateFormatter().format(trial.getDate()) + " removed");
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		
+		LogItem.debug("Wordcheck for word '" + word.getName() + "' and trial at " + ConvertUtil.convertDateToString(trial.getDateTime()) + " removed");
 	}
 	
 	public static final void removeAllWordChecks()
 	{
+		final String query = "DELETE FROM wordcheck";
+		
+		VPS.execute(query);
 		WordCheck.clearCache();
-		ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
+		
 		LogItem.debug("All wordchecks removed");
 	}
 	
 	private static final WordCheck readEntity(final Integer word_id, final Integer trial_id)
 	{
-		final String		query	= "SELECT * " + "FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
+		final String query = "SELECT * " + "FROM wordcheck " + "WHERE word_id = ? " + "AND trial_id = ?";
+		
+		try (final VPS vps = new VPS(query); final ResultSet rs = vps.query(word_id, trial_id))
 		{
-			pstmt.setInt(1, word_id);
-			pstmt.setInt(2, trial_id);
-			final ResultSet rs = pstmt.executeQuery();
 			if (rs.next())
 			{
 				final String	answerString	= rs.getString("answerString");
 				final Boolean	correct			= rs.getInt("correct") == 0 ? false : true;
 				final WordCheck	c				= new WordCheck(Word.get(word_id), Trial.get(trial_id), answerString, correct);
+				
 				WordCheck.cache.put(WordCheck.createKeyHash(word_id, trial_id), c);
-				rs.close();
+				
 				return c;
 			}
-			rs.close();
+			return null;
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 	
 	private static final void writeEntity(final WordCheck check)
 	{
-		final String		query	= "INSERT INTO wordcheck " + "VALUES(?, ?, ?, ?)";
-		final Connection	conn	= ConnectionDetails.getInstance().getConnection();
-		try (final PreparedStatement pstmt = conn.prepareStatement(query))
-		{
-			pstmt.setInt(1, check.getWord().getWord_id());
-			pstmt.setInt(2, check.getTrial().getTrial_id());
-			pstmt.setString(3, check.getAnswerString());
-			pstmt.setInt(4, check.isCorrect() ? 1 : 0);
-			pstmt.executeUpdate();
-			LogItem.debug("Inserted new wordcheck entity " + check.getWord() + " (" + check.isCorrect() + ") at " + Trial.getDateFormatter().format(check.getTrial().getDate()));
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		final String query = "INSERT INTO wordcheck " + "VALUES(?, ?, ?, ?)";
+		
+		final Word		word			= check.getWord();
+		final Trial		trial			= check.getTrial();
+		final Boolean	correct			= check.isCorrect().get();
+		final String	trial_datetime	= ConvertUtil.convertDateToString(trial.getDateTime());
+		
+		final Integer	word_id			= word.getWord_id();
+		final Integer	trial_id		= trial.getTrial_id();
+		final String	answerString	= check.getAnswerString();
+		final Integer	correct_i		= correct ? 1 : 0;
+		
+		VPS.execute(query, word_id, trial_id, answerString, correct_i);
+		
+		LogItem.debug("Inserted new wordcheck entity " + word + " (" + correct + ") at " + trial_datetime);
 	}
 	
 	private static final Integer createKeyHash(Integer k1, Integer k2)
@@ -166,7 +169,7 @@ public final class WordCheck
 		return this.answerString;
 	}
 	
-	public final Boolean isCorrect()
+	public final BooleanProperty isCorrect()
 	{
 		return this.correct;
 	}

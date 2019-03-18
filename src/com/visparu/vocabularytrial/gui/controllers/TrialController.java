@@ -1,10 +1,10 @@
 package com.visparu.vocabularytrial.gui.controllers;
 
 import java.net.URL;
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.StringJoiner;
 
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
 import com.visparu.vocabularytrial.model.db.entities.Language;
@@ -22,7 +22,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
@@ -58,29 +57,17 @@ public final class TrialController implements Initializable, VokAbfController
 	{
 		this.language_to	= language_to;
 		this.words			= words;
-		this.trial			= Trial.createTrial(Date.from(Instant.now()), language_from, language_to);
+		this.trial			= Trial.createTrial(LocalDateTime.now(), language_from, language_to);
 	}
 	
 	@Override
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with TrialController");
-		VokAbfController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-			if (this.trial.getWordChecks().isEmpty())
-			{
-				return;
-			}
-			final TrialResultController	trc		= new TrialResultController(this.trial);
-			final StringBinding			title	= I18N.createStringBinding("gui.result.title");
-			GUIUtil.createNewStage("TrialResult", trc, title);
-		});
-		this.bt_correct.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.correct.tooltip").get()));
-		this.bt_wrong.setTooltip(new Tooltip(I18N.createStringBinding("gui.trial.wrong.tooltip").get()));
+		
 		this.ta_answer.requestFocus();
 		this.cycle(State.QUESTION);
+		
 		LogItem.debug("Finished initializing new stage");
 	}
 	
@@ -93,9 +80,21 @@ public final class TrialController implements Initializable, VokAbfController
 	@Override
 	public final void close()
 	{
-		this.stage.setOnCloseRequest(null);
+		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 		LogItem.debug("Stage closed");
+	}
+	
+	@Override
+	public final void closeRequest()
+	{
+		if (this.trial.getWordChecks().isEmpty())
+		{
+			return;
+		}
+		final TrialResultController	trc		= new TrialResultController(this.trial);
+		final StringBinding			title	= I18N.createStringBinding("gui.result.title");
+		GUIUtil.createNewStage("TrialResult", trc, title);
 	}
 	
 	@FXML
@@ -134,20 +133,20 @@ public final class TrialController implements Initializable, VokAbfController
 	{
 		if (event.getCode() == KeyCode.ESCAPE)
 		{
-			this.exit(null);
+			this.close();
 			return;
 		}
-		if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.ENTER)
+		if (event.getCode() == KeyCode.UP)
 		{
 			this.solution(null);
 			return;
 		}
-		if (event.isControlDown() && event.getCode() == KeyCode.ENTER)
+		if (event.getCode() == KeyCode.LEFT)
 		{
 			this.correct(null);
 			return;
 		}
-		if (event.isControlDown() && event.getCode() == KeyCode.BACK_SPACE)
+		if (event.getCode() == KeyCode.RIGHT)
 		{
 			this.wrong(null);
 			return;
@@ -212,14 +211,11 @@ public final class TrialController implements Initializable, VokAbfController
 		else
 		{
 			final List<Translation>	translations	= question.getTranslations(this.language_to);
-			final StringBuilder		sb				= new StringBuilder();
+			final StringJoiner		sj				= new StringJoiner("\n");
 			for (int i = 0; i < translations.size(); i++)
 			{
 				final Translation t = translations.get(i);
-				if (i != 0)
-				{
-					sb.append("\n");
-				}
+				
 				final String name;
 				if (question.getWord_id() == t.getWord1_id())
 				{
@@ -229,9 +225,10 @@ public final class TrialController implements Initializable, VokAbfController
 				{
 					name = t.getWord1().getName();
 				}
-				sb.append(name);
+				
+				sj.add(name);
 			}
-			this.ta_solution.setText(sb.toString());
+			this.ta_solution.setText(sj.toString());
 		}
 	}
 }

@@ -9,7 +9,7 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity"
 	minHeight="-Infinity" minWidth="-Infinity"
-	xmlns="http://javafx.com/javafx/8.0.171"
+	xmlns="http://javafx.com/javafx/9.0.1"
 	xmlns:fx="http://javafx.com/fxml/1">
 	<children>
 		<HBox>
@@ -27,7 +27,7 @@
 				<HBox alignment="CENTER_LEFT" spacing="5.0">
 					<children>
 						<Label text="%gui.addlanguage.language.label" />
-						<TextField fx:id="tf_language"
+						<TextField fx:id="tf_language" onAction="#confirm"
 							promptText="%gui.addlanguage.language.sample" />
 					</children>
 					<HBox.margin>

@@ -56,14 +56,6 @@ public class LogDetailController implements Initializable, VokAbfController
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
-		VokAbfController.instances.add(this);
-		LogDetailController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-			LogDetailController.instances.remove(this);
-		});
-		
 		this.tf_logitem_id.setText(String.valueOf(this.liv.getLogitem_id()));
 		this.tf_log_id.setText(String.valueOf(this.liv.getLog_id()));
 		this.tf_message.setText(this.liv.getMessage());
@@ -74,47 +66,9 @@ public class LogDetailController implements Initializable, VokAbfController
 		this.ta_description.setText(this.liv.getDescription());
 		
 		Severity	severity	= Severity.valueOf(this.liv.getSeverity());
-		Color		bc;
-		Color		fc;
-		switch (severity)
-		{
-			case DEBUG:
-			{
-				bc = Color.GRAY;
-				fc = Color.WHITE;
-				break;
-			}
-			case INFO:
-			{
-				bc = Color.LIGHTGREEN;
-				fc = Color.BLACK;
-				break;
-			}
-			case WARNING:
-			{
-				bc = Color.YELLOW;
-				fc = Color.BLACK;
-				break;
-			}
-			case ERROR:
-			{
-				bc = Color.ORANGE;
-				fc = Color.BLACK;
-				break;
-			}
-			case CRITICAL:
-			{
-				bc = Color.RED;
-				fc = Color.WHITE;
-				break;
-			}
-			default:
-			{
-				bc = Color.PURPLE;
-				fc = Color.WHITE;
-				break;
-			}
-		}
+		Color		bc			= Severity.getBackgroundColor(severity);
+		Color		fc			= Severity.getForegroundColor(severity);
+		
 		this.hb_severity.setBackground(new Background(new BackgroundFill(bc, CornerRadii.EMPTY, Insets.EMPTY)));
 		this.tf_severity.setTextFill(fc);
 	}

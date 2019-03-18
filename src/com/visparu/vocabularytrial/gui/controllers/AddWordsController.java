@@ -59,13 +59,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with AddWordsController...");
-		LanguageComponent.instances.add(this);
-		VokAbfController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			LanguageComponent.instances.remove(this);
-			VokAbfController.instances.remove(this);
-		});
+		
 		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordTemplate, String>("name"));
 		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordTemplate, String>("translationsString"));
 		this.repopulateLanguages_from();
@@ -76,6 +70,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		{
 			this.repopulateLanguages_to();
 		});
+		
 		LogItem.debug("Finished initializing new stage");
 	}
 	
@@ -131,7 +126,7 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		wt.setName(this.tf_word.getText());
 		wt.setTranslationsString(this.tf_translations.getText());
 		this.tv_vocabulary.getItems().add(wt);
-		LogItem.debug("Word + " + wt.getName() + " added to temporary list");
+		LogItem.debug("Word " + wt.getName() + " added to temporary list");
 		this.tf_word.setText("");
 		this.tf_translations.setText("");
 		this.tf_word.requestFocus();
