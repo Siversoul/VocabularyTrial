@@ -87,7 +87,7 @@ public final class ManageLanguagesController implements Initializable, LanguageC
 	public final void repopulateLanguages()
 	{
 		final ObservableList<LanguageView> lv_list = FXCollections.observableArrayList();
-		Language.getAll().forEach(l -> lv_list.add(new LanguageView(l.getLanguage_code(), l.getName())));
+		Language.getAll().forEach(l -> lv_list.add(new LanguageView(l)));
 		this.tv_languages.setItems(lv_list);
 		LogItem.debug("Repopulated languages");
 	}

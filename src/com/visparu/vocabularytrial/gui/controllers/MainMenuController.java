@@ -25,7 +25,7 @@ import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 import com.visparu.vocabularytrial.model.db.entities.WordCheck;
-import com.visparu.vocabularytrial.model.views.WordView;
+import com.visparu.vocabularytrial.model.views.WordToLanguageView;
 import com.visparu.vocabularytrial.util.C11N;
 import com.visparu.vocabularytrial.util.GUIUtil;
 import com.visparu.vocabularytrial.util.I18N;
@@ -69,11 +69,11 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	@FXML
 	private ChoiceBox<Language>				cb_language_to;
 	@FXML
-	private TableView<WordView>				tv_vocabulary;
+	private TableView<WordToLanguageView>				tv_vocabulary;
 	@FXML
-	private TableColumn<WordView, String>	tc_word;
+	private TableColumn<WordToLanguageView, String>	tc_word;
 	@FXML
-	private TableColumn<WordView, String>	tc_translations;
+	private TableColumn<WordToLanguageView, String>	tc_translations;
 	@FXML
 	private HBox							hb_status_bar;
 	@FXML
@@ -135,8 +135,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				this.removeAllSelectedWords();
 			}
 		});
-		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordView, String>("name"));
-		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordView, String>("translationsString"));
+		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordToLanguageView, String>("name"));
+		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordToLanguageView, String>("translationsString"));
 		LogItem.debug("Finished initializing new stage");
 	}
 	
@@ -147,7 +147,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
 			int count = this.tv_vocabulary.getSelectionModel().getSelectedItems().size();
-			for (final WordView wv : this.tv_vocabulary.getSelectionModel().getSelectedItems())
+			for (final WordToLanguageView wv : this.tv_vocabulary.getSelectionModel().getSelectedItems())
 			{
 				Word.removeWord(wv.getWord_id());
 				this.tv_vocabulary.getItems().remove(wv);
@@ -192,8 +192,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			return;
 		}
 		final List<Word>				wordsRaw	= language_from.getWords();
-		final ObservableList<WordView>	wordViews	= FXCollections.observableArrayList();
-		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty()).forEach(w -> wordViews.add(new WordView(w, language_to)));
+		final ObservableList<WordToLanguageView>	wordViews	= FXCollections.observableArrayList();
+		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty()).forEach(w -> wordViews.add(new WordToLanguageView(w, language_to)));
 		this.tv_vocabulary.setItems(wordViews);
 		LogItem.debug("Words repopulated");
 	}
@@ -378,7 +378,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 					latestCheck	= wc;
 				}
 			}
-			if (latestCheck != null && !latestCheck.isCorrect())
+			if (latestCheck != null && !latestCheck.isCorrect().get())
 			{
 				trialWords.add(w);
 			}

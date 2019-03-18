@@ -17,7 +17,7 @@ import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 import com.visparu.vocabularytrial.model.db.entities.WordCheck;
-import com.visparu.vocabularytrial.model.views.WordView;
+import com.visparu.vocabularytrial.model.views.WordToLanguageView;
 import com.visparu.vocabularytrial.util.I18N;
 
 import javafx.scene.control.Alert;
@@ -127,7 +127,7 @@ public final class Debug
 				if (rand.nextBoolean())
 				{
 					correct	= true;
-					as		= new WordView(w, l_to).getTranslationsString();
+					as		= new WordToLanguageView(w, l_to).getTranslationsString();
 				}
 				else
 				{

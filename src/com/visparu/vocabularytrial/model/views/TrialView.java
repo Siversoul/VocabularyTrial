@@ -32,19 +32,19 @@ public final class TrialView
 	
 	public final String getCorrect()
 	{
-		String correct = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect()).count());
+		String correct = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect().get()).count());
 		return correct;
 	}
 	
 	public final String getWrong()
 	{
-		String wrong = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> !wc.isCorrect()).count());
+		String wrong = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> !wc.isCorrect().get()).count());
 		return wrong;
 	}
 	
 	public final String getPercentage()
 	{
-		final long	correct	= this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect()).count();
+		final long	correct	= this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect().get()).count();
 		final int	count	= this.trial.getWordChecks().size();
 		String		perc	= String.format("%.2f", (double) correct / count);
 		return perc;

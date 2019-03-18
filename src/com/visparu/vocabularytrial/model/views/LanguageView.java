@@ -1,33 +1,23 @@
 package com.visparu.vocabularytrial.model.views;
 
+import com.visparu.vocabularytrial.model.db.entities.Language;
+
 public final class LanguageView
 {
-	private String	language_code;
-	private String	name;
+	private Language language;
 	
-	public LanguageView(final String language_code, final String name)
+	public LanguageView(final Language language)
 	{
-		this.language_code	= language_code;
-		this.name			= name;
+		this.language = language;
 	}
 	
 	public final String getLanguage_code()
 	{
-		return this.language_code;
-	}
-	
-	public final void setLanguage_code(final String language_code)
-	{
-		this.language_code = language_code;
+		return this.language.getLanguage_code();
 	}
 	
 	public final String getName()
 	{
-		return this.name;
-	}
-	
-	public final void setName(final String name)
-	{
-		this.name = name;
+		return this.language.getName();
 	}
 }
