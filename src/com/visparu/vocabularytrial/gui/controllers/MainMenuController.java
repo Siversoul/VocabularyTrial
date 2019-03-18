@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -17,14 +17,15 @@ import com.visparu.vocabularytrial.gui.interfaces.LanguageComponent;
 import com.visparu.vocabularytrial.gui.interfaces.TrialComponent;
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
 import com.visparu.vocabularytrial.gui.interfaces.WordComponent;
-import com.visparu.vocabularytrial.model.db.ConnectionDetails;
+import com.visparu.vocabularytrial.model.db.Database;
+import com.visparu.vocabularytrial.model.db.VPS;
 import com.visparu.vocabularytrial.model.db.entities.Language;
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 import com.visparu.vocabularytrial.model.db.entities.WordCheck;
-import com.visparu.vocabularytrial.model.views.WordView;
+import com.visparu.vocabularytrial.model.views.WordToLanguageView;
 import com.visparu.vocabularytrial.util.C11N;
 import com.visparu.vocabularytrial.util.GUIUtil;
 import com.visparu.vocabularytrial.util.I18N;
@@ -60,26 +61,27 @@ import javafx.stage.Stage;
 public final class MainMenuController implements Initializable, LanguageComponent, WordComponent
 {
 	@FXML
-	private Menu							mn_languages;
+	private Menu									mn_languages;
 	@FXML
-	private CheckMenuItem					cmi_trial_randomize;
+	private CheckMenuItem							cmi_trial_randomize;
 	@FXML
-	private ChoiceBox<Language>				cb_language_from;
+	private ChoiceBox<Language>						cb_language_from;
 	@FXML
-	private ChoiceBox<Language>				cb_language_to;
+	private ChoiceBox<Language>						cb_language_to;
 	@FXML
-	private TableView<WordView>				tv_vocabulary;
+	private TableView<WordToLanguageView>			tv_vocabulary;
 	@FXML
-	private TableColumn<WordView, String>	tc_word;
+	private TableColumn<WordToLanguageView, String>	tc_word;
 	@FXML
-	private TableColumn<WordView, String>	tc_translations;
+	private TableColumn<WordToLanguageView, String>	tc_translations;
 	@FXML
-	private HBox							hb_status_bar;
+	private HBox									hb_status_bar;
 	@FXML
-	private Label							lb_status;
+	private Label									lb_status;
 	@FXML
-	private ImageView						iv_status_icon;
-	private final Stage						stage;
+	private ImageView								iv_status_icon;
+	
+	private final Stage stage;
 	
 	public MainMenuController(final Stage stage)
 	{
@@ -90,14 +92,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with MainMenuController");
-		LanguageComponent.instances.add(this);
-		WordComponent.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			LanguageComponent.instances.remove(this);
-			WordComponent.instances.remove(this);
-			VokAbfController.closeAll();
-		});
+		
 		int index;
 		switch (C11N.getLocale().toLanguageTag())
 		{
@@ -141,8 +136,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				this.removeAllSelectedWords();
 			}
 		});
-		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordView, String>("name"));
-		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordView, String>("translationsString"));
+		this.tc_word.setCellValueFactory(new PropertyValueFactory<WordToLanguageView, String>("name"));
+		this.tc_translations.setCellValueFactory(new PropertyValueFactory<WordToLanguageView, String>("translationsString"));
 		LogItem.debug("Finished initializing new stage");
 	}
 	
@@ -153,7 +148,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
 			int count = this.tv_vocabulary.getSelectionModel().getSelectedItems().size();
-			for (final WordView wv : this.tv_vocabulary.getSelectionModel().getSelectedItems())
+			for (final WordToLanguageView wv : this.tv_vocabulary.getSelectionModel().getSelectedItems())
 			{
 				Word.removeWord(wv.getWord_id());
 				this.tv_vocabulary.getItems().remove(wv);
@@ -197,9 +192,9 @@ public final class MainMenuController implements Initializable, LanguageComponen
 			this.tv_vocabulary.getItems().clear();
 			return;
 		}
-		final List<Word>				wordsRaw	= language_from.getWords();
-		final ObservableList<WordView>	wordViews	= FXCollections.observableArrayList();
-		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty()).forEach(w -> wordViews.add(new WordView(w, language_to)));
+		final List<Word>							wordsRaw	= language_from.getWords();
+		final ObservableList<WordToLanguageView>	wordViews	= FXCollections.observableArrayList();
+		wordsRaw.stream().filter(w -> !w.getTranslations(language_to).isEmpty()).forEach(w -> wordViews.add(new WordToLanguageView(w, language_to)));
 		this.tv_vocabulary.setItems(wordViews);
 		LogItem.debug("Words repopulated");
 	}
@@ -223,7 +218,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				return;
 			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
-			ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			Database.get().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 			LogItem.info("New database file created", "New database file created under " + selectedFile.getAbsolutePath());
 		}
@@ -243,7 +238,7 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		if (selectedFile != null)
 		{
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
-			ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			Database.get().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 			LogItem.info("Switched to existing database", "Switched to existing database under " + selectedFile.getAbsolutePath());
 		}
@@ -267,8 +262,8 @@ public final class MainMenuController implements Initializable, LanguageComponen
 				return;
 			}
 			C11N.setDatabasePath(selectedFile.getAbsolutePath());
-			ConnectionDetails.getInstance().copyDatabase(selectedFile);
-			ConnectionDetails.getInstance().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
+			Database.get().copyDatabase(selectedFile);
+			Database.get().changeDatabase(C11N.getDriver(), C11N.getProtocol(), C11N.getDatabasePath().getAbsolutePath());
 			VokAbfController.repopulateAll();
 			LogItem.info("Saved database to new file", "Saved database to " + selectedFile.getAbsolutePath());
 		}
@@ -373,18 +368,18 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		for (Word w : words)
 		{
 			final List<WordCheck>	wordchecks	= w.getWordChecks(l_to);
-			Date					date		= null;
+			LocalDateTime			datetime	= null;
 			WordCheck				latestCheck	= null;
 			for (final WordCheck wc : wordchecks)
 			{
 				final Trial t = wc.getTrial();
-				if (date == null || date.before(t.getDate()))
+				if (datetime == null || datetime.isBefore(t.getDateTime()))
 				{
-					date		= t.getDate();
+					datetime	= t.getDateTime();
 					latestCheck	= wc;
 				}
 			}
-			if (latestCheck != null && !latestCheck.isCorrect())
+			if (latestCheck != null && !latestCheck.isCorrect().get())
 			{
 				trialWords.add(w);
 			}
@@ -407,8 +402,9 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		final Optional<ButtonType>	result	= alert.showAndWait();
 		if (result.isPresent() && result.get() == ButtonType.YES)
 		{
-			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM wordcheck");
-			ConnectionDetails.getInstance().executeSimpleStatement("DELETE FROM trial");
+			VPS.execute("DELETE FROM wordcheck");
+			VPS.execute("DELETE FROM trial");
+			
 			LogItem.info("Deleted all trial data");
 		}
 		else

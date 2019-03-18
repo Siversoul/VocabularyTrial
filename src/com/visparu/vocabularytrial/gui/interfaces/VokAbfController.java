@@ -24,9 +24,14 @@ public interface VokAbfController
 	{
 		while (!VokAbfController.instances.isEmpty())
 		{
-			VokAbfController.instances.get(0).close();
+			VokAbfController.instances.remove(0).close();
 		}
 		LogItem.debug("All stages closed");
+	}
+	
+	default void closeRequest()
+	{
+		
 	}
 	
 	void setStage(Stage stage);

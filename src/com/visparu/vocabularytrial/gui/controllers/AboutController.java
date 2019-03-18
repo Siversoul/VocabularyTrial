@@ -29,15 +29,12 @@ public final class AboutController implements Initializable, VokAbfController
 	public final void initialize(final URL location, final ResourceBundle resources)
 	{
 		LogItem.debug("Initializing new stage with AboutController...");
-		VokAbfController.instances.add(this);
-		this.stage.setOnCloseRequest(e ->
-		{
-			VokAbfController.instances.remove(this);
-		});
+		
 		this.lb_name.setText(Main.NAME);
 		this.lb_version.setText(Main.VERSION);
 		this.lb_author.setText(Main.AUTHOR);
 		this.lb_date.setText(Main.RELEASE_DATE);
+		
 		LogItem.debug("Finished initializing new stage");
 	}
 	

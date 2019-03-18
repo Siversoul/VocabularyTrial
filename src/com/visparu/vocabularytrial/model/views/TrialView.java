@@ -1,8 +1,7 @@
 package com.visparu.vocabularytrial.model.views;
 
-import java.text.SimpleDateFormat;
-
 import com.visparu.vocabularytrial.model.db.entities.Trial;
+import com.visparu.vocabularytrial.util.ConvertUtil;
 
 public final class TrialView
 {
@@ -21,7 +20,7 @@ public final class TrialView
 	
 	public final String getDate()
 	{
-		String dateString = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(this.trial.getDate());
+		String dateString = ConvertUtil.convertDateToReadableString(this.trial.getDateTime());
 		return dateString;
 	}
 	
@@ -33,19 +32,19 @@ public final class TrialView
 	
 	public final String getCorrect()
 	{
-		String correct = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect()).count());
+		String correct = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect().get()).count());
 		return correct;
 	}
 	
 	public final String getWrong()
 	{
-		String wrong = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> !wc.isCorrect()).count());
+		String wrong = String.valueOf(this.trial.getWordChecks().stream().filter(wc -> !wc.isCorrect().get()).count());
 		return wrong;
 	}
 	
 	public final String getPercentage()
 	{
-		final long	correct	= this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect()).count();
+		final long	correct	= this.trial.getWordChecks().stream().filter(wc -> wc.isCorrect().get()).count();
 		final int	count	= this.trial.getWordChecks().size();
 		String		perc	= String.format("%.2f", (double) correct / count);
 		return perc;
