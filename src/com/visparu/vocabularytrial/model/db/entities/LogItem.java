@@ -13,6 +13,7 @@ import java.util.StringJoiner;
 import com.visparu.vocabularytrial.gui.interfaces.LogComponent;
 import com.visparu.vocabularytrial.model.db.VPS;
 import com.visparu.vocabularytrial.model.log.Severity;
+import com.visparu.vocabularytrial.util.C11N;
 
 public final class LogItem
 {
@@ -21,6 +22,7 @@ public final class LogItem
 	private static Integer			session_log_id				= -1;
 	private static boolean			initialized					= false;
 	private static List<LogItem>	preinitialization_logitems	= new ArrayList<>();
+	private static Severity			logging_level;
 	
 	private Integer			logitem_id;
 	private Integer			log_id;
@@ -30,6 +32,11 @@ public final class LogItem
 	private String			function;
 	private String			message;
 	private String			description;
+	
+	static
+	{
+		LogItem.logging_level = C11N.getLoggingLevel();
+	}
 	
 	private LogItem(final Integer logitem_id, final Integer log_id, final Severity severity, final LocalDateTime datetime, final String threadName,
 			final String function, final String message,
@@ -179,6 +186,12 @@ public final class LogItem
 	public final static LogItem createLogItem(final Severity severity, final LocalDateTime datetime, final String threadname, final String function,
 			final String message, final String description)
 	{
+		final Integer logging_level = severity.ordinal();
+		final Integer min_logging_level = C11N.getLoggingLevel().ordinal();
+		if(logging_level < min_logging_level)
+		{
+			return null;
+		}
 		final LogItem li = new LogItem(-1, LogItem.session_log_id, severity, datetime, threadname, function, message, description);
 		LogItem.preinitialization_logitems.add(li);
 		if (LogItem.initialized)
@@ -281,6 +294,16 @@ public final class LogItem
 	public static final Integer getSessionLog_id()
 	{
 		return LogItem.session_log_id;
+	}
+	
+	public static final Severity getLoggingLevel()
+	{
+		return LogItem.logging_level;
+	}
+	
+	public static final void setLoggingLevel(Severity severity)
+	{
+		LogItem.logging_level = severity;
 	}
 	
 	public final Integer getLogitem_id()
