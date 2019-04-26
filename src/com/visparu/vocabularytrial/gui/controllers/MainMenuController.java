@@ -274,6 +274,13 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	}
 	
 	@FXML
+	public final void file_settings(final ActionEvent event)
+	{
+		GUIUtil.createNewStage("Settings", new SettingsController(), I18N.createStringBinding("gui.settings.title"));
+		LogItem.debug("New stage created");
+	}
+	
+	@FXML
 	public final void file_close(final ActionEvent event)
 	{
 		this.stage.getOnCloseRequest().handle(null);
