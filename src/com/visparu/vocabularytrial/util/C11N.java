@@ -17,6 +17,7 @@ public final class C11N
 	private static final String		DEFAULT_DRIVER			= "jdbc";
 	private static final String		DEFAULT_PROTOCOL		= "sqlite";
 	private static final String		DEFAULT_FILENAME		= IOUtil.DATA_PATH + "temp.db";
+	private static final String		DEFAULT_SEPARATORS		= ",/;";
 	private static final Severity	DEFAULT_LOGGING_LEVEL	= Severity.INFO;
 	
 	public static final String getDriver()
@@ -86,6 +87,22 @@ public final class C11N
 		C11N.setValue("locale", locale.toLanguageTag());
 		I18N.localeProperty().set(locale);
 		LogItem.debug("Locale changed to " + locale.getDisplayName());
+	}
+	
+	public static final String getSeparators()
+	{
+		final String separatorsString = C11N.getValue("separators");
+		if (separatorsString == null)
+		{
+			return C11N.DEFAULT_SEPARATORS;
+		}
+		return separatorsString;
+	}
+	
+	public static final void setSeparators(final String separators)
+	{
+		C11N.setValue("separators", separators);
+		LogItem.debug("Separators changed to \"" + separators + "\"");
 	}
 	
 	public static final Severity getLoggingLevel()
