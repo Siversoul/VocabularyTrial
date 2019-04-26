@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.StringJoiner;
 
 import com.visparu.vocabularytrial.gui.interfaces.LanguageComponent;
 import com.visparu.vocabularytrial.gui.interfaces.VokAbfController;
@@ -13,6 +14,7 @@ import com.visparu.vocabularytrial.model.db.entities.LogItem;
 import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 import com.visparu.vocabularytrial.model.templates.WordTemplate;
+import com.visparu.vocabularytrial.util.C11N;
 import com.visparu.vocabularytrial.util.I18N;
 
 import javafx.collections.FXCollections;
@@ -154,7 +156,8 @@ public final class AddWordsController implements Initializable, LanguageComponen
 			{
 				w = Word.createWord(name, l_from);
 			}
-			final String[] translationNames = wt.getTranslationsString().split("[,|;|/]");
+			final String separatorRegex = this.createSeparatorRegex();
+			final String[] translationNames = wt.getTranslationsString().split(separatorRegex);
 			for (final String tn : translationNames)
 			{
 				final String	tn_sane	= tn.trim();
@@ -194,5 +197,18 @@ public final class AddWordsController implements Initializable, LanguageComponen
 		this.stage.getOnCloseRequest().handle(null);
 		this.stage.close();
 		LogItem.debug("Stage closed");
+	}
+	
+	private String createSeparatorRegex() 
+	{
+		final String separatorsString = C11N.getSeparators();
+		final String[] separatorsArray = separatorsString.split("");
+		final StringJoiner separatorsSB = new StringJoiner("|", "[", "]");
+		for(final String separator : separatorsArray)
+		{
+			final String escapedSeparator = separator.replaceAll("[\\W]", "\\\\$0");
+			separatorsSB.add(escapedSeparator);
+		}
+		return separatorsSB.toString();
 	}
 }
