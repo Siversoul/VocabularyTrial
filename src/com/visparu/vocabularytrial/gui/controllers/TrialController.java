@@ -217,7 +217,7 @@ public final class TrialController implements Initializable, VokAbfController
 				final Translation t = translations.get(i);
 				
 				final String name;
-				if (question.getWord_id() == t.getWord1_id())
+				if (question.getWord_id().equals(t.getWord1_id()))
 				{
 					name = t.getWord2().getName();
 				}

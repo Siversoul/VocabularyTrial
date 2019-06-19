@@ -37,7 +37,7 @@ public final class WordToLanguageView
 		for (final Translation t : translations)
 		{
 			final Word tw;
-			if (t.getWord1().getWord_id() == this.w.getWord_id())
+			if (t.getWord1().getWord_id().equals(this.w.getWord_id()))
 			{
 				tw = t.getWord2();
 			}

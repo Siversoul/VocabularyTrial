@@ -187,7 +187,7 @@ public final class LogItem
 		{
 			while (!LogItem.preinitialization_logitems.isEmpty())
 			{
-				if (LogItem.preinitialization_logitems.get(0).getLog_id() == -1)
+				if (LogItem.preinitialization_logitems.get(0).getLog_id().equals(-1))
 				{
 					LogItem lit = LogItem.preinitialization_logitems.get(0);
 					lit.log_id = LogItem.session_log_id;

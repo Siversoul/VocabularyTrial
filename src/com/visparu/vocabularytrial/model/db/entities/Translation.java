@@ -15,7 +15,7 @@ public final class Translation
 	
 	private Translation(Integer word1_id, Integer word2_id)
 	{
-		if (word1_id == null || word2_id == null || word1_id == -1 || word2_id == -1)
+		if (word1_id == null || word2_id == null || word1_id.equals(-1) || word2_id.equals(-1))
 		{
 			throw new IllegalArgumentException();
 		}

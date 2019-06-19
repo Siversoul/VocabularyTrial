@@ -39,7 +39,7 @@ public final class WordCheckView
 				sb.append(", ");
 			}
 			final String name;
-			if (this.wc.getWord().getWord_id() == t.getWord1_id())
+			if (this.wc.getWord().getWord_id().equals(t.getWord1_id()))
 			{
 				name = t.getWord2().getName();
 			}
