@@ -3,10 +3,11 @@
 A tool for managing vocabulary databases and randomly generating vocabulary exercises based on the user's selection.
 
 ## Download (Windows only)
-Latest build download (Build version 0.5.1):
-- https://www.mediafire.com/file/hy93j1tk2ska3fa/VocabularyTrial-0_5_1.zip
+Latest build download (Build version 0.6.0):
+- http://www.mediafire.com/file/j9xv44w197kacfy/VocabularyTrial-0_6_0.zip
 
 Legacy build downloads:
+- https://www.mediafire.com/file/hy93j1tk2ska3fa/VocabularyTrial-0_5_1.zip
 - https://www.mediafire.com/file/af7gd385wu437q8/VocabularyTrial-0_5_0.zip
 - https://www.mediafire.com/file/ro9nclm9lc6atjx/VocabularyTrial-0_4_0.zip
 - https://www.mediafire.com/file/rv5eszyz21vyvpu/VocabularyTrial-0_3_1.zip
