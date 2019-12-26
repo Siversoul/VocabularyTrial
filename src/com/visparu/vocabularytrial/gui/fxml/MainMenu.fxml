@@ -27,7 +27,8 @@
 						<MenuItem mnemonicParsing="false" onAction="#file_new" text="%gui.mainmenu.menubar.file.new" />
 						<MenuItem mnemonicParsing="false" onAction="#file_open" text="%gui.mainmenu.menubar.file.open" />
 						<MenuItem mnemonicParsing="false" onAction="#file_saveas" text="%gui.mainmenu.menubar.file.saveas" />
-                  <MenuItem mnemonicParsing="false" onAction="#file_settings" text="%gui.mainmenu.menubar.file.settings" />
+						<MenuItem mnemonicParsing="false" onAction="#file_saveselectionas" text="%gui.mainmenu.menubar.file.saveselection" />
+                  		<MenuItem mnemonicParsing="false" onAction="#file_settings" text="%gui.mainmenu.menubar.file.settings" />
 						<MenuItem mnemonicParsing="false" onAction="#file_close" text="%gui.mainmenu.menubar.file.close" />
 					</items>
 				</Menu>
@@ -35,6 +36,7 @@
 					<items>
 						<MenuItem mnemonicParsing="false" onAction="#vocab_add" text="%gui.mainmenu.menubar.vocabulary.add" />
 						<MenuItem mnemonicParsing="false" onAction="#vocab_clear" text="%gui.mainmenu.menubar.vocabulary.clear" />
+						<MenuItem mnemonicParsing="false" onAction="#vocab_shuffle" text="%gui.mainmenu.menubar.vocabulary.shuffle" />
 						<MenuItem mnemonicParsing="false" onAction="#vocab_languages" text="%gui.mainmenu.menubar.vocabulary.languages" />
 					</items>
 				</Menu>

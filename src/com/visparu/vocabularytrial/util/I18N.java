@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import com.visparu.vocabularytrial.model.db.entities.LogItem;
@@ -55,9 +56,16 @@ public final class I18N
 	
 	public static final String get(final String key, final Object... args)
 	{
-		final ResourceBundle	bundle	= ResourceBundle.getBundle("com.visparu.vocabularytrial.gui.lang.lang", C11N.getLocale());
-		String					ret		= MessageFormat.format(bundle.getString(key), args);
-		return ret;
+		try
+		{
+			final ResourceBundle	bundle	= ResourceBundle.getBundle("com.visparu.vocabularytrial.gui.lang.lang", C11N.getLocale());
+			String					ret		= MessageFormat.format(bundle.getString(key), args);
+			return ret;
+		}
+		catch (MissingResourceException e)
+		{
+			return key;
+		}
 	}
 	
 	public static final ResourceBundle getResources()

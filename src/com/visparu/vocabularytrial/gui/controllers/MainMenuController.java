@@ -274,6 +274,41 @@ public final class MainMenuController implements Initializable, LanguageComponen
 	}
 	
 	@FXML
+	public final void file_saveselectionas(final ActionEvent event)
+	{
+		if(this.tv_vocabulary.getSelectionModel().isEmpty())
+		{
+			Alert alert = new Alert(AlertType.ERROR, I18N.createStringBinding("gui.mainmenu.alert.selectionempty").get(), ButtonType.OK);
+			alert.showAndWait();
+			return;
+		}
+		final FileChooser fc = new FileChooser();
+		fc.titleProperty().bind(I18N.createStringBinding("gui.mainmenu.menubar.file.saveselection.title"));
+		fc.getExtensionFilters().add(new ExtensionFilter(I18N.createStringBinding("gui.mainmenu.menubar.file.saveselection.filter").get(), "*.db"));
+		final File selectedFile = fc.showSaveDialog(this.stage);
+		if (selectedFile != null)
+		{
+			if(C11N.getDatabasePath().equals(selectedFile))
+			{
+				Alert alert = new Alert(AlertType.ERROR, I18N.createStringBinding("gui.mainmenu.alert.overwrite").get(), ButtonType.OK);
+				alert.showAndWait();
+				return;
+			}
+			if(Files.exists(selectedFile.toPath()))
+			{
+				try {
+					Files.delete(selectedFile.toPath());
+				} catch (IOException e) {
+					Alert alert = new Alert(AlertType.ERROR, I18N.createStringBinding("gui.mainmenu.alert.overwrite.impossible").get(), ButtonType.OK);
+					alert.showAndWait();
+					return;
+				}
+			}
+			Database.get().createNewDatabase(selectedFile.getAbsolutePath(), this.tv_vocabulary.getSelectionModel().getSelectedItems());
+		}
+	}
+	
+	@FXML
 	public final void file_settings(final ActionEvent event)
 	{
 		GUIUtil.createNewStage("Settings", new SettingsController(), I18N.createStringBinding("gui.settings.title"));
@@ -324,6 +359,19 @@ public final class MainMenuController implements Initializable, LanguageComponen
 		{
 			LogItem.debug("Aborted clearing the database");
 		}
+	}
+	
+	@FXML
+	public final void vocab_shuffle(final ActionEvent event)
+	{
+		ObservableList<WordToLanguageView> words = FXCollections.observableArrayList(this.tv_vocabulary.getItems());
+		ObservableList<WordToLanguageView> newWords = FXCollections.observableArrayList();
+		Random rand = new Random();
+		while(!words.isEmpty())
+		{
+			newWords.add(words.remove(rand.nextInt(words.size())));
+		}
+		this.tv_vocabulary.setItems(newWords);
 	}
 	
 	@FXML

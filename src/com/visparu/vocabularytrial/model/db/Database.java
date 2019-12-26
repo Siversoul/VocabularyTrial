@@ -10,6 +10,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.sqlite.JDBC;
 
@@ -19,7 +22,10 @@ import com.visparu.vocabularytrial.model.db.entities.Translation;
 import com.visparu.vocabularytrial.model.db.entities.Trial;
 import com.visparu.vocabularytrial.model.db.entities.Word;
 import com.visparu.vocabularytrial.model.db.entities.WordCheck;
+import com.visparu.vocabularytrial.model.views.WordToLanguageView;
 import com.visparu.vocabularytrial.util.C11N;
+
+import javafx.collections.ObservableList;
 
 public final class Database
 {
@@ -164,5 +170,88 @@ public final class Database
 	private final Connection getConnection()
 	{
 		return this.connection;
+	}
+
+	public void createNewDatabase(String path, ObservableList<WordToLanguageView> items)
+	{
+		Set<Word> words = new HashSet<>();
+		for(WordToLanguageView wtlv : items)
+		{
+			words.add(Word.get(wtlv.getWord_id()));
+		}
+		Set<Language> languages = new HashSet<>();
+		for(Word w : words)
+		{
+			languages.add(w.getLanguage());
+			for(Language l : Language.getAll())
+			{
+				for(Translation t : w.getTranslations(l))
+				{
+					languages.add(t.getWord1().getLanguage());
+					languages.add(t.getWord2().getLanguage());
+				}
+			}
+		}
+		Set<Translation> translations = new HashSet<>();
+		for(Word w : words)
+		{
+			for(Language l : languages)
+			{
+				for(Translation t : w.getTranslations(l))
+				{
+					translations.add(t);
+				}
+			}
+		}
+		for(Translation t : translations)
+		{
+			words.add(t.getWord1());
+			words.add(t.getWord2());
+		}
+		
+		String connString = String.format("jdbc:sqlite:%s", path);
+		try(final Connection conn = DriverManager.getConnection(connString); final Statement stmt = conn.createStatement())
+		{
+			final String createLangTableQuery = "CREATE TABLE IF NOT EXISTS language (" + "language_code VARCHAR(2) PRIMARY KEY, " + "name VARCHAR(30)" + ")";
+			final String createWordTableQuery = "CREATE TABLE IF NOT EXISTS word(" + "word_id INTEGER PRIMARY KEY AUTOINCREMENT, " + "name VARCHAR(100), " + "language_code VARCHAR(2), " + "FOREIGN KEY(language_code) REFERENCES language(language_code) ON UPDATE CASCADE" + ")";
+			final String createTranTableQuery = "CREATE TABLE IF NOT EXISTS translation(" + "word1_id INTEGER, " + "word2_id INTEGER, " + "PRIMARY KEY(word1_id, word2_id), " + "FOREIGN KEY(word1_id) REFERENCES word(word_id) ON UPDATE CASCADE, " + "FOREIGN KEY(word2_id) REFERENCES word(word_id) ON UPDATE CASCADE" + ")";
+			
+			stmt.execute(createLangTableQuery);
+			stmt.execute(createWordTableQuery);
+			stmt.execute(createTranTableQuery);
+			
+			for(Language l : languages)
+			{
+				String addLangQuery = "INSERT INTO language(language_code, name) VALUES (?, ?)";
+				PreparedStatement pstmt = conn.prepareStatement(addLangQuery);
+				pstmt.setString(1, l.getLanguage_code());
+				pstmt.setString(2, l.getName());
+				pstmt.execute();
+				pstmt.close();
+			}
+			for(Word w : words)
+			{
+				String addWordQuery = "INSERT INTO word(word_id, name, language_code) VALUES (?, ?, ?)";
+				PreparedStatement pstmt = conn.prepareStatement(addWordQuery);
+				pstmt.setInt(1, w.getWord_id());
+				pstmt.setString(2, w.getName());
+				pstmt.setString(3, w.getLanguage().getLanguage_code());
+				pstmt.execute();
+				pstmt.close();
+			}
+			for(Translation t : translations)
+			{
+				String addTranQuery = "INSERT INTO translation(word1_id, word2_id) VALUES (?, ?)";
+				PreparedStatement pstmt = conn.prepareStatement(addTranQuery);
+				pstmt.setInt(1, t.getWord1_id());
+				pstmt.setInt(2, t.getWord2_id());
+				pstmt.execute();
+				pstmt.close();
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
